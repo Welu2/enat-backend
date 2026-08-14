@@ -1,0 +1,80 @@
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+
+from app.dependencies import get_current_user_id
+from app.db.repositories.check_ins import CheckInRepository
+from app.models.checkin import (
+    CheckInHistoryItem,
+    CheckInRespondResponse,
+    CheckInStartResponse,
+    CompleteStageResponse,
+    VerifyItemRequest,
+    VerifyItemResponse,
+)
+from app.services.checkin_session import CheckInSessionService
+
+router = APIRouter(prefix="/checkin", tags=["checkin"])
+
+
+@router.post("/start", response_model=CheckInStartResponse)
+def start_checkin(user_id: UUID = Depends(get_current_user_id)) -> CheckInStartResponse:
+    result = CheckInSessionService().start_session(user_id)
+    return CheckInStartResponse(**result)
+
+
+@router.post("/{session_id}/respond", response_model=CheckInRespondResponse)
+async def respond_to_checkin(
+    session_id: UUID,
+    audio: UploadFile = File(...),
+    user_id: UUID = Depends(get_current_user_id),
+) -> CheckInRespondResponse:
+    audio_bytes = await audio.read()
+    try:
+        result = await CheckInSessionService().respond(
+            user_id,
+            session_id,
+            audio_bytes,
+            audio.filename or "audio.webm",
+            audio.content_type or "audio/webm",
+        )
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    return CheckInRespondResponse(**result)
+
+
+@router.post("/{session_id}/verify", response_model=VerifyItemResponse)
+def verify_checkin_item(
+    session_id: UUID,
+    payload: VerifyItemRequest,
+    user_id: UUID = Depends(get_current_user_id),
+) -> VerifyItemResponse:
+    try:
+        result = CheckInSessionService().verify_item(
+            user_id,
+            session_id,
+            payload.item_id,
+            payload.confirmed,
+            payload.corrected_value,
+        )
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    return VerifyItemResponse(**result)
+
+
+@router.post("/{session_id}/complete", response_model=CompleteStageResponse)
+def complete_checkin_stage(
+    session_id: UUID,
+    user_id: UUID = Depends(get_current_user_id),
+) -> CompleteStageResponse:
+    try:
+        result = CheckInSessionService().complete_stage(user_id, session_id)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    return CompleteStageResponse(**result)
+
+
+@router.get("/history", response_model=list[CheckInHistoryItem])
+def get_checkin_history(user_id: UUID = Depends(get_current_user_id)) -> list[CheckInHistoryItem]:
+    rows = CheckInRepository().list_by_user(user_id)
+    return [CheckInHistoryItem(**row) for row in rows]

@@ -1,0 +1,65 @@
+from datetime import date, datetime, time
+from typing import Any
+from uuid import UUID
+
+from pydantic import BaseModel, EmailStr, Field
+
+
+class AuthCredentials(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=6)
+
+
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user_id: UUID
+    email: str
+
+
+class UserProfile(BaseModel):
+    id: UUID
+    email: str | None
+    created_at: datetime
+
+
+class SupplementCreate(BaseModel):
+    name: str
+    active: bool = True
+    reminder_enabled: bool = True
+    reminder_time: time | None = None
+
+
+class SupplementUpdate(BaseModel):
+    name: str | None = None
+    active: bool | None = None
+    reminder_enabled: bool | None = None
+    reminder_time: time | None = None
+
+
+class SupplementResponse(BaseModel):
+    id: UUID
+    user_id: UUID
+    name: str
+    active: bool
+    reminder_enabled: bool
+    reminder_time: time | None
+    created_at: datetime
+
+
+class AppointmentCreate(BaseModel):
+    appointment_date: date
+    reminder_lead_days: int = 2
+
+
+class AppointmentUpdate(BaseModel):
+    appointment_date: date | None = None
+    reminder_lead_days: int | None = None
+
+
+class AppointmentResponse(BaseModel):
+    id: UUID
+    user_id: UUID
+    appointment_date: date
+    last_summary_generated_at: datetime | None
+    reminder_lead_days: int
