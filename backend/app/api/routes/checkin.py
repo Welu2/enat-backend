@@ -11,6 +11,7 @@ from app.models.checkin import (
     CompleteStageResponse,
     VerifyItemRequest,
     VerifyItemResponse,
+    VoiceCorrectItemResponse,
 )
 from app.services.checkin_session import CheckInSessionService
 
@@ -60,6 +61,28 @@ def verify_checkin_item(
     except ValueError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     return VerifyItemResponse(**result)
+
+
+@router.post("/{session_id}/items/{item_id}/voice-correct", response_model=VoiceCorrectItemResponse)
+async def voice_correct_item(
+    session_id: UUID,
+    item_id: str,
+    audio: UploadFile = File(...),
+    user_id: UUID = Depends(get_current_user_id),
+) -> VoiceCorrectItemResponse:
+    audio_bytes = await audio.read()
+    try:
+        result = await CheckInSessionService().voice_correct_item(
+            user_id,
+            session_id,
+            item_id,
+            audio_bytes,
+            audio.filename or "correction.webm",
+            audio.content_type or "audio/webm",
+        )
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    return VoiceCorrectItemResponse(**result)
 
 
 @router.post("/{session_id}/complete", response_model=CompleteStageResponse)

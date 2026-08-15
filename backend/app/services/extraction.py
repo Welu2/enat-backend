@@ -60,12 +60,12 @@ FEW_SHOT_PROMPTS: dict[CheckInStage, str] = {
 Examples:
 
 Input: "ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው"
-Output: {{"symptoms":[{{"raw_text":"ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው","category":"severe_headache","duration":"2 days","severity":"severe"}}]}}
+Output: {{"symptoms":[{{"raw_text":"ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው","category":"severe_headache","duration":{{"value":2,"unit":"day"}},"severity":"severe"}}]}}
 
 Input: "እግሮቼ ለሶስት ቀናት እያበጡ ነው እና ከባድ ራስ ምታት አለኝ"
 Output: {{"symptoms":[
-  {{"raw_text":"እግሮቼ ለሶስት ቀናት እያበጡ ነው","category":"swelling_hands_face","duration":"3 days","severity":"moderate"}},
-  {{"raw_text":"ከባድ ራስ ምታት አለኝ","category":"severe_headache","duration":"unspecified","severity":"severe"}}
+  {{"raw_text":"እግሮቼ ለሶስት ቀናት እያበጡ ነው","category":"swelling_hands_face","duration":{{"value":3,"unit":"day"}},"severity":"moderate"}},
+  {{"raw_text":"ከባድ ራስ ምታት አለኝ","category":"severe_headache","duration":{{"value":null,"unit":"unspecified"}},"severity":"severe"}}
 ]}}
 
 Input: "ምንም ምልክት የለም"
@@ -109,7 +109,10 @@ _SYSTEM_PROMPT_BASE = (
     "If nothing relevant is mentioned, return empty lists or null values rather than guessing. "
     "Preserve the raw_text field exactly as it appears in the transcript — do not translate or paraphrase. "
     "Never set the danger_sign field — that is computed deterministically by the rules engine, not by you. "
-    "duration must be expressed in English (e.g. '3 days', '1 week', 'unspecified'). "
+    "duration must be an object: {\"value\": <integer or null>, \"unit\": \"hour|day|week|month|unspecified\"}. "
+    "This keeps duration language-neutral so it can be displayed in any language at render time — "
+    "never return duration as a free-text string in English or Amharic. "
+    "If no duration is mentioned, use {\"value\": null, \"unit\": \"unspecified\"}. "
     "severity must be exactly one of: mild, moderate, severe, unspecified. "
     f"For symptom category, you MUST use one of these exact values (or null for non-danger symptoms): "
     f"{_CATEGORY_LIST}."
@@ -132,23 +135,78 @@ def _parse_json_response(text: str) -> dict[str, Any]:
     return json.loads(cleaned)
 
 
-_CATEGORY_DISPLAY_AMHARIC: dict[str, str] = {
-    "vaginal_bleeding": "የማህፀን ደም መፍሰስ",
-    "swelling_hands_face": "የእጅ ወይም የፊት እብጠት",
-    "blurred_vision": "የእይታ ብዥታ",
-    "severe_abdominal_pain": "ከባድ የሆድ ህመም",
-    "fluid_leakage": "የፈሳሽ መፍሰስ",
-    "severe_headache": "ከባድ ራስ ምታት",
-    "persistent_nausea_vomiting": "የማይቋረጥ ማስታወክ",
-    "high_fever": "ከፍተኛ ትኩሳት",
-    "convulsions_loss_of_consciousness": "መንቀጥቀጥ ወይም ራስን መሳት",
-    "difficulty_breathing": "የመተንፈስ ችግር",
-    "severe_weakness_or_backache": "ከባድ ድካም ወይም የጀርባ ህመም",
-    "abnormal_fetal_movement": "የፅንስ እንቅስቃሴ መለወጥ",
+# Danger-sign category display labels per language. One entry per category,
+# both languages together, so the 12-item list can never drift out of sync
+# between languages (the old two-separate-dicts setup could silently lose
+# a category from one language and not the other).
+_CATEGORY_DISPLAY: dict[str, dict[str, str]] = {
+    "vaginal_bleeding": {"am": "የማህፀን ደም መፍሰስ", "en": "vaginal bleeding"},
+    "swelling_hands_face": {"am": "የእጅ ወይም የፊት እብጠት", "en": "swelling of hands or face"},
+    "blurred_vision": {"am": "የእይታ ብዥታ", "en": "blurred vision"},
+    "severe_abdominal_pain": {"am": "ከባድ የሆድ ህመም", "en": "severe abdominal pain"},
+    "fluid_leakage": {"am": "የፈሳሽ መፍሰስ", "en": "fluid leakage"},
+    "severe_headache": {"am": "ከባድ ራስ ምታት", "en": "severe headache"},
+    "persistent_nausea_vomiting": {"am": "የማይቋረጥ ማስታወክ", "en": "persistent nausea or vomiting"},
+    "high_fever": {"am": "ከፍተኛ ትኩሳት", "en": "high fever"},
+    "convulsions_loss_of_consciousness": {"am": "መንቀጥቀጥ ወይም ራስን መሳት", "en": "convulsions or loss of consciousness"},
+    "difficulty_breathing": {"am": "የመተንፈስ ችግር", "en": "difficulty breathing"},
+    "severe_weakness_or_backache": {"am": "ከባድ ድካም ወይም የጀርባ ህመም", "en": "severe weakness or backache"},
+    "abnormal_fetal_movement": {"am": "የፅንስ እንቅስቃሴ መለወጥ", "en": "abnormal fetal movement"},
 }
 
 
-def _build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
+def _category_display(category: str, lang: str = "am") -> str:
+    """Look up a danger-sign category's display label in the given language.
+
+    Used for both the patient-facing Amharic verification phrase and the
+    clinician-facing summary (which may render in English) — one lookup
+    table, two consumers, so the label sets can't diverge.
+    """
+    labels = _CATEGORY_DISPLAY.get(category)
+    if not labels:
+        return category.replace("_", " ") if category else "ምልክት" if lang == "am" else "symptom"
+    return labels.get(lang, labels.get("am", category))
+
+# Duration unit display labels per language. Add a new top-level key here
+# (e.g. "om" for Afaan Oromo) to support another language without touching
+# the extraction schema, prompts, or database — duration stays a
+# language-neutral {value, unit} object everywhere upstream of this dict.
+_DURATION_UNIT_DISPLAY: dict[str, dict[str, str]] = {
+    "am": {
+        "hour": "ሰዓት",
+        "day": "ቀን",
+        "week": "ሳምንት",
+        "month": "ወር",
+    },
+    "en": {
+        "hour": "hour(s)",
+        "day": "day(s)",
+        "week": "week(s)",
+        "month": "month(s)",
+    },
+}
+
+
+def _format_duration(duration: dict[str, Any] | str | None, lang: str = "am") -> str:
+    """Render a duration object {value, unit} or string as display text.
+
+    Returns "" when there's nothing to show (no duration mentioned), so
+    callers can safely skip it rather than showing an empty/placeholder value.
+    """
+    if not duration:
+        return ""
+    if isinstance(duration, str):
+        return duration
+    unit = duration.get("unit")
+    value = duration.get("value")
+    if not unit or unit == "unspecified" or value is None:
+        return ""
+    unit_labels = _DURATION_UNIT_DISPLAY.get(lang, _DURATION_UNIT_DISPLAY["am"])
+    unit_label = unit_labels.get(unit, unit)
+    return f"{value} {unit_label}"
+
+
+def build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
     """Build the human-readable Amharic read-back string shown to the patient for confirmation.
 
     PRD §4 step 6: "App reads back each extracted item individually for
@@ -156,11 +214,11 @@ def _build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str
     """
     if stage == "symptoms":
         category = item.get("category") or ""
-        display = _CATEGORY_DISPLAY_AMHARIC.get(category) or _CATEGORY_DISPLAY.get(category) or category.replace("_", " ") or "ምልክት"
-        duration = item.get("duration") or ""
+        display = _category_display(category, lang="am")
+        duration_str = _format_duration(item.get("duration"), lang="am")
         parts: list[str] = [display]
-        if duration and duration != "unspecified":
-            parts.append(duration)
+        if duration_str:
+            parts.append(duration_str)
         return f"{'፣ '.join(parts)} — ትክክል ነው?"
 
     if stage == "food":
@@ -175,6 +233,9 @@ def _build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str
     # closing
     raw = item.get("raw_text") or ""
     return f"የጠቀሱት: {raw} — ትክክል ነው?"
+
+
+_build_verification_phrase = build_verification_phrase
 
 
 def _attach_item_ids(stage: CheckInStage, data: dict[str, Any]) -> list[dict[str, Any]]:

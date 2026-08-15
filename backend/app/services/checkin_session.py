@@ -9,7 +9,7 @@ from app.db.repositories.supplements import SupplementRepository
 from app.models.checkin import CheckInStage
 from app.services.addis_ai import AddisAIClient
 from app.services.danger_signs import check_danger_sign
-from app.services.extraction import ExtractionService
+from app.services.extraction import ExtractionService, build_verification_phrase
 
 
 def _empty_draft_data() -> dict[str, Any]:
@@ -114,6 +114,9 @@ class CheckInSessionService:
 
             if corrected_value:
                 item.update(corrected_value)
+                if stage == "symptoms":
+                    item["danger_sign"] = check_danger_sign(item.get("category", ""))
+                item["verification_phrase"] = build_verification_phrase(item, stage)
 
             item["confirmed"] = confirmed
             if confirmed:
@@ -133,6 +136,52 @@ class CheckInSessionService:
             "stage": stage,
             "pending_items": updated_pending,
             "confirmed_count": confirmed_count,
+        }
+
+    async def voice_correct_item(
+        self,
+        user_id: UUID,
+        session_id: UUID,
+        item_id: str,
+        audio_bytes: bytes,
+        filename: str,
+        content_type: str,
+    ) -> dict[str, Any]:
+        """Record voice again specifically to correct a single pending item."""
+        session = self._get_active_session(user_id, session_id)
+        stage = session["current_stage"]
+        pending_items = list(session.get("pending_items") or [])
+
+        correction_transcript = await self.asr.transcribe(audio_bytes, filename, content_type)
+        extracted_corrections = await self.extraction.extract(correction_transcript, stage)
+
+        item_updated = False
+        if extracted_corrections:
+            new_data = extracted_corrections[0]
+            for item in pending_items:
+                if item.get("item_id") == item_id:
+                    for field in ("category", "duration", "severity", "raw_text", "supplement_name", "taken_today", "topic"):
+                        if field in new_data and new_data[field] is not None:
+                            item[field] = new_data[field]
+                    if stage == "symptoms":
+                        item["danger_sign"] = check_danger_sign(item.get("category", ""))
+                    item["verification_phrase"] = build_verification_phrase(item, stage)
+                    item["correction_transcript"] = correction_transcript
+                    item_updated = True
+                    break
+
+        self.sessions.update(
+            session_id,
+            user_id,
+            {"pending_items": pending_items},
+        )
+
+        return {
+            "session_id": session_id,
+            "stage": stage,
+            "correction_transcript": correction_transcript,
+            "item_updated": item_updated,
+            "pending_items": pending_items,
         }
 
     def complete_stage(self, user_id: UUID, session_id: UUID) -> dict[str, Any]:

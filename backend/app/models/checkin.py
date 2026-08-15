@@ -12,7 +12,7 @@ class SymptomItem(BaseModel):
     item_id: str
     raw_text: str
     category: str
-    duration: str | None = None
+    duration: dict[str, Any] | str | None = None
     severity: str | None = None
     danger_sign: bool = False
     confirmed: bool = False
@@ -63,6 +63,14 @@ class VerifyItemResponse(BaseModel):
     stage: CheckInStage
     pending_items: list[dict[str, Any]]
     confirmed_count: int
+
+
+class VoiceCorrectItemResponse(BaseModel):
+    session_id: UUID
+    stage: CheckInStage
+    correction_transcript: str
+    item_updated: bool
+    pending_items: list[dict[str, Any]]
 
 
 class CompleteStageResponse(BaseModel):

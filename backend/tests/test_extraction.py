@@ -19,7 +19,7 @@ async def test_extraction_validates_symptoms_and_sets_danger_sign() -> None:
             {
                 "raw_text": "ከባድ ራስ ምታት",
                 "category": "severe_headache",
-                "duration": "1 day",
+                "duration": {"value": 1, "unit": "day"},
                 "severity": "severe",
             }
         ]
@@ -36,6 +36,9 @@ async def test_extraction_validates_symptoms_and_sets_danger_sign() -> None:
     assert items[0]["danger_sign"] is True
     assert items[0]["confirmed"] is False
     assert "item_id" in items[0]
+    assert "verification_phrase" in items[0]
+    assert "ከባድ ራስ ምታት" in items[0]["verification_phrase"]
+    assert "1 ቀን" in items[0]["verification_phrase"]
 
 
 @pytest.mark.asyncio

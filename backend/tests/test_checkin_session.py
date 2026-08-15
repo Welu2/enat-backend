@@ -53,3 +53,75 @@ def test_verify_item_moves_confirmed_symptom_to_draft(service: CheckInSessionSer
     update_mock.assert_called_once()
     draft_data = update_mock.call_args[0][2]["draft_data"]
     assert draft_data["symptoms"][0]["danger_sign"] is True
+
+
+def test_verify_item_manual_edit_updates_phrase_and_danger_sign(service: CheckInSessionService) -> None:
+    user_id = uuid4()
+    session_id = uuid4()
+    item_id = str(uuid4())
+    session = {
+        "current_stage": "symptoms",
+        "stage_order": ["symptoms", "food", "closing"],
+        "draft_data": {"symptoms": [], "food_log": None, "supplement_check": None, "closing_mentions": []},
+        "pending_items": [
+            {
+                "item_id": item_id,
+                "raw_text": "mild headache",
+                "category": "mild_headache",
+                "confirmed": False,
+            }
+        ],
+        "status": "in_progress",
+        "expires_at": "2099-01-01T00:00:00",
+    }
+
+    corrected = {"category": "severe_headache", "duration": {"value": 3, "unit": "day"}}
+    with patch.object(service, "_get_active_session", return_value=session):
+        with patch.object(service.sessions, "update") as update_mock:
+            result = service.verify_item(user_id, session_id, item_id, True, corrected)
+
+    assert result["confirmed_count"] == 1
+    draft = update_mock.call_args[0][2]["draft_data"]["symptoms"][0]
+    assert draft["danger_sign"] is True
+    assert "ከባድ ራስ ምታት" in draft["verification_phrase"]
+    assert "3 ቀን" in draft["verification_phrase"]
+
+
+@pytest.mark.asyncio
+async def test_voice_correct_item_updates_pending_item(service: CheckInSessionService) -> None:
+    user_id = uuid4()
+    session_id = uuid4()
+    item_id = str(uuid4())
+    session = {
+        "current_stage": "symptoms",
+        "stage_order": ["symptoms", "food", "closing"],
+        "draft_data": {"symptoms": []},
+        "pending_items": [
+            {
+                "item_id": item_id,
+                "raw_text": "headache",
+                "category": "severe_headache",
+                "duration": {"value": 1, "unit": "day"},
+                "confirmed": False,
+            }
+        ],
+        "status": "in_progress",
+        "expires_at": "2099-01-01T00:00:00",
+    }
+
+    with patch.object(service, "_get_active_session", return_value=session):
+        with patch.object(service.asr, "transcribe", new=pytest.importorskip("unittest.mock").AsyncMock(return_value="ሶስት ቀን ነው")):
+            with patch.object(
+                service.extraction,
+                "extract",
+                new=pytest.importorskip("unittest.mock").AsyncMock(
+                    return_value=[{"category": "severe_headache", "duration": {"value": 3, "unit": "day"}}]
+                ),
+            ):
+                with patch.object(service.sessions, "update"):
+                    res = await service.voice_correct_item(user_id, session_id, item_id, b"audio", "correction.webm", "audio/webm")
+
+    assert res["item_updated"] is True
+    updated_item = res["pending_items"][0]
+    assert updated_item["duration"] == {"value": 3, "unit": "day"}
+    assert "3 ቀን" in updated_item["verification_phrase"]
