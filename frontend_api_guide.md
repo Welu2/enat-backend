@@ -64,6 +64,39 @@ Authorization: Bearer <access_token>
 ```
 - **Response** `(200 OK)`: Returns `access_token`, `user_id`, and `email`.
 
+### Forgot Password (Send Reset Email)
+- **Endpoint**: `POST /auth/forgot-password`
+- **Request Body**:
+```json
+{
+  "email": "mother@example.com"
+}
+```
+- **Response** `(200 OK)`:
+```json
+{
+  "status": "success",
+  "message": "If an account with that email exists, a password reset link has been sent to your email."
+}
+```
+
+### Reset Password (Update Password with Recovery Token)
+- **Endpoint**: `POST /auth/reset-password`
+- **Request Body**:
+```json
+{
+  "access_token": "recovery_access_token_from_email_link",
+  "new_password": "newsecurepassword123"
+}
+```
+- **Response** `(200 OK)`:
+```json
+{
+  "status": "success",
+  "message": "Password updated successfully. You can now log in with your new password."
+}
+```
+
 > [!NOTE]
 > The backend handles Supabase ES256 and HS256 JWT decoding seamlessly. Save the `access_token` securely on device storage.
 
@@ -103,8 +136,28 @@ Frontend apps can query `GET /users/me` at launch to load all user configuration
 }
 ```
 
-### Add Supplement
-- **Endpoint**: `POST /users/me/supplements`
+### Unified Settings Update (Bulk Update All Settings)
+- **Endpoint**: `PUT /users/me/settings` or `PATCH /users/me/settings`
+- **Request Body**:
+```json
+{
+  "appointment": {
+    "appointment_date": "2026-08-25",
+    "reminder_lead_days": 3
+  },
+  "supplements": [
+    {
+      "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+      "reminder_enabled": true,
+      "reminder_time": "08:30:00"
+    }
+  ]
+}
+```
+- **Response** `(200 OK)`: Returns updated `UserProfile`.
+
+### Add or Update Supplement
+- **Endpoint**: `POST /users/me/supplements` or `PUT /users/me/supplements/{supplement_id}`
 - **Request Body**:
 ```json
 {
@@ -115,17 +168,12 @@ Frontend apps can query `GET /users/me` at launch to load all user configuration
 }
 ```
 
-### Update Supplement
-- **Endpoint**: `PUT /users/me/supplements/{supplement_id}`
-- **Request Body**:
-```json
-{
-  "active": false
-}
-```
+### Delete Supplement
+- **Endpoint**: `DELETE /users/me/supplements/{supplement_id}`
+- **Response** `(200 OK)`: `{"status": "deleted"}`
 
-### Set ANC Appointment
-- **Endpoint**: `POST /users/me/appointment`
+### Set or Update ANC Appointment
+- **Endpoint**: `POST /users/me/appointment` or `PUT /users/me/appointment`
 - **Request Body**:
 ```json
 {
@@ -134,14 +182,9 @@ Frontend apps can query `GET /users/me` at launch to load all user configuration
 }
 ```
 
-### Update ANC Appointment
-- **Endpoint**: `PUT /users/me/appointment`
-- **Request Body**:
-```json
-{
-  "appointment_date": "2026-08-25"
-}
-```
+### Delete ANC Appointment
+- **Endpoint**: `DELETE /users/me/appointment`
+- **Response** `(200 OK)`: `{"status": "deleted"}`
 
 ---
 
@@ -217,7 +260,7 @@ Each stage presents `pending_items` for patient read-back confirmation.
 When the patient confirms or manually edits an item:
 
 - **Endpoint**: `POST /checkin/{session_id}/verify`
-- **Request Body**:
+- **Request Body (Single Item Verification)**:
 ```json
 {
   "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
@@ -227,17 +270,37 @@ When the patient confirms or manually edits an item:
   }
 }
 ```
+
+- **Request Body (Bulk Verification for All Items at Once)**:
+```json
+{
+  "items": [
+    {
+      "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
+      "confirmed": true
+    },
+    {
+      "item_id": "889bb790-ce6d-4008-8254-9435f3d8642c",
+      "confirmed": true,
+      "corrected_value": {
+        "severity": "mild"
+      }
+    }
+  ]
+}
+```
 - **Response** `(200 OK)`:
 ```json
 {
   "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
   "stage": "symptoms",
   "pending_items": [],
-  "confirmed_count": 1
+  "confirmed_count": 2
 }
 ```
 
 > [!TIP]
+> **Bulk Verification**: When multiple symptoms, foods, or closing questions are returned in `pending_items`, the frontend can present all items at once and confirm them all in a single bulk `POST /verify` call!
 > **Single-Item Fallback**: On single-item stages (`food`, `supplement`), if the client accidentally sends the `session_id` in `item_id`, the backend automatically targets the single pending item.
 
 ### B. Single-Item Voice Correction
@@ -394,6 +457,31 @@ Summaries aggregate all confirmed check-ins over a period for ANC doctor visits.
 
 ### Dismiss Notification
 - **Endpoint**: `POST /notifications/{notification_id}/dismiss`
+
+### 1-Tap Google Calendar Link & iCal Export (.ics)
+Add ANC appointment directly to Google Calendar or Apple Calendar with automated device reminders (1 day & 2 hours before):
+- **Get Calendar Links**: `GET /users/me/appointment/calendar-link`
+  - **Response** `(200 OK)`:
+  ```json
+  {
+    "google_calendar_url": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=...",
+    "ical_download_url": "/users/me/appointment/calendar.ics"
+  }
+  ```
+- **Download iCal File**: `GET /users/me/appointment/calendar.ics`
+  - Returns downloadable `.ics` calendar file with built-in device notification alarms.
+
+### Register Device Push Notification Tokens (FCM / Web Push)
+Register device token for lockscreen push notifications when the app or browser is closed:
+- **Endpoint**: `POST /users/me/push-tokens`
+- **Request Body**:
+```json
+{
+  "token": "fcm_device_token_or_web_push_subscription_string",
+  "platform": "web"
+}
+```
+- **Response** `(200 OK)`: `{"status": "registered", "token": "..."}`
 
 ---
 

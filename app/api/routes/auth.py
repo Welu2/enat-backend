@@ -5,7 +5,12 @@ from supabase import create_client
 
 from app.config import get_settings
 from app.db.repositories.users import UserRepository
-from app.models.user import AuthCredentials, AuthResponse
+from app.models.user import (
+    AuthCredentials,
+    AuthResponse,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -89,3 +94,45 @@ def login(credentials: AuthCredentials) -> AuthResponse:
         user_id=user_id,
         email=credentials.email,
     )
+
+
+@router.post("/forgot-password")
+def forgot_password(payload: ForgotPasswordRequest) -> dict[str, str]:
+    """Triggers Supabase Auth password reset email to user."""
+    settings = get_settings()
+    client = create_client(settings.supabase_url, settings.supabase_service_role_key)
+
+    try:
+        client.auth.reset_password_for_email(payload.email)
+    except Exception as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    return {
+        "status": "success",
+        "message": "If an account with that email exists, a password reset link has been sent to your email.",
+    }
+
+
+@router.post("/reset-password")
+def reset_password(payload: ResetPasswordRequest) -> dict[str, str]:
+    """Updates user password using the recovery access token sent to their email."""
+    settings = get_settings()
+
+    try:
+        user_client = create_client(
+            settings.supabase_url,
+            settings.supabase_service_role_key,
+            options={"headers": {"Authorization": f"Bearer {payload.access_token}"}},
+        )
+        res = user_client.auth.update_user({"password": payload.new_password})
+        if not res or not res.user:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Invalid or expired recovery token")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=f"Failed to reset password: {exc}") from exc
+
+    return {
+        "status": "success",
+        "message": "Password updated successfully. You can now log in with your new password.",
+    }
