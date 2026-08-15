@@ -21,6 +21,9 @@ class UserProfile(BaseModel):
     id: UUID
     email: str | None
     created_at: datetime
+    supplements: list["SupplementResponse"] = []
+    appointment: "AppointmentResponse | None" = None
+    pending_reminders: list[dict[str, Any]] = []
 
 
 class SupplementCreate(BaseModel):

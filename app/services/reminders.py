@@ -21,11 +21,17 @@ class ReminderService:
         return self.reminders.list_pending(user_id)
 
     def run_daily_job(self) -> dict[str, int]:
-        created = {"set_appointment": 0, "supplement": 0, "appointment_approaching": 0}
+        created = {"set_appointment": 0, "supplement": 0, "appointment_approaching": 0, "auto_summary": 0}
         today = date.today()
 
         for user in self.users.list_all():
             user_id = UUID(user["id"])
+
+            # Automatic clinician summary check (1 day before appointment or 30-day monthly fallback)
+            auto_summary = self.summary_service.check_and_generate_auto_summary(user_id)
+            if auto_summary:
+                created["auto_summary"] += 1
+
             appointment = self.appointments.get_by_user(user_id)
 
             if not appointment:
@@ -59,7 +65,6 @@ class ReminderService:
                             },
                         )
                         created["appointment_approaching"] += 1
-                        self.summary_service.generate(user_id)
 
             for supplement in self.supplements.list_active(user_id):
                 if not supplement.get("reminder_enabled"):

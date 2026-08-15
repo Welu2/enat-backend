@@ -42,3 +42,15 @@ class CheckInRepository:
             .execute()
         )
         return result.data or []
+
+    def get_by_id(self, user_id: UUID, checkin_id: UUID) -> dict[str, Any] | None:
+        client = get_supabase_client()
+        result = (
+            client.table("check_ins")
+            .select("*")
+            .eq("id", str(checkin_id))
+            .eq("user_id", str(user_id))
+            .maybe_single()
+            .execute()
+        )
+        return result.data if result else None

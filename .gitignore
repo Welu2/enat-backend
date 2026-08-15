@@ -28,6 +28,8 @@ data/
 *.pyd
 *.pyc
 /.pytest_cache
+*.ini
+
 
 # Build / packaging 
 dist/

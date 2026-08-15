@@ -32,3 +32,11 @@ def get_public_summary(share_link_slug: str) -> PublicSummaryResponse:
     if not summary:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Summary not found")
     return PublicSummaryResponse(**summary)
+
+
+@router.post("/check-automatic")
+def check_automatic_summary(user_id: UUID = Depends(get_current_user_id)) -> dict:
+    summary = SummaryService().check_and_generate_auto_summary(user_id)
+    if not summary:
+        return {"status": "no_summary_due", "message": "No automatic summary is due at this time."}
+    return {"status": "summary_generated", "summary": summary}

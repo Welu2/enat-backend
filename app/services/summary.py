@@ -76,6 +76,19 @@ class SummaryService:
         if appointment:
             self.appointments.update_last_summary_generated_at(user_id, period_end)
 
+        try:
+            from app.db.repositories.reminders import ReminderRepository
+            ReminderRepository().create(
+                user_id,
+                {
+                    "type": "report_generated",
+                    "message": "Your clinician summary report for your ANC appointment has been generated.",
+                    "due_at": datetime.utcnow().isoformat(),
+                },
+            )
+        except Exception:
+            pass
+
         return summary
 
     def get_latest(self, user_id: UUID) -> dict[str, Any] | None:
@@ -83,6 +96,63 @@ class SummaryService:
 
     def get_public(self, slug: str) -> dict[str, Any] | None:
         return self.summaries.get_by_slug(slug)
+
+    def check_and_generate_auto_summary(self, user_id: UUID) -> dict[str, Any] | None:
+        """Check whether an automatic summary is due for the user and generate it if so.
+
+        Rules per PRD / user requirement:
+        1. If an appointment is set: automatically generate 1 day before the appointment date
+           (or on the day of appointment if not yet generated for this cycle).
+        2. If no appointment is set: automatically generate every 30 days (1 month)
+           since the last summary or account creation.
+        """
+        user = self.users.get_by_id(user_id)
+        if not user:
+            return None
+
+        appointment = self.appointments.get_by_user(user_id)
+        today = date.today()
+        now = datetime.utcnow()
+
+        should_generate = False
+        reason = ""
+
+        if appointment and appointment.get("appointment_date"):
+            appointment_date = date.fromisoformat(appointment["appointment_date"])
+            days_until = (appointment_date - today).days
+
+            # 1 day before appointment (or day of appointment if not yet generated)
+            if 0 <= days_until <= 1:
+                last_generated = appointment.get("last_summary_generated_at")
+                if not last_generated:
+                    should_generate = True
+                    reason = "pre_appointment_1_day_before"
+                else:
+                    last_gen_dt = _parse_datetime(last_generated)
+                    # If not generated within the last 3 days for this appointment cycle
+                    if (now - last_gen_dt).days >= 3:
+                        should_generate = True
+                        reason = "pre_appointment_1_day_before"
+        else:
+            # No appointment set -> generate every 30 days (monthly)
+            latest_summary = self.summaries.get_latest(user_id)
+            if latest_summary and latest_summary.get("generated_at"):
+                last_gen_dt = _parse_datetime(latest_summary["generated_at"])
+                if (now - last_gen_dt).days >= 30:
+                    should_generate = True
+                    reason = "monthly_auto_summary"
+            else:
+                created_at = _parse_datetime(user["created_at"])
+                if (now - created_at).days >= 30:
+                    should_generate = True
+                    reason = "monthly_auto_summary"
+
+        if should_generate:
+            summary = self.generate(user_id)
+            summary["auto_reason"] = reason
+            return summary
+
+        return None
 
     @staticmethod
     def _aggregate(check_ins: list[dict[str, Any]]) -> dict[str, Any]:

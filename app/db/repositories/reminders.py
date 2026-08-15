@@ -45,4 +45,17 @@ class ReminderRepository:
             .lte("due_at", end)
             .execute()
         )
-        return bool(result.data)
+        return bool(result.data if result else False)
+
+    def dismiss(self, user_id: UUID, reminder_id: UUID) -> dict[str, Any]:
+        client = get_supabase_client()
+        result = (
+            client.table("reminders")
+            .update({"dismissed": True})
+            .eq("id", str(reminder_id))
+            .eq("user_id", str(user_id))
+            .execute()
+        )
+        if not result or not result.data:
+            raise ValueError("Notification not found")
+        return result.data[0]

@@ -61,3 +61,54 @@ async def test_extraction_raises_after_max_retries() -> None:
     ):
         with pytest.raises(ValueError):
             await service.extract("test", "symptoms")
+
+
+@pytest.mark.asyncio
+async def test_extraction_mild_symptom_overrides_danger_sign_to_false() -> None:
+    service = ExtractionService()
+    # Even if LLM erroneously outputs a category for a mild symptom,
+    # server-side guard forces category=None and danger_sign=False.
+    llm_payload = {
+        "symptoms": [
+            {
+                "raw_text": "ቀላል የድካም ስሜት",
+                "category": "severe_weakness_or_backache",
+                "duration": {"value": None, "unit": "unspecified"},
+                "severity": "mild",
+            }
+        ]
+    }
+
+    with patch.object(
+        service.client,
+        "generate_json",
+        new=AsyncMock(return_value=json.dumps(llm_payload)),
+    ):
+        items = await service.extract("ቀላል የድካም ስሜት", "symptoms")
+
+    assert len(items) == 1
+    assert items[0]["category"] is None
+    assert items[0]["danger_sign"] is False
+    assert items[0]["verification_phrase"] == "ቀላል የድካም ስሜት — ትክክል ነው?"
+
+
+@pytest.mark.asyncio
+async def test_extraction_supplement_unknown_name_formats_clean_amharic_phrase() -> None:
+    service = ExtractionService()
+    llm_payload = {
+        "supplement_check": {
+            "raw_text": "አዎ ወስቻለሁ።",
+            "supplement_name": "unknown",
+            "taken_today": True,
+        }
+    }
+
+    with patch.object(
+        service.client,
+        "generate_json",
+        new=AsyncMock(return_value=json.dumps(llm_payload)),
+    ):
+        items = await service.extract("አዎ ወስቻለሁ።", "supplement")
+
+    assert len(items) == 1
+    assert items[0]["verification_phrase"] == "ተጨማሪ ምግብ ዛሬ ወስደዋል — ትክክል ነው?"

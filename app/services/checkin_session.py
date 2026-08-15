@@ -78,6 +78,14 @@ class CheckInSessionService:
         transcript = await self.asr.transcribe(audio_bytes, filename, content_type)
         pending_items = await self.extraction.extract(transcript, stage)
 
+        if stage == "supplement" and pending_items:
+            active_supplements = self.supplements.list_active(user_id)
+            for item in pending_items:
+                raw_name = str(item.get("supplement_name") or "").lower().strip()
+                if raw_name in ("unknown", "other", "none", "") and active_supplements:
+                    item["supplement_name"] = active_supplements[0]["name"]
+                    item["verification_phrase"] = build_verification_phrase(item, stage)
+
         self.sessions.update(
             session_id,
             user_id,
@@ -104,26 +112,67 @@ class CheckInSessionService:
         draft_data = dict(session.get("draft_data") or _empty_draft_data())
         stage = session["current_stage"]
 
+        # Support fallback when user passes session_id instead of item_id on single-item stages
+        target_item_id = item_id
+        matching_items = [i for i in pending_items if i.get("item_id") == item_id]
+        if not matching_items and len(pending_items) == 1:
+            target_item_id = pending_items[0].get("item_id", item_id)
+
         updated_pending: list[dict[str, Any]] = []
         confirmed_count = 0
 
-        for item in pending_items:
-            if item.get("item_id") != item_id:
-                updated_pending.append(item)
-                continue
+        if not pending_items and corrected_value:
+            new_item = {
+                "item_id": target_item_id,
+                "raw_text": corrected_value.get("raw_text", ""),
+                "confirmed": confirmed,
+            }
+            if stage == "symptoms":
+                new_item["category"] = corrected_value.get("category")
+                new_item["duration"] = corrected_value.get("duration")
+                new_item["severity"] = corrected_value.get("severity", "unspecified")
+                severity = str(new_item.get("severity") or "").lower()
+                if severity == "mild":
+                    new_item["category"] = None
+                    new_item["danger_sign"] = False
+                else:
+                    new_item["danger_sign"] = check_danger_sign(new_item.get("category"))
+            elif stage == "supplement":
+                new_item["supplement_name"] = corrected_value.get("supplement_name", "unknown")
+                new_item["taken_today"] = corrected_value.get("taken_today", True)
+            elif stage == "closing":
+                new_item["topic"] = corrected_value.get("topic", "general_question")
 
-            if corrected_value:
-                item.update(corrected_value)
-                if stage == "symptoms":
-                    item["danger_sign"] = check_danger_sign(item.get("category", ""))
-                item["verification_phrase"] = build_verification_phrase(item, stage)
+            new_item["verification_phrase"] = build_verification_phrase(new_item, stage)
 
-            item["confirmed"] = confirmed
             if confirmed:
                 confirmed_count += 1
-                self._store_confirmed_item(draft_data, stage, item)
+                self._store_confirmed_item(draft_data, stage, new_item)
             else:
-                updated_pending.append(item)
+                updated_pending.append(new_item)
+        else:
+            for item in pending_items:
+                if item.get("item_id") != target_item_id:
+                    updated_pending.append(item)
+                    continue
+
+                if corrected_value:
+                    item.update(corrected_value)
+                    if stage == "symptoms":
+                        severity = str(item.get("severity") or "").lower()
+                        if severity == "mild":
+                            item["category"] = None
+                            item["danger_sign"] = False
+                        else:
+                            item["danger_sign"] = check_danger_sign(item.get("category"))
+                    item["verification_phrase"] = build_verification_phrase(item, stage)
+
+                item["confirmed"] = confirmed
+                if confirmed:
+                    confirmed_count += 1
+                    self._store_confirmed_item(draft_data, stage, item)
+                else:
+                    updated_pending.append(item)
 
         self.sessions.update(
             session_id,
@@ -152,6 +201,12 @@ class CheckInSessionService:
         stage = session["current_stage"]
         pending_items = list(session.get("pending_items") or [])
 
+        # Support fallback when user passes session_id instead of item_id on single-item stages
+        target_item_id = item_id
+        matching_items = [i for i in pending_items if i.get("item_id") == item_id]
+        if not matching_items and len(pending_items) == 1:
+            target_item_id = pending_items[0].get("item_id", item_id)
+
         correction_transcript = await self.asr.transcribe(audio_bytes, filename, content_type)
         extracted_corrections = await self.extraction.extract(correction_transcript, stage)
 
@@ -159,12 +214,17 @@ class CheckInSessionService:
         if extracted_corrections:
             new_data = extracted_corrections[0]
             for item in pending_items:
-                if item.get("item_id") == item_id:
+                if item.get("item_id") == target_item_id:
                     for field in ("category", "duration", "severity", "raw_text", "supplement_name", "taken_today", "topic"):
                         if field in new_data and new_data[field] is not None:
                             item[field] = new_data[field]
                     if stage == "symptoms":
-                        item["danger_sign"] = check_danger_sign(item.get("category", ""))
+                        severity = str(item.get("severity") or "").lower()
+                        if severity == "mild":
+                            item["category"] = None
+                            item["danger_sign"] = False
+                        else:
+                            item["danger_sign"] = check_danger_sign(item.get("category"))
                     item["verification_phrase"] = build_verification_phrase(item, stage)
                     item["correction_transcript"] = correction_transcript
                     item_updated = True

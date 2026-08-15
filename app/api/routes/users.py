@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.dependencies import get_current_user
 from app.db.repositories.appointments import AppointmentRepository
+from app.db.repositories.reminders import ReminderRepository
 from app.db.repositories.supplements import SupplementRepository
 from app.models.user import (
     AppointmentCreate,
@@ -20,7 +21,19 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/me", response_model=UserProfile)
 def get_me(current_user: dict = Depends(get_current_user)) -> UserProfile:
-    return UserProfile(**current_user)
+    user_id = UUID(current_user["id"])
+    supplements = SupplementRepository().list_all(user_id)
+    appointment = AppointmentRepository().get_by_user(user_id)
+    reminders = ReminderRepository().list_pending(user_id)
+
+    return UserProfile(
+        id=user_id,
+        email=current_user.get("email"),
+        created_at=current_user["created_at"],
+        supplements=supplements,
+        appointment=appointment,
+        pending_reminders=reminders,
+    )
 
 
 @router.post("/me/supplements", response_model=SupplementResponse)

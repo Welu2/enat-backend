@@ -78,3 +78,48 @@ def test_public_summary_repository_selects_limited_fields(monkeypatch) -> None:
     assert captured["fields"] == "period_start, period_end, generated_at, content_json"
     assert "email" not in captured["fields"]
     assert result is not None
+
+
+def test_check_and_generate_auto_summary_pre_appointment(monkeypatch) -> None:
+    from datetime import date, timedelta
+    service = SummaryService()
+    user_id = uuid4()
+    tomorrow = (date.today() + timedelta(days=1)).isoformat()
+
+    monkeypatch.setattr(service.users, "get_by_id", lambda uid: {"id": str(uid), "created_at": "2026-01-01T00:00:00"})
+    monkeypatch.setattr(
+        service.appointments,
+        "get_by_user",
+        lambda uid: {"appointment_date": tomorrow, "last_summary_generated_at": None},
+    )
+    monkeypatch.setattr(
+        service,
+        "generate",
+        lambda uid: {"id": uuid4(), "auto_reason": "pre_appointment_1_day_before"},
+    )
+
+    result = service.check_and_generate_auto_summary(user_id)
+    assert result is not None
+    assert result["auto_reason"] == "pre_appointment_1_day_before"
+
+
+def test_check_and_generate_auto_summary_monthly_fallback(monkeypatch) -> None:
+    service = SummaryService()
+    user_id = uuid4()
+
+    monkeypatch.setattr(service.users, "get_by_id", lambda uid: {"id": str(uid), "created_at": "2026-01-01T00:00:00"})
+    monkeypatch.setattr(service.appointments, "get_by_user", lambda uid: None)
+    monkeypatch.setattr(
+        service.summaries,
+        "get_latest",
+        lambda uid: {"generated_at": "2026-01-01T00:00:00"},
+    )
+    monkeypatch.setattr(
+        service,
+        "generate",
+        lambda uid: {"id": uuid4(), "auto_reason": "monthly_auto_summary"},
+    )
+
+    result = service.check_and_generate_auto_summary(user_id)
+    assert result is not None
+    assert result["auto_reason"] == "monthly_auto_summary"

@@ -62,6 +62,9 @@ Examples:
 Input: "ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው"
 Output: {{"symptoms":[{{"raw_text":"ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው","category":"severe_headache","duration":{{"value":2,"unit":"day"}},"severity":"severe"}}]}}
 
+Input: "ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ"
+Output: {{"symptoms":[{{"raw_text":"ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ","category":null,"duration":{{"value":null,"unit":"unspecified"}},"severity":"mild"}}]}}
+
 Input: "እግሮቼ ለሶስት ቀናት እያበጡ ነው እና ከባድ ራስ ምታት አለኝ"
 Output: {{"symptoms":[
   {{"raw_text":"እግሮቼ ለሶስት ቀናት እያበጡ ነው","category":"swelling_hands_face","duration":{{"value":3,"unit":"day"}},"severity":"moderate"}},
@@ -110,11 +113,12 @@ _SYSTEM_PROMPT_BASE = (
     "Preserve the raw_text field exactly as it appears in the transcript — do not translate or paraphrase. "
     "Never set the danger_sign field — that is computed deterministically by the rules engine, not by you. "
     "duration must be an object: {\"value\": <integer or null>, \"unit\": \"hour|day|week|month|unspecified\"}. "
-    "This keeps duration language-neutral so it can be displayed in any language at render time — "
-    "never return duration as a free-text string in English or Amharic. "
     "If no duration is mentioned, use {\"value\": null, \"unit\": \"unspecified\"}. "
     "severity must be exactly one of: mild, moderate, severe, unspecified. "
-    f"For symptom category, you MUST use one of these exact values (or null for non-danger symptoms): "
+    "CRITICAL CATEGORY RULE: Most common pregnancy symptoms (such as mild weakness/fatigue, mild back pain, "
+    "mild nausea, normal leg swelling, or mild headache) are NON-DANGER symptoms and MUST have category set to null. "
+    "Do NOT force mild or non-critical symptoms into danger categories. Only set category to one of the 12 danger sign "
+    "keys if the transcript explicitly describes a severe, persistent, or alarming danger sign: "
     f"{_CATEGORY_LIST}."
 )
 
@@ -206,6 +210,21 @@ def _format_duration(duration: dict[str, Any] | str | None, lang: str = "am") ->
     return f"{value} {unit_label}"
 
 
+_SUPPLEMENT_NAME_AMHARIC: dict[str, str] = {
+    "iron": "የብረት ተጨማሪ ምግብ",
+    "folic_acid": "ፎሊክ አሲድ",
+    "calcium": "ካልሲየም",
+    "multivitamin": "መልቲቪታሚን",
+}
+
+
+def _supplement_display(name: str | None) -> str:
+    if not name or str(name).lower().strip() in ("unknown", "other", "none", "null"):
+        return "ተጨማሪ ምግብ"
+    clean_name = str(name).lower().strip()
+    return _SUPPLEMENT_NAME_AMHARIC.get(clean_name, str(name))
+
+
 def build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
     """Build the human-readable Amharic read-back string shown to the patient for confirmation.
 
@@ -213,25 +232,34 @@ def build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
     confirmation ('swelling, 3 days — is that correct?')."
     """
     if stage == "symptoms":
-        category = item.get("category") or ""
-        display = _category_display(category, lang="am")
+        raw_text = (item.get("raw_text") or "").strip()
+        category = item.get("category")
         duration_str = _format_duration(item.get("duration"), lang="am")
+
+        # For protocol danger signs, use the localized danger sign display label.
+        # For non-danger symptoms (category is None), use the patient's actual reported text (raw_text).
+        if category:
+            display = _category_display(category, lang="am")
+        else:
+            display = raw_text if raw_text else "ምልክት"
+
         parts: list[str] = [display]
-        if duration_str:
+        if duration_str and duration_str not in display:
             parts.append(duration_str)
         return f"{'፣ '.join(parts)} — ትክክል ነው?"
 
     if stage == "food":
-        raw = item.get("raw_text") or ""
+        raw = (item.get("raw_text") or "").strip()
         return f"የበሉት: {raw} — ትክክል ነው?"
 
     if stage == "supplement":
-        name = item.get("supplement_name") or "ተጨማሪ ምግብ"
+        raw_name = item.get("supplement_name")
+        display_name = _supplement_display(raw_name)
         taken = "ዛሬ ወስደዋል" if item.get("taken_today") else "ዛሬ አልወሰዱም"
-        return f"{name} {taken} — ትክክል ነው?"
+        return f"{display_name} {taken} — ትክክል ነው?"
 
     # closing
-    raw = item.get("raw_text") or ""
+    raw = (item.get("raw_text") or "").strip()
     return f"የጠቀሱት: {raw} — ትክክል ነው?"
 
 
@@ -245,8 +273,18 @@ def _attach_item_ids(stage: CheckInStage, data: dict[str, Any]) -> list[dict[str
             item = dict(item)
             item["item_id"] = str(uuid4())
             item["confirmed"] = False
-            item["danger_sign"] = check_danger_sign(item.get("category", ""))
-            item["verification_phrase"] = _build_verification_phrase(item, stage)
+
+            # Server-side safety rule: A symptom with severity == "mild"
+            # can NEVER be a protocol danger sign. Clear category to None.
+            severity = str(item.get("severity") or "").lower()
+            category = item.get("category")
+            if severity == "mild":
+                item["category"] = None
+                item["danger_sign"] = False
+            else:
+                item["danger_sign"] = check_danger_sign(category)
+
+            item["verification_phrase"] = build_verification_phrase(item, stage)
             items.append(item)
         return items
 

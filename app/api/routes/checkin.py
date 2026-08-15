@@ -101,3 +101,14 @@ def complete_checkin_stage(
 def get_checkin_history(user_id: UUID = Depends(get_current_user_id)) -> list[CheckInHistoryItem]:
     rows = CheckInRepository().list_by_user(user_id)
     return [CheckInHistoryItem(**row) for row in rows]
+
+
+@router.get("/history/{checkin_id}", response_model=CheckInHistoryItem)
+def get_checkin_history_detail(
+    checkin_id: UUID,
+    user_id: UUID = Depends(get_current_user_id),
+) -> CheckInHistoryItem:
+    row = CheckInRepository().get_by_id(user_id, checkin_id)
+    if not row:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Check-in record not found")
+    return CheckInHistoryItem(**row)
