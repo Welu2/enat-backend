@@ -52,10 +52,17 @@ class CheckInRespondResponse(BaseModel):
     pending_items: list[dict[str, Any]]
 
 
-class VerifyItemRequest(BaseModel):
-    item_id: str
-    confirmed: bool
+class ItemVerificationPayload(BaseModel):
+    item_id: str | None = None
+    confirmed: bool = True
     corrected_value: dict[str, Any] | None = None
+
+
+class VerifyItemRequest(BaseModel):
+    item_id: str | None = None
+    confirmed: bool = True
+    corrected_value: dict[str, Any] | None = None
+    items: list[ItemVerificationPayload] | None = None
 
 
 class VerifyItemResponse(BaseModel):

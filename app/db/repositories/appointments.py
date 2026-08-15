@@ -44,3 +44,14 @@ class AppointmentRepository:
         client.table("appointments").update(
             {"last_summary_generated_at": generated_at.isoformat()}
         ).eq("user_id", str(user_id)).execute()
+
+    def upsert(self, user_id: UUID, data: dict[str, Any]) -> dict[str, Any]:
+        existing = self.get_by_user(user_id)
+        if existing:
+            return self.update(user_id, data)
+        return self.create(user_id, data)
+
+    def delete(self, user_id: UUID) -> bool:
+        client = get_supabase_client()
+        result = client.table("appointments").delete().eq("user_id", str(user_id)).execute()
+        return bool(result.data if result else False)

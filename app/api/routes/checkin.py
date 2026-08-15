@@ -51,12 +51,14 @@ def verify_checkin_item(
     user_id: UUID = Depends(get_current_user_id),
 ) -> VerifyItemResponse:
     try:
+        items_payload = [item.model_dump() for item in payload.items] if payload.items else None
         result = CheckInSessionService().verify_item(
             user_id,
             session_id,
             payload.item_id,
             payload.confirmed,
             payload.corrected_value,
+            items_payload=items_payload,
         )
     except ValueError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc

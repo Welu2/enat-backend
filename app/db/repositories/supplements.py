@@ -50,3 +50,14 @@ class SupplementRepository:
             .execute()
         )
         return result.data or []
+
+    def delete(self, user_id: UUID, supplement_id: UUID) -> bool:
+        client = get_supabase_client()
+        result = (
+            client.table("supplements")
+            .delete()
+            .eq("id", str(supplement_id))
+            .eq("user_id", str(user_id))
+            .execute()
+        )
+        return bool(result.data if result else False)
