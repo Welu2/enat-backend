@@ -125,3 +125,35 @@ async def test_voice_correct_item_updates_pending_item(service: CheckInSessionSe
     updated_item = res["pending_items"][0]
     assert updated_item["duration"] == {"value": 3, "unit": "day"}
     assert "3 ቀን" in updated_item["verification_phrase"]
+
+
+def test_verify_items_bulk_confirms_multiple_items_at_once(service: CheckInSessionService) -> None:
+    user_id = uuid4()
+    session_id = uuid4()
+    item1 = str(uuid4())
+    item2 = str(uuid4())
+    session = {
+        "current_stage": "symptoms",
+        "stage_order": ["symptoms", "food", "closing"],
+        "draft_data": {"symptoms": []},
+        "pending_items": [
+            {"item_id": item1, "raw_text": "ማቅለሽለሽ", "category": "persistent_nausea_vomiting", "confirmed": False},
+            {"item_id": item2, "raw_text": "ትኩሳት", "category": "high_fever", "confirmed": False},
+        ],
+        "status": "in_progress",
+        "expires_at": "2099-01-01T00:00:00",
+    }
+
+    items_payload = [
+        {"item_id": item1, "confirmed": True},
+        {"item_id": item2, "confirmed": True},
+    ]
+
+    with patch.object(service, "_get_active_session", return_value=session):
+        with patch.object(service.sessions, "update") as update_mock:
+            result = service.verify_item(user_id, session_id, items_payload=items_payload)
+
+    assert result["confirmed_count"] == 2
+    assert result["pending_items"] == []
+    draft_data = update_mock.call_args[0][2]["draft_data"]
+    assert len(draft_data["symptoms"]) == 2

@@ -65,6 +65,12 @@ Output: {{"symptoms":[{{"raw_text":"ሁለት ቀን ከባድ ራስ ምታት 
 Input: "ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ"
 Output: {{"symptoms":[{{"raw_text":"ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ","category":null,"duration":{{"value":null,"unit":"unspecified"}},"severity":"mild"}}]}}
 
+Input: "ማቅለሽለሽ ማስታወክ እና ትኩሳት አለብኝ"
+Output: {{"symptoms":[
+  {{"raw_text":"ማቅለሽለሽ እና ማስታወክ","category":"persistent_nausea_vomiting","duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}},
+  {{"raw_text":"ትኩሳት","category":"high_fever","duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}}
+]}}
+
 Input: "እግሮቼ ለሶስት ቀናት እያበጡ ነው እና ከባድ ራስ ምታት አለኝ"
 Output: {{"symptoms":[
   {{"raw_text":"እግሮቼ ለሶስት ቀናት እያበጡ ነው","category":"swelling_hands_face","duration":{{"value":3,"unit":"day"}},"severity":"moderate"}},
@@ -79,6 +85,9 @@ Examples:
 
 Input: "ዛሬ ጤፍ እና ስንዴ በላሁ"
 Output: {"food_log":{"raw_text":"ዛሬ ጤፍ እና ስንዴ በላሁ"}}
+
+Input: "ዛሬ ጤፍ፣ ስንዴ እና ወተት ጠጣሁ"
+Output: {"food_log":[{"raw_text":"ጤፍ እና ስንዴ"},{"raw_text":"ወተት"}]}
 
 Input: "ምንም አልበልኩም"
 Output: {"food_log":null}
@@ -98,6 +107,12 @@ Examples:
 Input: "በወራት ላይ ጡት መክተት እፈልጋለሁ"
 Output: {"closing_mentions":[{"raw_text":"በወራት ላይ ጡት መክተት እፈልጋለሁ","topic":"breastfeeding_intent"}]}
 
+Input: "በወራት ላይ ጡት መክተት እፈልጋለሁ እና ስለ አመጋገብ ማወቅ እፈልጋለሁ"
+Output: {"closing_mentions":[
+  {"raw_text":"በወራት ላይ ጡት መክተት እፈልጋለሁ","topic":"breastfeeding_intent"},
+  {"raw_text":"ስለ አመጋገብ ማወቅ እፈልጋለሁ","topic":"dietary_intake"}
+]}
+
 Input: "ሌላ ነገር የለም"
 Output: {"closing_mentions":[]}
 """,
@@ -109,6 +124,10 @@ _SYSTEM_PROMPT_BASE = (
     "Your ONLY job is to convert Amharic speech transcripts into the requested JSON schema — "
     "you must NEVER give medical advice, diagnosis, or any clinical opinion. "
     "Return ONLY valid JSON with no markdown fences, no explanation, no commentary outside the JSON. "
+    "CRITICAL MULTI-ITEM MANDATE: If the transcript contains multiple distinct symptoms, multiple food items, "
+    "or multiple questions/topics, YOU MUST EXTRACT EVERY SINGLE ITEM as a separate object in the output JSON list! "
+    "For example, if the transcript mentions nausea, vomiting, AND fever, extract 'nausea/vomiting' AND 'fever' "
+    "as separate objects in the symptoms array. NEVER drop items or extract only one item when multiple items are spoken. "
     "If nothing relevant is mentioned, return empty lists or null values rather than guessing. "
     "Preserve the raw_text field exactly as it appears in the transcript — do not translate or paraphrase. "
     "Never set the danger_sign field — that is computed deterministically by the rules engine, not by you. "
@@ -234,11 +253,12 @@ def build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
     if stage == "symptoms":
         raw_text = (item.get("raw_text") or "").strip()
         category = item.get("category")
+        severity = str(item.get("severity") or "").lower()
         duration_str = _format_duration(item.get("duration"), lang="am")
 
-        # For protocol danger signs, use the localized danger sign display label.
-        # For non-danger symptoms (category is None), use the patient's actual reported text (raw_text).
-        if category:
+        # For active danger sign categories, use the localized danger sign display label.
+        # For non-danger symptoms (category is None or severity is mild), use the patient's actual reported text (raw_text).
+        if category and severity != "mild":
             display = _category_display(category, lang="am")
         else:
             display = raw_text if raw_text else "ምልክት"
@@ -292,11 +312,17 @@ def _attach_item_ids(stage: CheckInStage, data: dict[str, Any]) -> list[dict[str
         food = data.get("food_log")
         if not food:
             return []
-        item = dict(food)
-        item["item_id"] = str(uuid4())
-        item["confirmed"] = False
-        item["verification_phrase"] = _build_verification_phrase(item, stage)
-        return [item]
+        food_list = food if isinstance(food, list) else [food]
+        items = []
+        for f in food_list:
+            if not isinstance(f, dict):
+                continue
+            item = dict(f)
+            item["item_id"] = str(uuid4())
+            item["confirmed"] = False
+            item["verification_phrase"] = build_verification_phrase(item, stage)
+            items.append(item)
+        return items
 
     if stage == "supplement":
         supplement = data.get("supplement_check")

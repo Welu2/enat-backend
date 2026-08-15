@@ -103,76 +103,69 @@ class CheckInSessionService:
         self,
         user_id: UUID,
         session_id: UUID,
-        item_id: str,
-        confirmed: bool,
+        item_id: str | None = None,
+        confirmed: bool = True,
         corrected_value: dict[str, Any] | None = None,
+        items_payload: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         session = self._get_active_session(user_id, session_id)
         pending_items = list(session.get("pending_items") or [])
         draft_data = dict(session.get("draft_data") or _empty_draft_data())
         stage = session["current_stage"]
 
-        # Support fallback when user passes session_id instead of item_id on single-item stages
-        target_item_id = item_id
-        matching_items = [i for i in pending_items if i.get("item_id") == item_id]
-        if not matching_items and len(pending_items) == 1:
-            target_item_id = pending_items[0].get("item_id", item_id)
+        verifications: list[dict[str, Any]] = []
+        if items_payload:
+            verifications = items_payload
+        elif item_id:
+            verifications = [{"item_id": item_id, "confirmed": confirmed, "corrected_value": corrected_value}]
+        elif corrected_value:
+            verifications = [{"item_id": str(uuid4()), "confirmed": confirmed, "corrected_value": corrected_value}]
 
-        updated_pending: list[dict[str, Any]] = []
+        updated_pending: list[dict[str, Any]] = list(pending_items)
         confirmed_count = 0
 
-        if not pending_items and corrected_value:
-            new_item = {
-                "item_id": target_item_id,
-                "raw_text": corrected_value.get("raw_text", ""),
-                "confirmed": confirmed,
-            }
-            if stage == "symptoms":
-                new_item["category"] = corrected_value.get("category")
-                new_item["duration"] = corrected_value.get("duration")
-                new_item["severity"] = corrected_value.get("severity", "unspecified")
-                severity = str(new_item.get("severity") or "").lower()
-                if severity == "mild":
-                    new_item["category"] = None
-                    new_item["danger_sign"] = False
-                else:
-                    new_item["danger_sign"] = check_danger_sign(new_item.get("category"))
-            elif stage == "supplement":
-                new_item["supplement_name"] = corrected_value.get("supplement_name", "unknown")
-                new_item["taken_today"] = corrected_value.get("taken_today", True)
-            elif stage == "closing":
-                new_item["topic"] = corrected_value.get("topic", "general_question")
+        for verif in verifications:
+            v_item_id = verif.get("item_id")
+            v_confirmed = verif.get("confirmed", True)
+            v_corrected = verif.get("corrected_value")
 
-            new_item["verification_phrase"] = build_verification_phrase(new_item, stage)
+            target_id = v_item_id
+            matching = [i for i in updated_pending if i.get("item_id") == v_item_id]
+            if not matching and len(updated_pending) == 1 and v_item_id:
+                target_id = updated_pending[0].get("item_id")
 
-            if confirmed:
-                confirmed_count += 1
-                self._store_confirmed_item(draft_data, stage, new_item)
-            else:
-                updated_pending.append(new_item)
-        else:
-            for item in pending_items:
-                if item.get("item_id") != target_item_id:
-                    updated_pending.append(item)
-                    continue
+            matched_item = None
+            for idx, item in enumerate(updated_pending):
+                if item.get("item_id") == target_id:
+                    matched_item = dict(item)
+                    updated_pending.pop(idx)
+                    break
 
-                if corrected_value:
-                    item.update(corrected_value)
+            if not matched_item and v_corrected:
+                matched_item = {
+                    "item_id": target_id or str(uuid4()),
+                    "raw_text": v_corrected.get("raw_text", ""),
+                }
+
+            if matched_item:
+                if v_corrected:
+                    matched_item.update(v_corrected)
                     if stage == "symptoms":
-                        severity = str(item.get("severity") or "").lower()
+                        severity = str(matched_item.get("severity") or "").lower()
                         if severity == "mild":
-                            item["category"] = None
-                            item["danger_sign"] = False
+                            matched_item["category"] = None
+                            matched_item["danger_sign"] = False
                         else:
-                            item["danger_sign"] = check_danger_sign(item.get("category"))
-                    item["verification_phrase"] = build_verification_phrase(item, stage)
+                            matched_item["danger_sign"] = check_danger_sign(matched_item.get("category"))
+                    if "verification_phrase" not in v_corrected:
+                        matched_item["verification_phrase"] = build_verification_phrase(matched_item, stage)
 
-                item["confirmed"] = confirmed
-                if confirmed:
+                matched_item["confirmed"] = v_confirmed
+                if v_confirmed:
                     confirmed_count += 1
-                    self._store_confirmed_item(draft_data, stage, item)
+                    self._store_confirmed_item(draft_data, stage, matched_item)
                 else:
-                    updated_pending.append(item)
+                    updated_pending.append(matched_item)
 
         self.sessions.update(
             session_id,

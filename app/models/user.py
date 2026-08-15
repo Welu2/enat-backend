@@ -17,6 +17,20 @@ class AuthResponse(BaseModel):
     email: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    access_token: str
+    new_password: str = Field(min_length=6)
+
+
+class PushTokenRegister(BaseModel):
+    token: str
+    platform: Literal["web", "android", "ios"] = "web"
+
+
 class UserProfile(BaseModel):
     id: UUID
     email: str | None
@@ -66,3 +80,16 @@ class AppointmentResponse(BaseModel):
     appointment_date: date
     last_summary_generated_at: datetime | None
     reminder_lead_days: int
+
+
+class SupplementSettingsItem(BaseModel):
+    id: UUID | None = None
+    name: str | None = None
+    active: bool | None = None
+    reminder_enabled: bool | None = None
+    reminder_time: time | None = None
+
+
+class UserSettingsUpdate(BaseModel):
+    appointment: AppointmentUpdate | None = None
+    supplements: list[SupplementSettingsItem] | None = None
