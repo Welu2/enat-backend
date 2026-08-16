@@ -286,6 +286,13 @@ def build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
 _build_verification_phrase = build_verification_phrase
 
 
+from urllib.parse import quote
+
+
+def build_tts_url(text: str) -> str:
+    return f"/tts?text={quote(text)}"
+
+
 def _attach_item_ids(stage: CheckInStage, data: dict[str, Any]) -> list[dict[str, Any]]:
     if stage == "symptoms":
         items = []
@@ -294,8 +301,6 @@ def _attach_item_ids(stage: CheckInStage, data: dict[str, Any]) -> list[dict[str
             item["item_id"] = str(uuid4())
             item["confirmed"] = False
 
-            # Server-side safety rule: A symptom with severity == "mild"
-            # can NEVER be a protocol danger sign. Clear category to None.
             severity = str(item.get("severity") or "").lower()
             category = item.get("category")
             if severity == "mild":
@@ -304,7 +309,9 @@ def _attach_item_ids(stage: CheckInStage, data: dict[str, Any]) -> list[dict[str
             else:
                 item["danger_sign"] = check_danger_sign(category)
 
-            item["verification_phrase"] = build_verification_phrase(item, stage)
+            phrase = build_verification_phrase(item, stage)
+            item["verification_phrase"] = phrase
+            item["verification_audio_url"] = build_tts_url(phrase)
             items.append(item)
         return items
 
@@ -320,7 +327,9 @@ def _attach_item_ids(stage: CheckInStage, data: dict[str, Any]) -> list[dict[str
             item = dict(f)
             item["item_id"] = str(uuid4())
             item["confirmed"] = False
-            item["verification_phrase"] = build_verification_phrase(item, stage)
+            phrase = build_verification_phrase(item, stage)
+            item["verification_phrase"] = phrase
+            item["verification_audio_url"] = build_tts_url(phrase)
             items.append(item)
         return items
 
@@ -331,7 +340,9 @@ def _attach_item_ids(stage: CheckInStage, data: dict[str, Any]) -> list[dict[str
         item = dict(supplement)
         item["item_id"] = str(uuid4())
         item["confirmed"] = False
-        item["verification_phrase"] = _build_verification_phrase(item, stage)
+        phrase = _build_verification_phrase(item, stage)
+        item["verification_phrase"] = phrase
+        item["verification_audio_url"] = build_tts_url(phrase)
         return [item]
 
     # closing
@@ -340,7 +351,9 @@ def _attach_item_ids(stage: CheckInStage, data: dict[str, Any]) -> list[dict[str
         item = dict(mention)
         item["item_id"] = str(uuid4())
         item["confirmed"] = False
-        item["verification_phrase"] = _build_verification_phrase(item, stage)
+        phrase = _build_verification_phrase(item, stage)
+        item["verification_phrase"] = phrase
+        item["verification_audio_url"] = build_tts_url(phrase)
         items.append(item)
     return items
 

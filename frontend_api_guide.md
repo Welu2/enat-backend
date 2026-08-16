@@ -239,7 +239,8 @@ graph TD
 {
   "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
   "stage": "symptoms",
-  "question_prompt": "ዛሬ ወይም በቅርቡ ምንም አይነት ያልተለመደ የጤና እክል ወይም ህመም ተሰምቶዎታል?"
+  "question_prompt": "ዛሬ ወይም በቅርቡ ምንም አይነት ያልተለመደ የጤና እክል ወይም ህመም ተሰምቶዎታል?",
+  "question_audio_url": "/tts?text=%E1%8B%AE%E1%88%A5..."
 }
 ```
 
@@ -519,3 +520,39 @@ Register device token for lockscreen push notifications when the app or browser 
 1. **Always display `verification_phrase`** returned by backend directly on screen.
 2. **Audio File Formats**: Send `.webm` or `.wav` recorded at 16kHz for Addis AI ASR accuracy.
 3. **Empty Stage Handling**: When user says "No / nothing", `pending_items` is `[]`. Directly call `/complete` to move forward.
+
+---
+
+## 9. Text-to-Speech (TTS) Voice Synthesis
+
+The backend includes native **Text-to-Speech (TTS)** via Addis AI so the AI can speak stage prompts and read-back verification phrases in Amharic voice.
+
+### 1. Automatic Audio URLs in Check-in Responses
+All check-in endpoints automatically attach `question_audio_url` and `verification_audio_url`:
+
+- **Start / Advance Stage Response**:
+```json
+{
+  "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
+  "stage": "symptoms",
+  "question_prompt": "ዛሬ ወይም በቅርቡ ምንም አይነት ያልተለመደ የጤና እክል ወይም ህመም ተሰምቶዎታል?",
+  "question_audio_url": "/tts?text=%E1%8B%AE%E1%88%A5..."
+}
+```
+
+- **Respond / Verify Pending Items Response**:
+```json
+{
+  "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
+  "raw_text": "ቀላል የድካም ስሜት",
+  "verification_phrase": "ቀላል የድካም ስሜት — ትክክል ነው?",
+  "verification_audio_url": "/tts?text=%E1%88%A8%E1%8B%AE..."
+}
+```
+
+### 2. Direct TTS Endpoints
+- **Stream Audio via GET (HTML `<audio src="...">` / Mobile Audio Player)**:  
+  `GET /tts?text=ከፍተኛ+ትኩሳት+—+ትክክል+ነው%3F` -> Returns `audio/mpeg` MP3 stream.
+- **Synthesize Audio via POST**:  
+  `POST /tts`  
+  `{"text": "ከፍተኛ ትኩሳት — ትክክል ነው?"}` -> Returns `audio/mpeg` MP3 stream.

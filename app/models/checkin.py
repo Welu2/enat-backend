@@ -43,6 +43,7 @@ class CheckInStartResponse(BaseModel):
     session_id: UUID
     stage: CheckInStage
     question_prompt: str
+    question_audio_url: str | None = None
 
 
 class CheckInRespondResponse(BaseModel):
@@ -86,6 +87,7 @@ class CompleteStageResponse(BaseModel):
     danger_sign_triggered: bool
     next_stage: CheckInStage | None = None
     question_prompt: str | None = None
+    question_audio_url: str | None = None
     session_completed: bool = False
     check_in_id: UUID | None = None
 
