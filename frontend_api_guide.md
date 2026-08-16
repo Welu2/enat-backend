@@ -172,6 +172,27 @@ Frontend apps can query `GET /users/me` at launch to load all user configuration
 - **Endpoint**: `DELETE /users/me/supplements/{supplement_id}`
 - **Response** `(200 OK)`: `{"status": "deleted"}`
 
+### Manual Supplement Intake Verification (Skip Stage 3 in Voice Check-in)
+Allows the patient to manually confirm supplement intake (e.g. from home screen checklist button). Logging supplement intake for today automatically dismisses pending reminders and **skips Stage 3 (Supplement)** during voice check-in!
+- **Endpoint**: `POST /users/me/supplements/verify` or `POST /users/me/supplements/{supplement_id}/verify`
+- **Request Body**:
+```json
+{
+  "supplement_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "supplement_name": "iron",
+  "taken_today": true
+}
+```
+- **Response** `(200 OK)`:
+```json
+{
+  "status": "verified",
+  "supplement_name": "iron",
+  "taken_today": true,
+  "logged_at": "2026-08-16T13:00:00Z"
+}
+```
+
 ### Set or Update ANC Appointment
 - **Endpoint**: `POST /users/me/appointment` or `PUT /users/me/appointment`
 - **Request Body**:
@@ -218,7 +239,8 @@ graph TD
 {
   "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
   "stage": "symptoms",
-  "question_prompt": "ዛሬ ወይም በቅርቡ ምንም አይነት ያልተለመደ የጤና እክል ወይም ህመም ተሰምቶዎታል?"
+  "question_prompt": "ዛሬ ወይም በቅርቡ ምንም አይነት ያልተለመደ የጤና እክል ወይም ህመም ተሰምቶዎታል?",
+  "question_audio_url": "/tts?text=%E1%8B%AE%E1%88%A5..."
 }
 ```
 
@@ -498,3 +520,39 @@ Register device token for lockscreen push notifications when the app or browser 
 1. **Always display `verification_phrase`** returned by backend directly on screen.
 2. **Audio File Formats**: Send `.webm` or `.wav` recorded at 16kHz for Addis AI ASR accuracy.
 3. **Empty Stage Handling**: When user says "No / nothing", `pending_items` is `[]`. Directly call `/complete` to move forward.
+
+---
+
+## 9. Text-to-Speech (TTS) Voice Synthesis
+
+The backend includes native **Text-to-Speech (TTS)** via Addis AI so the AI can speak stage prompts and read-back verification phrases in Amharic voice.
+
+### 1. Automatic Audio URLs in Check-in Responses
+All check-in endpoints automatically attach `question_audio_url` and `verification_audio_url`:
+
+- **Start / Advance Stage Response**:
+```json
+{
+  "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
+  "stage": "symptoms",
+  "question_prompt": "ዛሬ ወይም በቅርቡ ምንም አይነት ያልተለመደ የጤና እክል ወይም ህመም ተሰምቶዎታል?",
+  "question_audio_url": "/tts?text=%E1%8B%AE%E1%88%A5..."
+}
+```
+
+- **Respond / Verify Pending Items Response**:
+```json
+{
+  "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
+  "raw_text": "ቀላል የድካም ስሜት",
+  "verification_phrase": "ቀላል የድካም ስሜት — ትክክል ነው?",
+  "verification_audio_url": "/tts?text=%E1%88%A8%E1%8B%AE..."
+}
+```
+
+### 2. Direct TTS Endpoints
+- **Stream Audio via GET (HTML `<audio src="...">` / Mobile Audio Player)**:  
+  `GET /tts?text=ከፍተኛ+ትኩሳት+—+ትክክል+ነው%3F` -> Returns `audio/mpeg` MP3 stream.
+- **Synthesize Audio via POST**:  
+  `POST /tts`  
+  `{"text": "ከፍተኛ ትኩሳት — ትክክል ነው?"}` -> Returns `audio/mpeg` MP3 stream.

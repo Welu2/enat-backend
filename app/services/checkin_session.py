@@ -9,7 +9,7 @@ from app.db.repositories.supplements import SupplementRepository
 from app.models.checkin import CheckInStage
 from app.services.addis_ai import AddisAIClient
 from app.services.danger_signs import check_danger_sign
-from app.services.extraction import ExtractionService, build_verification_phrase
+from app.services.extraction import ExtractionService, build_tts_url, build_verification_phrase
 
 
 def _empty_draft_data() -> dict[str, Any]:
@@ -43,7 +43,7 @@ class CheckInSessionService:
 
     def _build_stage_order(self, user_id: UUID) -> list[CheckInStage]:
         stages: list[CheckInStage] = ["symptoms", "food"]
-        if self.supplements.list_active(user_id):
+        if self.supplements.list_active(user_id) and not self.check_ins.has_supplement_logged_today(user_id):
             stages.append("supplement")
         stages.append("closing")
         return stages
@@ -59,10 +59,12 @@ class CheckInSessionService:
                 "pending_items": [],
             },
         )
+        prompt = STAGE_PROMPTS[stage_order[0]]
         return {
             "session_id": session["id"],
             "stage": stage_order[0],
-            "question_prompt": STAGE_PROMPTS[stage_order[0]],
+            "question_prompt": prompt,
+            "question_audio_url": build_tts_url(prompt),
         }
 
     async def respond(
@@ -286,12 +288,14 @@ class CheckInSessionService:
             user_id,
             {"current_stage": next_stage, "pending_items": []},
         )
+        next_prompt = STAGE_PROMPTS[next_stage]
         return {
             "session_id": session_id,
             "stage_completed": current_stage,
             "danger_sign_triggered": False,
             "next_stage": next_stage,
-            "question_prompt": STAGE_PROMPTS[next_stage],
+            "question_prompt": next_prompt,
+            "question_audio_url": build_tts_url(next_prompt),
             "session_completed": False,
             "check_in_id": None,
         }

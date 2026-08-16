@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -6,6 +6,7 @@ from fastapi.responses import Response
 
 from app.dependencies import get_current_user
 from app.db.repositories.appointments import AppointmentRepository
+from app.db.repositories.check_ins import CheckInRepository
 from app.db.repositories.push_tokens import PushTokenRepository
 from app.db.repositories.reminders import ReminderRepository
 from app.db.repositories.supplements import SupplementRepository
@@ -17,10 +18,13 @@ from app.models.user import (
     SupplementCreate,
     SupplementResponse,
     SupplementUpdate,
+    SupplementVerifyRequest,
+    SupplementVerifyResponse,
     UserProfile,
     UserSettingsUpdate,
 )
 from app.services.calendar import generate_google_calendar_url, generate_ical_content
+from app.services.extraction import _supplement_display
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -114,6 +118,59 @@ def delete_supplement(
     if not deleted:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Supplement not found")
     return {"status": "deleted"}
+
+
+@router.post("/me/supplements/verify", response_model=SupplementVerifyResponse)
+@router.post("/me/supplements/{supplement_id}/verify", response_model=SupplementVerifyResponse)
+def verify_supplement_manually(
+    payload: SupplementVerifyRequest = SupplementVerifyRequest(),
+    supplement_id: UUID | None = None,
+    current_user: dict = Depends(get_current_user),
+) -> SupplementVerifyResponse:
+    """Manually verify/log supplement intake today outside of voice checkin intake."""
+    user_id = UUID(current_user["id"])
+    target_id = supplement_id or payload.supplement_id
+
+    all_supps = SupplementRepository().list_all(user_id)
+    supp_name = payload.supplement_name or "iron"
+    if target_id:
+        match = next((s for s in all_supps if str(s["id"]) == str(target_id)), None)
+        if match:
+            supp_name = match.get("name", supp_name)
+    elif all_supps:
+        supp_name = all_supps[0].get("name", supp_name)
+
+    disp_name = _supplement_display(supp_name)
+    raw_text = payload.raw_text or (
+        f"የ{disp_name} ወስጃለሁ" if payload.taken_today else f"የ{disp_name} አልወሰድኩም"
+    )
+
+    checkin_data = {
+        "symptoms": [],
+        "food_log": None,
+        "supplement_check": {
+            "supplement_name": supp_name,
+            "taken_today": payload.taken_today,
+            "raw_text": raw_text,
+            "confirmed": True,
+        },
+        "closing_mentions": [],
+        "danger_sign_triggered": False,
+    }
+
+    CheckInRepository().create(user_id, checkin_data)
+
+    reminders = ReminderRepository().list_pending(user_id)
+    for r in reminders:
+        if r.get("type") == "supplement":
+            ReminderRepository().dismiss(user_id, UUID(r["id"]))
+
+    return SupplementVerifyResponse(
+        status="verified",
+        supplement_name=supp_name,
+        taken_today=payload.taken_today,
+        logged_at=datetime.utcnow(),
+    )
 
 
 @router.post("/me/appointment", response_model=AppointmentResponse)

@@ -53,6 +53,7 @@ app.include_router(checkin.router)
 app.include_router(summary.router)
 app.include_router(reminders.router)
 app.include_router(notifications.router)
+app.include_router(tts.router)
 
 
 @app.get("/health")

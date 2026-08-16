@@ -18,11 +18,20 @@ def test_build_stage_order_skips_supplement_when_none_active(service: CheckInSes
     assert stages == ["symptoms", "food", "closing"]
 
 
-def test_build_stage_order_includes_supplement_when_active(service: CheckInSessionService) -> None:
+def test_build_stage_order_includes_supplement_when_active_and_not_logged_today(service: CheckInSessionService) -> None:
     user_id = uuid4()
     with patch.object(service.supplements, "list_active", return_value=[{"id": str(uuid4())}]):
-        stages = service._build_stage_order(user_id)
+        with patch.object(service.check_ins, "has_supplement_logged_today", return_value=False):
+            stages = service._build_stage_order(user_id)
     assert stages == ["symptoms", "food", "supplement", "closing"]
+
+
+def test_build_stage_order_skips_supplement_when_already_logged_today(service: CheckInSessionService) -> None:
+    user_id = uuid4()
+    with patch.object(service.supplements, "list_active", return_value=[{"id": str(uuid4())}]):
+        with patch.object(service.check_ins, "has_supplement_logged_today", return_value=True):
+            stages = service._build_stage_order(user_id)
+    assert stages == ["symptoms", "food", "closing"]
 
 
 def test_verify_item_moves_confirmed_symptom_to_draft(service: CheckInSessionService) -> None:
