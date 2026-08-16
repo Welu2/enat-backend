@@ -172,6 +172,27 @@ Frontend apps can query `GET /users/me` at launch to load all user configuration
 - **Endpoint**: `DELETE /users/me/supplements/{supplement_id}`
 - **Response** `(200 OK)`: `{"status": "deleted"}`
 
+### Manual Supplement Intake Verification (Skip Stage 3 in Voice Check-in)
+Allows the patient to manually confirm supplement intake (e.g. from home screen checklist button). Logging supplement intake for today automatically dismisses pending reminders and **skips Stage 3 (Supplement)** during voice check-in!
+- **Endpoint**: `POST /users/me/supplements/verify` or `POST /users/me/supplements/{supplement_id}/verify`
+- **Request Body**:
+```json
+{
+  "supplement_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "supplement_name": "iron",
+  "taken_today": true
+}
+```
+- **Response** `(200 OK)`:
+```json
+{
+  "status": "verified",
+  "supplement_name": "iron",
+  "taken_today": true,
+  "logged_at": "2026-08-16T13:00:00Z"
+}
+```
+
 ### Set or Update ANC Appointment
 - **Endpoint**: `POST /users/me/appointment` or `PUT /users/me/appointment`
 - **Request Body**:

@@ -93,3 +93,17 @@ class SupplementSettingsItem(BaseModel):
 class UserSettingsUpdate(BaseModel):
     appointment: AppointmentUpdate | None = None
     supplements: list[SupplementSettingsItem] | None = None
+
+
+class SupplementVerifyRequest(BaseModel):
+    supplement_id: UUID | None = None
+    supplement_name: str | None = None
+    taken_today: bool = True
+    raw_text: str | None = None
+
+
+class SupplementVerifyResponse(BaseModel):
+    status: str = "verified"
+    supplement_name: str
+    taken_today: bool
+    logged_at: datetime

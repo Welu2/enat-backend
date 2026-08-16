@@ -43,7 +43,7 @@ class CheckInSessionService:
 
     def _build_stage_order(self, user_id: UUID) -> list[CheckInStage]:
         stages: list[CheckInStage] = ["symptoms", "food"]
-        if self.supplements.list_active(user_id):
+        if self.supplements.list_active(user_id) and not self.check_ins.has_supplement_logged_today(user_id):
             stages.append("supplement")
         stages.append("closing")
         return stages
