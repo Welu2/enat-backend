@@ -1,4 +1,5 @@
 import io
+import os
 import secrets
 
 import qrcode
@@ -39,5 +40,13 @@ def generate_share_slug() -> str:
 
 def build_share_url(slug: str) -> str:
     settings = get_settings()
-    base = settings.public_base_url.rstrip("/")
+    
+    # 1. Check settings or environment variables
+    base = getattr(settings, "public_base_url", None) or os.getenv("PUBLIC_BASE_URL") or os.getenv("FRONTEND_URL")
+    
+    # 2. Prevent baking localhost into production QR codes
+    if not base or "localhost" in base:
+        base = os.getenv("FRONTEND_URL", "https://enat-tena.onrender.com")
+        
+    base = base.rstrip("/")
     return f"{base}/summary/public/{slug}"
