@@ -45,7 +45,7 @@ class SummaryService:
         self.appointments = AppointmentRepository()
         self.users = UserRepository()
 
-    def _resolve_period_start(
+    def _resolve_fetch_window(
         self, user: dict[str, Any], period_end: datetime
     ) -> datetime:
         created_at = _parse_datetime(user.get("created_at"))
@@ -57,28 +57,19 @@ class SummaryService:
 
     def _fetch_check_ins(
         self, user_id: UUID, start_dt: datetime, end_dt: datetime
-    ) -> tuple[list[dict[str, Any]], datetime]:
+    ) -> list[dict[str, Any]]:
         try:
             records = self.check_ins.list_in_period(
                 user_id, start_dt, end_dt
             )
             if records:
-                return records, start_dt
+                return records
         except Exception:
             pass
 
         if hasattr(self.check_ins, "list_by_user"):
-            records = self.check_ins.list_by_user(user_id) or []
-            if records:
-                dates = [
-                    _parse_datetime(
-                        r.get("timestamp") or r.get("created_at")
-                    )
-                    for r in records
-                    if r.get("timestamp") or r.get("created_at")
-                ]
-                return records, (min(dates) if dates else start_dt)
-        return [], start_dt
+            return self.check_ins.list_by_user(user_id) or []
+        return []
 
     def generate(self, user_id: UUID) -> dict[str, Any]:
         user = self.users.get_by_id(user_id)
@@ -86,10 +77,23 @@ class SummaryService:
             raise ValueError("User not found")
 
         period_end = datetime.utcnow()
-        init_start = self._resolve_period_start(user, period_end)
-        check_ins, period_start = self._fetch_check_ins(
-            user_id, init_start, period_end
+        window_start = self._resolve_fetch_window(user, period_end)
+        check_ins = self._fetch_check_ins(
+            user_id, window_start, period_end
         )
+
+        # Set period_start to the earliest actual check-in date
+        if check_ins:
+            dates = [
+                _parse_datetime(
+                    c.get("timestamp") or c.get("created_at") or c.get("date")
+                )
+                for c in check_ins
+                if c.get("timestamp") or c.get("created_at") or c.get("date")
+            ]
+            period_start = min(dates) if dates else period_end
+        else:
+            period_start = period_end
 
         content_json = self._aggregate(check_ins)
         slug = generate_share_slug()
@@ -245,11 +249,8 @@ class SummaryService:
         general_symptoms: list[dict[str, Any]] = []
         food_logs: list[dict[str, Any]] = []
         closing_mentions: list[dict[str, Any]] = []
-        
         seen_symptoms: set[tuple[str, str]] = set()
         seen_foods: set[tuple[str, str]] = set()
-        
-        # Unique calendar day tracking for supplements
         tracked_dates: set[str] = set()
         taken_dates: set[str] = set()
 
@@ -264,19 +265,14 @@ class SummaryService:
             SummaryService._extract_symptoms(
                 c, c_date, danger_signs, general_symptoms, seen_symptoms
             )
-            SummaryService._extract_food_logs(
-                c, c_date, food_logs, seen_foods
-            )
+            SummaryService._extract_food_logs(c, c_date, food_logs, seen_foods)
 
             supp = (
                 c.get("supplement_check")
                 or c.get("supplement")
                 or c.get("supplements")
             )
-            if (
-                isinstance(supp, dict)
-                and supp.get("confirmed") is not False
-            ):
+            if isinstance(supp, dict) and supp.get("confirmed") is not False:
                 tracked_dates.add(c_date)
                 if supp.get("taken_today") or supp.get("taken"):
                     taken_dates.add(c_date)
