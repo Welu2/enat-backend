@@ -159,6 +159,7 @@ class SummaryService:
         date_str: str,
         danger_signs: list[dict[str, Any]],
         general_symptoms: list[dict[str, Any]],
+        seen_symptoms: set[tuple[str, str]],
     ) -> None:
         items = (
             check_in.get("symptoms")
@@ -174,6 +175,11 @@ class SummaryService:
             ).strip()
             if not text:
                 continue
+
+            dedup_key = (date_str, text.lower())
+            if dedup_key in seen_symptoms:
+                continue
+            seen_symptoms.add(dedup_key)
 
             raw_cat = s.get("category")
             is_danger = bool(s.get("danger_sign"))
@@ -205,25 +211,33 @@ class SummaryService:
         check_in: dict[str, Any],
         date_str: str,
         food_logs: list[dict[str, Any]],
+        seen_foods: set[tuple[str, str]],
     ) -> None:
         foods = (
             check_in.get("food_log")
             or check_in.get("food_logs")
             or check_in.get("foods")
         )
+        items_to_add: list[str] = []
         if isinstance(foods, list):
             for f in foods:
                 text = (
                     f.get("raw_text") if isinstance(f, dict) else str(f)
                 ) or ""
                 if text.strip():
-                    food_logs.append({"date": date_str, "raw_text": text.strip()})
+                    items_to_add.append(text.strip())
         elif isinstance(foods, dict) and foods.get("confirmed") is not False:
             text = (foods.get("raw_text") or "").strip()
             if text:
-                food_logs.append({"date": date_str, "raw_text": text})
+                items_to_add.append(text)
         elif isinstance(foods, str) and foods.strip():
-            food_logs.append({"date": date_str, "raw_text": foods.strip()})
+            items_to_add.append(foods.strip())
+
+        for text in items_to_add:
+            dedup_key = (date_str, text.lower())
+            if dedup_key not in seen_foods:
+                seen_foods.add(dedup_key)
+                food_logs.append({"date": date_str, "raw_text": text})
 
     @staticmethod
     def _aggregate(check_ins: list[dict[str, Any]]) -> dict[str, Any]:
@@ -231,18 +245,28 @@ class SummaryService:
         general_symptoms: list[dict[str, Any]] = []
         food_logs: list[dict[str, Any]] = []
         closing_mentions: list[dict[str, Any]] = []
-        supp_taken, supp_tracked = 0, 0
+        
+        seen_symptoms: set[tuple[str, str]] = set()
+        seen_foods: set[tuple[str, str]] = set()
+        
+        # Unique calendar day tracking for supplements
+        tracked_dates: set[str] = set()
+        taken_dates: set[str] = set()
 
         for c in check_ins:
             raw_ts = (
                 c.get("timestamp") or c.get("created_at") or c.get("date") or ""
             )
             c_date = str(raw_ts)[:10]
+            if not c_date or len(c_date) < 10:
+                continue
 
             SummaryService._extract_symptoms(
-                c, c_date, danger_signs, general_symptoms
+                c, c_date, danger_signs, general_symptoms, seen_symptoms
             )
-            SummaryService._extract_food_logs(c, c_date, food_logs)
+            SummaryService._extract_food_logs(
+                c, c_date, food_logs, seen_foods
+            )
 
             supp = (
                 c.get("supplement_check")
@@ -253,9 +277,9 @@ class SummaryService:
                 isinstance(supp, dict)
                 and supp.get("confirmed") is not False
             ):
-                supp_tracked += 1
+                tracked_dates.add(c_date)
                 if supp.get("taken_today") or supp.get("taken"):
-                    supp_taken += 1
+                    taken_dates.add(c_date)
 
             for m in c.get("closing_mentions") or []:
                 if isinstance(m, dict) and m.get("confirmed") is not False:
@@ -270,12 +294,14 @@ class SummaryService:
                         )
 
         adherence = None
-        if supp_tracked > 0:
+        total_tracked = len(tracked_dates)
+        total_taken = len(taken_dates)
+        if total_tracked > 0:
             adherence = {
-                "taken_days": supp_taken,
-                "tracked_days": supp_tracked,
-                "total_reported": supp_tracked,
-                "percentage": round((supp_taken / supp_tracked) * 100),
+                "taken_days": total_taken,
+                "tracked_days": total_tracked,
+                "total_reported": total_tracked,
+                "percentage": round((total_taken / total_tracked) * 100),
             }
 
         return {
