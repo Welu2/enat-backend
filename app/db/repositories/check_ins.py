@@ -74,3 +74,27 @@ class CheckInRepository:
         except Exception:
             pass
         return False
+
+    def has_food_logged_today(self, user_id: UUID) -> bool:
+        client = get_supabase_client()
+        today_start = datetime.combine(datetime.utcnow().date(), datetime.min.time()).isoformat()
+        try:
+            result = (
+                client.table("check_ins")
+                .select("food_log")
+                .eq("user_id", str(user_id))
+                .gte("timestamp", today_start)
+                .execute()
+            )
+            if result and result.data:
+                for row in result.data:
+                    food = row.get("food_log")
+                    if food:
+                        if isinstance(food, dict) and food.get("confirmed") is not False:
+                            return True
+                        elif isinstance(food, list) and len(food) > 0:
+                            return True
+        except Exception:
+            pass
+        return False
+
