@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.responses import Response
 
 from app.dependencies import get_current_user_id
 from app.db.repositories.check_ins import CheckInRepository
@@ -14,8 +15,34 @@ from app.models.checkin import (
     VoiceCorrectItemResponse,
 )
 from app.services.checkin_session import CheckInSessionService
+from app.services.stage_audio import (
+    get_all_stage_prompts_metadata,
+    get_or_synthesize_stage_audio,
+)
 
 router = APIRouter(prefix="/checkin", tags=["checkin"])
+
+
+@router.get("/prompts")
+def list_checkin_prompts() -> list[dict]:
+    """Returns all 4 standard check-in stage prompt questions, localized categories, and audio playback URLs."""
+    return get_all_stage_prompts_metadata()
+
+
+@router.get("/prompts/{stage}/audio")
+async def get_stage_prompt_audio(stage: str) -> Response:
+    """Streams the stored/pre-cached Amharic question prompt audio for the given stage (zero redundant TTS calls)."""
+    try:
+        audio_bytes = await get_or_synthesize_stage_audio(stage)
+        return Response(
+            content=audio_bytes,
+            media_type="audio/mpeg",
+            headers={"Content-Disposition": f"inline; filename=prompt_{stage}.mp3"},
+        )
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Audio retrieval failed: {exc}") from exc
 
 
 @router.post("/start", response_model=CheckInStartResponse)
