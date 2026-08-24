@@ -34,7 +34,10 @@ class SummaryRepository:
         client = get_supabase_client()
         result = (
             client.table("summaries")
-            .select("period_start, period_end, generated_at, content_json")
+            .select(
+                "period_start, period_end, generated_at, content_json, "
+                "anc_contact_number, anc_contact_title, anc_contact_title_am, target_gestational_weeks"
+            )
             .eq("share_link_slug", slug)
             .maybe_single()
             .execute()
