@@ -85,6 +85,8 @@ class CompleteStageResponse(BaseModel):
     session_id: UUID
     stage_completed: CheckInStage
     danger_sign_triggered: bool
+    summary_text_am: str | None = None
+    summary_text_en: str | None = None
     next_stage: CheckInStage | None = None
     question_prompt: str | None = None
     question_audio_url: str | None = None
@@ -100,3 +102,5 @@ class CheckInHistoryItem(BaseModel):
     supplement_check: dict[str, Any] | None = None
     closing_mentions: list[dict[str, Any]] | None = None
     danger_sign_triggered: bool
+    summary_text_am: str | None = None
+    summary_text_en: str | None = None
