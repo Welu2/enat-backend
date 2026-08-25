@@ -6,7 +6,14 @@ from app.db.repositories.appointments import AppointmentRepository
 from app.db.repositories.check_ins import CheckInRepository
 from app.db.repositories.summaries import SummaryRepository
 from app.db.repositories.users import UserRepository
+from app.services.anc_schedule import (
+    WHO_ANC_CONTACTS,
+    _CONTACT_BY_NUM,
+    advance_to_next_anc_contact,
+    get_next_anc_contact,
+)
 from app.services.extraction import _category_display
+from app.services.nutrition import calculate_food_group_shares, classify_ethiopian_food
 from app.services.qr import (
     build_share_url,
     generate_share_slug,
@@ -95,7 +102,30 @@ class SummaryService:
         else:
             period_start = period_end
 
-        content_json = self._aggregate(check_ins)
+        # Resolve ANC contact info
+        apt = self.appointments.get_by_user(user_id)
+        contact_spec = None
+        if apt and apt.get("anc_contact_number"):
+            contact_spec = _CONTACT_BY_NUM.get(apt["anc_contact_number"])
+        if not contact_spec:
+            eff_lnmp_str = user.get("effective_lnmp_date") or user.get("lnmp_date")
+            if eff_lnmp_str:
+                contact_spec = get_next_anc_contact(date.fromisoformat(eff_lnmp_str[:10]))
+            else:
+                contact_spec = WHO_ANC_CONTACTS[0]
+
+        anc_info = {
+            "contact_number": contact_spec.get("contact_number", 1),
+            "title_en": contact_spec.get("title_en"),
+            "title_am": contact_spec.get("title_am"),
+            "target_gestational_weeks": contact_spec.get("gestational_weeks", 12),
+            "trimester": contact_spec.get("trimester"),
+            "schedule_next_weeks": contact_spec.get("schedule_next_weeks"),
+        }
+
+        content_json = self._aggregate(check_ins, period_start=period_start, period_end=period_end)
+        content_json["anc_contact"] = anc_info
+
         slug = generate_share_slug()
         share_url = build_share_url(slug)
         qr_code_url = upload_qr_code(slug, share_url)
@@ -108,10 +138,13 @@ class SummaryService:
                 "content_json": content_json,
                 "share_link_slug": slug,
                 "qr_code_url": qr_code_url,
+                "anc_contact_number": anc_info["contact_number"],
+                "anc_contact_title": anc_info["title_en"],
+                "anc_contact_title_am": anc_info["title_am"],
+                "target_gestational_weeks": anc_info["target_gestational_weeks"],
             },
         )
 
-        apt = self.appointments.get_by_user(user_id)
         if apt:
             self.appointments.update_last_summary_generated_at(
                 user_id, period_end
@@ -142,6 +175,29 @@ class SummaryService:
                 if not last_gen or (now - _parse_datetime(last_gen)).days >= 3:
                     summary = self.generate(user_id)
                     summary["auto_reason"] = "pre_appointment_1_day_before"
+
+                    # Advance to next WHO ANC contact appointment
+                    current_contact_num = apt.get("anc_contact_number", 1) or 1
+                    eff_lnmp_str = user.get("effective_lnmp_date") or user.get("lnmp_date")
+                    eff_lnmp = date.fromisoformat(eff_lnmp_str[:10]) if eff_lnmp_str else None
+                    next_anc = advance_to_next_anc_contact(
+                        current_contact_num=current_contact_num,
+                        current_appointment_date=apt_date,
+                        effective_lnmp=eff_lnmp,
+                    )
+                    if next_anc:
+                        self.appointments.upsert(
+                            user_id,
+                            {
+                                "appointment_date": next_anc["appointment_date"],
+                                "anc_contact_number": next_anc["contact_number"],
+                                "anc_contact_title": next_anc["title_en"],
+                                "anc_contact_title_am": next_anc["title_am"],
+                                "target_gestational_weeks": next_anc["gestational_weeks"],
+                                "previous_appointment_date": apt_date.isoformat(),
+                            },
+                        )
+
                     return summary
         else:
             latest = self.summaries.get_latest(user_id)
@@ -222,29 +278,40 @@ class SummaryService:
             or check_in.get("food_logs")
             or check_in.get("foods")
         )
-        items_to_add: list[str] = []
+        items_to_add: list[dict[str, Any]] = []
         if isinstance(foods, list):
             for f in foods:
                 text = (
                     f.get("raw_text") if isinstance(f, dict) else str(f)
                 ) or ""
+                groups = f.get("food_groups") if isinstance(f, dict) else None
                 if text.strip():
-                    items_to_add.append(text.strip())
+                    items_to_add.append({"text": text.strip(), "groups": groups or classify_ethiopian_food(text)})
         elif isinstance(foods, dict) and foods.get("confirmed") is not False:
             text = (foods.get("raw_text") or "").strip()
-            if text:
-                items_to_add.append(text)
+            groups = foods.get("food_groups") or (classify_ethiopian_food(text) if text else [])
+            if text or groups:
+                items_to_add.append({"text": text or "የተመገቡት ምግብ", "groups": groups})
         elif isinstance(foods, str) and foods.strip():
-            items_to_add.append(foods.strip())
+            items_to_add.append({"text": foods.strip(), "groups": classify_ethiopian_food(foods)})
 
-        for text in items_to_add:
+        for item_data in items_to_add:
+            text = item_data["text"]
             dedup_key = (date_str, text.lower())
             if dedup_key not in seen_foods:
                 seen_foods.add(dedup_key)
-                food_logs.append({"date": date_str, "raw_text": text})
+                food_logs.append({
+                    "date": date_str,
+                    "raw_text": text,
+                    "food_groups": item_data["groups"],
+                })
 
     @staticmethod
-    def _aggregate(check_ins: list[dict[str, Any]]) -> dict[str, Any]:
+    def _aggregate(
+        check_ins: list[dict[str, Any]],
+        period_start: Any = None,
+        period_end: Any = None,
+    ) -> dict[str, Any]:
         danger_signs: list[dict[str, Any]] = []
         general_symptoms: list[dict[str, Any]] = []
         food_logs: list[dict[str, Any]] = []
@@ -289,21 +356,40 @@ class SummaryService:
                             }
                         )
 
+        nutritional_variation = calculate_food_group_shares(food_logs)
+
         adherence = None
         total_tracked = len(tracked_dates)
         total_taken = len(taken_dates)
-        if total_tracked > 0:
+
+        total_days_in_period = total_tracked
+        if period_start and period_end:
+            p_start_d = period_start.date() if isinstance(period_start, datetime) else period_start
+            p_end_d = period_end.date() if isinstance(period_end, datetime) else period_end
+            if isinstance(p_start_d, str):
+                p_start_d = date.fromisoformat(p_start_d)
+            if isinstance(p_end_d, str):
+                p_end_d = date.fromisoformat(p_end_d)
+            if isinstance(p_start_d, date) and isinstance(p_end_d, date):
+                total_days_in_period = max(1, (p_end_d - p_start_d).days + 1)
+
+        if total_tracked > 0 or total_days_in_period > 0:
+            pct = round((total_taken / total_days_in_period) * 100) if total_days_in_period > 0 else 0
             adherence = {
                 "taken_days": total_taken,
                 "tracked_days": total_tracked,
+                "total_days_in_period": total_days_in_period,
                 "total_reported": total_tracked,
-                "percentage": round((total_taken / total_tracked) * 100),
+                "percentage": pct,
+                "tracked_percentage": round((total_taken / total_tracked) * 100) if total_tracked > 0 else 0,
             }
 
         return {
             "danger_signs": danger_signs,
             "general_symptoms": general_symptoms,
+            "recorded_symptoms": general_symptoms,
             "food_logs": food_logs,
+            "nutritional_variation": nutritional_variation,
             "supplement_adherence": adherence,
             "closing_mentions": closing_mentions,
             "muac_reminder": _MUAC_REMINDER,
