@@ -97,44 +97,57 @@ class AddisAIClient:
         return ""
 
     async def synthesize_speech(self, text: str, voice_id: str | None = None) -> bytes:
-        """Synthesize Amharic text into audio bytes via Addis AI TTS API with fallback."""
-        url = f"{self.settings.addis_api_base_url}/api/v1/tts"
-        headers = {
-            "x-api-key": self.settings.addis_api_key,
-            "Content-Type": "application/json",
-        }
-        body: dict[str, Any] = {
-            "text": text,
-            "language_code": "am",
-        }
-        if voice_id:
-            body["voice_id"] = voice_id
+        """Synthesize Amharic text into audio bytes (MP3) via TTS with robust fallback."""
+        clean_text = text.strip()
+        if not clean_text:
+            return b""
 
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(url, headers=headers, json=body)
-                response.raise_for_status()
+        # 1. First try upstream Addis AI API if configured and available
+        if self.settings.addis_api_key:
+            url = f"{self.settings.addis_api_base_url}/api/v1/tts"
+            headers = {
+                "x-api-key": self.settings.addis_api_key,
+                "Content-Type": "application/json",
+            }
+            body: dict[str, Any] = {
+                "text": clean_text,
+                "language_code": "am",
+            }
+            if voice_id:
+                body["voice_id"] = voice_id
 
-                content_type = response.headers.get("content-type", "")
-                if "audio" in content_type or "mpeg" in content_type or "octet-stream" in content_type:
-                    return response.content
-
-                payload = response.json()
-                data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
-                for key in ("audio_base64", "audio_content", "audio"):
-                    if isinstance(data, dict) and key in data and isinstance(data[key], str):
-                        import base64
-                        return base64.b64decode(data[key])
-
-                return response.content
-        except Exception:
-            from io import BytesIO
             try:
-                from gtts import gTTS
-                tts = gTTS(text=text, lang="am")
+                async with httpx.AsyncClient(timeout=15.0) as client:
+                    response = await client.post(url, headers=headers, json=body)
+                    if response.status_code == 200:
+                        content_type = response.headers.get("content-type", "")
+                        if "audio" in content_type or "mpeg" in content_type or "octet-stream" in content_type:
+                            return response.content
+
+                        payload = response.json()
+                        data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+                        for key in ("audio_base64", "audio_content", "audio"):
+                            if isinstance(data, dict) and key in data and isinstance(data[key], str):
+                                import base64
+                                return base64.b64decode(data[key])
+                        return response.content
+            except Exception:
+                pass
+
+        # 2. Synthesize using high quality Amharic engine (gTTS)
+        try:
+            import asyncio
+            from io import BytesIO
+            from gtts import gTTS
+
+            def _run_gtts() -> bytes:
+                tts = gTTS(text=clean_text, lang="am")
                 fp = BytesIO()
                 tts.write_to_fp(fp)
-                fp.seek(0)
-                return fp.read()
-            except Exception:
-                return b""
+                return fp.getvalue()
+
+            return await asyncio.to_thread(_run_gtts)
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).error(f"TTS synthesis error: {exc}", exc_info=True)
+            return b""
