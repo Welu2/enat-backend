@@ -8,8 +8,10 @@ from app.db.repositories.check_ins import CheckInRepository
 from app.db.repositories.supplements import SupplementRepository
 from app.models.checkin import CheckInStage
 from app.services.addis_ai import AddisAIClient
+from app.services.anc_schedule import generate_checkin_summary_text
 from app.services.danger_signs import check_danger_sign
 from app.services.extraction import ExtractionService, build_tts_url, build_verification_phrase
+from app.services.stage_audio import get_stage_audio_url
 
 
 def _empty_draft_data() -> dict[str, Any]:
@@ -42,7 +44,9 @@ class CheckInSessionService:
         self.extraction = ExtractionService()
 
     def _build_stage_order(self, user_id: UUID) -> list[CheckInStage]:
-        stages: list[CheckInStage] = ["symptoms", "food"]
+        stages: list[CheckInStage] = ["symptoms"]
+        if not self.check_ins.has_food_logged_today(user_id):
+            stages.append("food")
         if self.supplements.list_active(user_id) and not self.check_ins.has_supplement_logged_today(user_id):
             stages.append("supplement")
         stages.append("closing")
@@ -64,7 +68,7 @@ class CheckInSessionService:
             "session_id": session["id"],
             "stage": stage_order[0],
             "question_prompt": prompt,
-            "question_audio_url": build_tts_url(prompt),
+            "question_audio_url": get_stage_audio_url(stage_order[0]),
         }
 
     async def respond(
@@ -253,10 +257,8 @@ class CheckInSessionService:
 
         if is_last_stage:
             draft_data = session.get("draft_data") or _empty_draft_data()
-            danger_sign_triggered = any(
-                item.get("confirmed") and item.get("danger_sign")
-                for item in draft_data.get("symptoms", [])
-            )
+            summary_info = generate_checkin_summary_text(draft_data.get("symptoms", []))
+            danger_sign_triggered = summary_info["danger_sign_triggered"]
             check_in = self.check_ins.create(
                 user_id,
                 {
@@ -265,6 +267,8 @@ class CheckInSessionService:
                     "supplement_check": draft_data.get("supplement_check"),
                     "closing_mentions": draft_data.get("closing_mentions"),
                     "danger_sign_triggered": danger_sign_triggered,
+                    "summary_text_am": summary_info["summary_text_am"],
+                    "summary_text_en": summary_info["summary_text_en"],
                 },
             )
             self.sessions.update(
@@ -276,6 +280,8 @@ class CheckInSessionService:
                 "session_id": session_id,
                 "stage_completed": current_stage,
                 "danger_sign_triggered": danger_sign_triggered,
+                "summary_text_am": summary_info["summary_text_am"],
+                "summary_text_en": summary_info["summary_text_en"],
                 "next_stage": None,
                 "question_prompt": None,
                 "session_completed": True,
@@ -295,7 +301,7 @@ class CheckInSessionService:
             "danger_sign_triggered": False,
             "next_stage": next_stage,
             "question_prompt": next_prompt,
-            "question_audio_url": build_tts_url(next_prompt),
+            "question_audio_url": get_stage_audio_url(next_stage),
             "session_completed": False,
             "check_in_id": None,
         }
