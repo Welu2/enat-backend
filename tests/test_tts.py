@@ -9,6 +9,7 @@ async def test_addis_ai_synthesize_speech_success() -> None:
     dummy_audio = b"dummy_mp3_bytes"
 
     mock_response = AsyncMock()
+    mock_response.status_code = 200
     mock_response.headers = {"content-type": "audio/mpeg"}
     mock_response.content = dummy_audio
     mock_response.raise_for_status = lambda: None
