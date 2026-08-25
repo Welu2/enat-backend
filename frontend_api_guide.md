@@ -102,11 +102,98 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 2. User Settings & Profile Management
+## 2. Maternal Onboarding, Gestational Age Calculation & Profile Management
 
-Frontend apps can query `GET /users/me` at launch to load all user configuration states (supplements, appointment date, reminder lead days, active notifications).
+### 2.1 Calculate Gestational Age & EDD (Instant Live Preview)
+Allows the frontend to instantly compute fetal age, trimester classification, and estimated due date (EDD) without storing, as the mother enters or edits her LNMP or ultrasound date.
+- **Endpoint**: `POST /users/calculate-gestational-age`
+- **Request Body**:
+```json
+{
+  "pregnancy_counting_method": "lnmp",
+  "lnmp_date": "2026-05-01"
+}
+```
+*Alternatively, for manual override or ultrasound:*
+```json
+{
+  "pregnancy_counting_method": "manual",
+  "manual_gestational_weeks": 16,
+  "manual_gestational_days": 3
+}
+```
+- **Response** `(200 OK)`:
+```json
+{
+  "gestational_age_weeks": 16,
+  "gestational_age_days": 4,
+  "gestational_age_total_days": 116,
+  "formatted_age_am": "16 ሳምንት ከ 4 ቀን",
+  "formatted_age_en": "16 weeks, 4 days",
+  "trimester": "second_trimester",
+  "trimester_info": {
+    "number": 2,
+    "key": "second_trimester",
+    "name_en": "2nd Trimester",
+    "name_am": "2ኛ ትሪሚስተር (14-27 ሳምንት)",
+    "week_range": "14 - 27 weeks"
+  },
+  "estimated_due_date": "2027-02-05",
+  "effective_lnmp_date": "2026-05-01",
+  "is_gestational_age_manual": false,
+  "days_until_edd": 164
+}
+```
 
-### Get Full User Profile & Settings
+### 2.2 Submit Initial Onboarding Questions
+When a mother registers for the first time, she completes the baseline onboarding questionnaire. Submitting this endpoint calculates and saves her baseline pregnancy metrics, medical history, preferred hospital, and **automatically seeds her supplements** into the supplements database table.
+- **Endpoint**: `POST /users/me/onboarding`
+- **Request Body**:
+```json
+{
+  "age": 26,
+  "area": "urban",
+  "pregnancy_counting_method": "lnmp",
+  "lnmp_date": "2026-05-01",
+  "manual_gestational_weeks": 16,
+  "manual_gestational_days": 4,
+  "total_pregnancies": 2,
+  "live_births": 1,
+  "had_c_section": false,
+  "child_passed_away": false,
+  "past_pregnancy_complications": [
+    "preterm_birth",
+    "pre_eclampsia"
+  ],
+  "known_medical_conditions": [
+    "hypertension",
+    "other"
+  ],
+  "custom_medical_condition": "Mild seasonal asthma",
+  "malaria_endemic_area": true,
+  "current_medications": "Methyldopa 250mg daily",
+  "supplements": [
+    "iron & folic acid",
+    "calcium"
+  ],
+  "hospital": "St. Paul's Hospital Millennium Medical College"
+}
+```
+- **Response** `(200 OK)`: Returns complete `UserProfile` with `onboarding_completed: true` and live calculated `current_pregnancy_status`.
+
+### 2.3 Set or Update Preferred Hospital
+Mothers can set or change their preferred delivery / ANC hospital anytime.
+- **Endpoint**: `PUT /users/me/hospital` or `PATCH /users/me/hospital`
+- **Request Body**:
+```json
+{
+  "hospital": "Tikur Anbessa Specialized Hospital"
+}
+```
+- **Response** `(200 OK)`: Returns updated `UserProfile`.
+
+### 2.4 Get Full User Profile & Settings
+Frontend apps can query `GET /users/me` at launch to load all user configuration states, onboarding data, live gestational age progression, supplements, appointment date, and active notifications.
 - **Endpoint**: `GET /users/me`
 - **Response** `(200 OK)`:
 ```json
@@ -114,11 +201,53 @@ Frontend apps can query `GET /users/me` at launch to load all user configuration
   "id": "e81acbf1-5f43-4afc-90be-b2d86c9a6802",
   "email": "mother@example.com",
   "created_at": "2026-08-15T10:00:00Z",
+  "age": 26,
+  "area": "urban",
+  "pregnancy_counting_method": "lnmp",
+  "lnmp_date": "2026-05-01",
+  "ultrasound_date": null,
+  "ultrasound_weeks": null,
+  "gestational_age_weeks": 16,
+  "gestational_age_days": 4,
+  "is_gestational_age_manual": false,
+  "effective_lnmp_date": "2026-05-01",
+  "estimated_due_date": "2027-02-05",
+  "trimester": "second_trimester",
+  "total_pregnancies": 2,
+  "live_births": 1,
+  "had_c_section": false,
+  "child_passed_away": false,
+  "past_pregnancy_complications": ["preterm_birth"],
+  "known_medical_conditions": ["hypertension"],
+  "custom_medical_condition": null,
+  "malaria_endemic_area": true,
+  "current_medications": "Methyldopa",
+  "hospital": "St. Paul's Hospital",
+  "onboarding_completed": true,
+  "current_pregnancy_status": {
+    "gestational_age_weeks": 16,
+    "gestational_age_days": 4,
+    "gestational_age_total_days": 116,
+    "formatted_age_am": "16 ሳምንት ከ 4 ቀን",
+    "formatted_age_en": "16 weeks, 4 days",
+    "trimester": "second_trimester",
+    "trimester_info": {
+      "number": 2,
+      "key": "second_trimester",
+      "name_en": "2nd Trimester",
+      "name_am": "2ኛ ትሪሚስተር (14-27 ሳምንት)",
+      "week_range": "14 - 27 weeks"
+    },
+    "estimated_due_date": "2027-02-05",
+    "effective_lnmp_date": "2026-05-01",
+    "is_gestational_age_manual": false,
+    "days_until_edd": 164
+  },
   "supplements": [
     {
       "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
       "user_id": "e81acbf1-5f43-4afc-90be-b2d86c9a6802",
-      "name": "iron",
+      "name": "iron & folic acid",
       "active": true,
       "reminder_enabled": true,
       "reminder_time": "09:00:00",
@@ -193,19 +322,155 @@ Allows the patient to manually confirm supplement intake (e.g. from home screen 
 }
 ```
 
+### Manual 4-Food-Group Logging (Skip Stage 2 in Voice Check-in)
+Allows the patient to select the food groups she ate today directly via a 4-group checkbox UI (`grains`, `proteins`, `dairy`, `fruits_and_vegetables`). Logging food for today automatically **skips Stage 2 (Food)** during the voice check-in session!
+- **Endpoint**: `POST /users/me/food/verify` or `POST /users/me/food-log`
+- **Request Body**:
+```json
+{
+  "food_groups": [
+    "grains",
+    "proteins",
+    "fruits_and_vegetables"
+  ],
+  "raw_text": "እንጀራ፣ ሽሮ እና ሰላጣ",
+  "items": [
+    "እንጀራ",
+    "ሽሮ",
+    "ሰላጣ"
+  ]
+}
+```
+- **Response** `(200 OK)`:
+```json
+{
+  "status": "verified",
+  "food_groups": [
+    "grains",
+    "proteins",
+    "fruits_and_vegetables"
+  ],
+  "raw_text": "እንጀራ፣ ሽሮ እና ሰላጣ",
+  "logged_at": "2026-08-25T12:00:00Z"
+}
+```
+
 ### Set or Update ANC Appointment
 - **Endpoint**: `POST /users/me/appointment` or `PUT /users/me/appointment`
 - **Request Body**:
 ```json
 {
   "appointment_date": "2026-08-20",
-  "reminder_lead_days": 2
+  "reminder_lead_days": 2,
+  "anc_contact_number": 2,
+  "anc_contact_title": "2nd ANC Contact (20 Weeks)"
 }
 ```
 
 ### Delete ANC Appointment
 - **Endpoint**: `DELETE /users/me/appointment`
 - **Response** `(200 OK)`: `{"status": "deleted"}`
+
+### WHO 8-Contact ANC Schedule & Timeline
+Returns the complete WHO 8-contact antenatal schedule calculated directly from the mother's gestational age / LNMP:
+- **Endpoint**: `GET /users/me/anc-schedule`
+- **Response** `(200 OK)`:
+```json
+{
+  "current_gestational_age_weeks": 16,
+  "current_gestational_age_days": 4,
+  "effective_lnmp_date": "2026-05-01",
+  "estimated_due_date": "2027-02-05",
+  "next_anc_contact": {
+    "contact_number": 2,
+    "trimester": "second_trimester",
+    "trimester_en": "Second Trimester",
+    "trimester_am": "2ኛ ትሪሚስተር",
+    "gestational_weeks": 20,
+    "gestational_label_en": "20 weeks",
+    "gestational_label_am": "20 ሳምንት",
+    "schedule_next_weeks": 6,
+    "title_en": "2nd ANC Contact (20 Weeks)",
+    "title_am": "2ኛ የቅድመ ወሊድ ክትትል (20 ሳምንት)",
+    "target_date": "2026-09-18",
+    "current_gestational_weeks": 16
+  },
+  "all_contacts": [
+    {
+      "contact_number": 1,
+      "trimester": "first_trimester",
+      "gestational_weeks": 12,
+      "title_en": "1st ANC Contact (Up to 12 Weeks)",
+      "title_am": "1ኛ የቅድመ ወሊድ ክትትል (እስከ 12 ሳምንት)",
+      "target_date": "2026-07-24",
+      "schedule_next_weeks": 8
+    },
+    {
+      "contact_number": 2,
+      "trimester": "second_trimester",
+      "gestational_weeks": 20,
+      "title_en": "2nd ANC Contact (20 Weeks)",
+      "title_am": "2ኛ የቅድመ ወሊድ ክትትል (20 ሳምንት)",
+      "target_date": "2026-09-18",
+      "schedule_next_weeks": 6
+    },
+    {
+      "contact_number": 3,
+      "trimester": "second_trimester",
+      "gestational_weeks": 26,
+      "title_en": "3rd ANC Contact (26 Weeks)",
+      "title_am": "3ኛ የቅድመ ወሊድ ክትትል (26 ሳምንት)",
+      "target_date": "2026-10-30",
+      "schedule_next_weeks": 4
+    },
+    {
+      "contact_number": 4,
+      "trimester": "third_trimester",
+      "gestational_weeks": 30,
+      "title_en": "4th ANC Contact (30 Weeks)",
+      "title_am": "4ኛ የቅድመ ወሊድ ክትትል (30 ሳምንት)",
+      "target_date": "2026-11-27",
+      "schedule_next_weeks": 4
+    },
+    {
+      "contact_number": 5,
+      "trimester": "third_trimester",
+      "gestational_weeks": 34,
+      "title_en": "5th ANC Contact (34 Weeks)",
+      "title_am": "5ኛ የቅድመ ወሊድ ክትትል (34 ሳምንት)",
+      "target_date": "2026-12-25",
+      "schedule_next_weeks": 2
+    },
+    {
+      "contact_number": 6,
+      "trimester": "third_trimester",
+      "gestational_weeks": 36,
+      "title_en": "6th ANC Contact (36 Weeks)",
+      "title_am": "6ኛ የቅድመ ወሊድ ክትትል (36 ሳምንት)",
+      "target_date": "2027-01-08",
+      "schedule_next_weeks": 2
+    },
+    {
+      "contact_number": 7,
+      "trimester": "third_trimester",
+      "gestational_weeks": 38,
+      "title_en": "7th ANC Contact (38 Weeks)",
+      "title_am": "7ኛ የቅድመ ወሊድ ክትትል (38 ሳምንት)",
+      "target_date": "2027-01-22",
+      "schedule_next_weeks": 2
+    },
+    {
+      "contact_number": 8,
+      "trimester": "third_trimester",
+      "gestational_weeks": 40,
+      "title_en": "8th ANC Contact (40 Weeks - Delivery)",
+      "title_am": "8ኛ የቅድመ ወሊድ ክትትል (40 ሳምንት - የመውለጃ ጊዜ)",
+      "target_date": "2027-02-05",
+      "schedule_next_weeks": null
+    }
+  ]
+}
+```
 
 ---
 
@@ -232,6 +497,11 @@ graph TD
     Stage4 --> Finish[Intake Complete status: completed]
 ```
 
+### Step 0: Check-in Stage Prompts & Stored Voice Audio
+Frontend can query all 4 standard check-in prompts or play the stored Amharic voice for each stage directly (zero dynamic TTS latency!):
+- **Get All Stage Prompts**: `GET /checkin/prompts`
+- **Stream Stored Audio for Stage**: `GET /checkin/prompts/{stage}/audio` (e.g. `/checkin/prompts/symptoms/audio`)
+
 ### Step 1: Start Session
 - **Endpoint**: `POST /checkin/start`
 - **Response** `(200 OK)`:
@@ -239,8 +509,8 @@ graph TD
 {
   "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
   "stage": "symptoms",
-  "question_prompt": "ዛሬ ወይም በቅርቡ ምንም አይነት ያልተለመደ የጤና እክል ወይም ህመም ተሰምቶዎታል?",
-  "question_audio_url": "/tts?text=%E1%8B%AE%E1%88%A5..."
+  "question_prompt": "ዛሬ ጽኑ ራስ ምታት፣ የዓይን ብዥታ፣ ደም መፍሰስ፣ ፈሳሽ መፍሰስ ወይም ከፍተኛ የሆድ ህመም ተሰምቶዎታል?",
+  "question_audio_url": "/checkin/prompts/symptoms/audio"
 }
 ```
 
@@ -378,9 +648,17 @@ Once all pending items in a stage are verified (or if `pending_items` is `[]` be
   "question_prompt": null,
   "session_completed": true,
   "danger_sign_triggered": false,
+  "summary_text_am": "ምንም የአደጋ ምልክት አልተገኘም፣ ነገር ግን ቀላል የድካም ስሜት ምልክት ተመዝግቧል",
+  "summary_text_en": "No danger signs detected, but mild fatigue symptom recorded.",
   "check_in_id": "f589c311-2090-482f-b441-11883c5112ab"
 }
 ```
+
+> [!NOTE]
+> **Daily Check-in Summary Rules (in Amharic & English)**:
+> - **Danger Signs Detected**: `"{x} የአደጋ ምልክት ተገኝቷል፣ በአስቸቋይ የህክምና እርዳታ ያግኙ"`
+> - **Non-Danger Symptoms**: `"ምንም የአደጋ ምልክት አልተገኘም፣ ነገር ግን {x} ምልክት ተመዝግቧል"`
+> - **No Symptoms Reported**: `"ምንም የአደጋ ምልክት አልተገኘም"`
 
 ---
 
@@ -398,7 +676,9 @@ Once all pending items in a stage are verified (or if `pending_items` is `[]` be
     "food_log": {"raw_text": "እንጀራ በሽሮ", "confirmed": true},
     "supplement_check": {"supplement_name": "iron", "taken_today": true, "confirmed": true},
     "closing_mentions": [],
-    "danger_sign_triggered": false
+    "danger_sign_triggered": false,
+    "summary_text_am": "ምንም የአደጋ ምልክት አልተገኘም፣ ነገር ግን ቀላል የድካም ስሜት ምልክት ተመዝግቧል",
+    "summary_text_en": "No danger signs detected, but mild fatigue symptom recorded."
   }
 ]
 ```
@@ -411,7 +691,7 @@ Once all pending items in a stage are verified (or if `pending_items` is `[]` be
 
 ## 6. Clinician Summaries & QR Sharing
 
-Summaries aggregate all confirmed check-ins over a period for ANC doctor visits.
+Summaries aggregate all confirmed check-ins over the ANC window, formatted specifically for fast doctor skimming (distinct **Danger Signs** vs **Recorded General Symptoms** and **Nutritional Variation Share %**).
 
 ### Generate Manual Summary
 - **Endpoint**: `POST /summary/generate`
@@ -419,15 +699,64 @@ Summaries aggregate all confirmed check-ins over a period for ANC doctor visits.
 ```json
 {
   "id": "c138861d-91b4-4b51-bdf1-897711200119",
-  "period_start": "2026-08-01",
-  "period_end": "2026-08-15",
-  "generated_at": "2026-08-15T13:00:00Z",
+  "period_start": "2026-07-24",
+  "period_end": "2026-09-18",
+  "generated_at": "2026-09-17T13:00:00Z",
+  "anc_contact_number": 2,
+  "anc_contact_title": "2nd ANC Contact (20 Weeks)",
+  "anc_contact_title_am": "2ኛ የቅድመ ወሊድ ክትትል (20 ሳምንት)",
+  "target_gestational_weeks": 20,
   "content_json": {
-    "danger_signs": [],
-    "symptoms_summary": [...],
-    "food_logs": [{"raw_text": "እንጀራ በሽሮ"}],
-    "supplement_adherence": {"taken_days": 5, "total_reported": 6, "percentage": 83.3},
-    "patient_questions": []
+    "anc_contact": {
+      "contact_number": 2,
+      "title_en": "2nd ANC Contact (20 Weeks)",
+      "title_am": "2ኛ የቅድመ ወሊድ ክትትል (20 ሳምንት)",
+      "target_gestational_weeks": 20,
+      "trimester": "second_trimester",
+      "schedule_next_weeks": 6
+    },
+    "danger_signs": [
+      {
+        "date": "2026-09-10",
+        "category": "severe_headache",
+        "category_display": "ከባድ ራስ ምታት",
+        "category_display_en": "Severe headache",
+        "raw_text": "ከባድ ራስ ምታት ለ 1 ቀን",
+        "duration": {"value": 1, "unit": "day"},
+        "severity": "severe"
+      }
+    ],
+    "recorded_symptoms": [
+      {
+        "date": "2026-09-12",
+        "category": "no_danger_sign_detected",
+        "category_display": "ቀላል የድካም ስሜት",
+        "raw_text": "ቀላል የድካም ስሜት",
+        "severity": "mild"
+      }
+    ],
+    "food_logs": [
+      {"date": "2026-09-12", "raw_text": "እንጀራ በሽሮ", "food_groups": ["grains", "proteins"]}
+    ],
+    "nutritional_variation": {
+      "total_items_classified": 14,
+      "tracked_days": 10,
+      "percentages": {
+        "grains": 40,
+        "proteins": 30,
+        "dairy": 10,
+        "fruits_and_vegetables": 20
+      }
+    },
+    "supplement_adherence": {
+      "taken_days": 18,
+      "tracked_days": 20,
+      "total_days_in_period": 21,
+      "percentage": 86
+    },
+    "closing_mentions": [],
+    "muac_reminder": "MUAC screening due — check at visit",
+    "provenance_note": "All data in this summary is self-reported by the patient (no device-measured data)."
   },
   "share_link_slug": "ab89ef12",
   "qr_code_url": "https://.../qr/ab89ef12.png"
