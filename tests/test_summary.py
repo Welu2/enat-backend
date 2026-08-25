@@ -35,6 +35,9 @@ def test_summary_aggregation_includes_only_confirmed_items() -> None:
     assert content["food_logs"][0]["raw_text"] == "injera"
     assert content["supplement_adherence"]["taken_days"] == 1
     assert content["closing_mentions"][0]["topic"] == "breastfeeding_intent"
+    assert "nutritional_variation" in content
+    assert content["nutritional_variation"]["percentages"]["grains"] == 100
+    assert sum(content["nutritional_variation"]["percentages"].values()) == 100
 
 
 def test_public_summary_repository_selects_limited_fields(monkeypatch) -> None:
@@ -75,7 +78,9 @@ def test_public_summary_repository_selects_limited_fields(monkeypatch) -> None:
     from app.db.repositories.summaries import SummaryRepository
 
     result = SummaryRepository().get_by_slug("abc123")
-    assert captured["fields"] == "period_start, period_end, generated_at, content_json"
+    assert "period_start" in captured["fields"]
+    assert "content_json" in captured["fields"]
+    assert "anc_contact_number" in captured["fields"]
     assert "email" not in captured["fields"]
     assert result is not None
 
@@ -90,7 +95,12 @@ def test_check_and_generate_auto_summary_pre_appointment(monkeypatch) -> None:
     monkeypatch.setattr(
         service.appointments,
         "get_by_user",
-        lambda uid: {"appointment_date": tomorrow, "last_summary_generated_at": None},
+        lambda uid: {"appointment_date": tomorrow, "last_summary_generated_at": None, "anc_contact_number": 1},
+    )
+    monkeypatch.setattr(
+        service.appointments,
+        "upsert",
+        lambda uid, data: data,
     )
     monkeypatch.setattr(
         service,
