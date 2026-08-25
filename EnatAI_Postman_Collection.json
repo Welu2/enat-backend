@@ -1,0 +1,1644 @@
+{
+  "info": {
+    "_postman_id": "e9b2b4a6-enat-4444-8888-abcdef123456",
+    "name": "EnatAI - Maternal Health Clinical Backend API",
+    "description": "Comprehensive Postman API Collection for EnatAI Maternal Health Platform.\n\nIncludes Authentication, Maternal Onboarding, Gestational Calculator, WHO 8-Contact ANC Schedule, Voice & Text Check-in, Ethiopian Nutrition & Food Group Classification, Supplements, Appointments, Clinician Summaries & QR Sharing, Notifications, and Text-to-Speech (TTS).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "supplement_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notification_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "share_link_slug",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "checkin_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Health & System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Returns operational status of the FastAPI backend."
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Authentication",
+      "item": [
+        {
+          "name": "Register / Signup",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set('token', jsonData.access_token);",
+                  "    console.log('Saved token:', jsonData.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mother@example.com\",\n  \"password\": \"StrongPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Registers a new mother account with Supabase Auth and seeds user in PostgreSQL users table."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.collectionVariables.set('token', jsonData.access_token);",
+                  "    console.log('Saved token:', jsonData.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mother@example.com\",\n  \"password\": \"StrongPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticates user and returns JWT bearer access token."
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mother@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Sends password reset email link."
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access_token\": \"RECOVERY_TOKEN_FROM_EMAIL\",\n  \"new_password\": \"NewStrongPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "Updates password with recovery token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Maternal Intake & Gestational Engine",
+      "item": [
+        {
+          "name": "Calculate Gestational Age (Instant Preview Calculator)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"lnmp\",\n  \"lnmp_date\": \"2026-05-15\",\n  \"ultrasound_date\": null,\n  \"ultrasound_gestational_weeks\": null,\n  \"ultrasound_gestational_days\": null,\n  \"calculation_date\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/calculate-gestational-age",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "calculate-gestational-age"
+              ]
+            },
+            "description": "Instant public preview calculator without needing authentication. Computes gestational age in weeks & days, trimester, and EDD."
+          }
+        },
+        {
+          "name": "Submit Onboarding (23 Maternal Questions)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"age\": 26,\n  \"area\": \"urban\",\n  \"pregnancy_counting_method\": \"lnmp\",\n  \"lnmp_date\": \"2026-05-15\",\n  \"ultrasound_date\": null,\n  \"ultrasound_gestational_weeks\": null,\n  \"ultrasound_gestational_days\": null,\n  \"user_gestational_weeks\": 14,\n  \"user_gestational_days\": 3,\n  \"total_pregnancies\": 2,\n  \"live_births\": 1,\n  \"had_c_section\": false,\n  \"child_passed_away\": false,\n  \"past_pregnancy_complications\": [\n    \"preterm_birth\",\n    \"prom\"\n  ],\n  \"known_medical_conditions\": [\n    \"hypertension\",\n    \"other\"\n  ],\n  \"custom_medical_condition\": \"Mild seasonal asthma\",\n  \"malaria_endemic_area\": true,\n  \"current_medications\": \"Methyldopa 250mg\",\n  \"supplements\": [\n    \"iron & folic acid\",\n    \"calcium\"\n  ],\n  \"hospital\": \"St. Paul's Hospital Millennium Medical College\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/onboarding",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "onboarding"
+              ]
+            },
+            "description": "Saves maternal clinical intake, seeds supplements table, and auto-schedules immediate next WHO ANC contact appointment."
+          }
+        },
+        {
+          "name": "Get User Profile (Live Pregnancy Progress & Metrics)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            },
+            "description": "Returns full user profile, live gestational progression (advancing automatically every day), supplements, active appointment, and notifications."
+          }
+        },
+        {
+          "name": "Update Profile (Full Maternal Update)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"age\": 27,\n  \"area\": \"urban\",\n  \"pregnancy_counting_method\": \"lnmp\",\n  \"lnmp_date\": \"2026-05-15\",\n  \"user_gestational_weeks\": 14,\n  \"user_gestational_days\": 3,\n  \"hospital\": \"Tikur Anbessa Specialized Hospital (TASH)\",\n  \"malaria_endemic_area\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "profile"
+              ]
+            },
+            "description": "Updates maternal details and recalculates gestational metrics."
+          }
+        },
+        {
+          "name": "Patch Profile (Partial Update)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_medications\": \"Methyldopa 250mg morning only\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "profile"
+              ]
+            },
+            "description": "Partially updates user profile fields."
+          }
+        },
+        {
+          "name": "Update Preferred Hospital",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hospital\": \"Tikur Anbessa Specialized Hospital (TASH)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/hospital",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "hospital"
+              ]
+            },
+            "description": "Dedicated endpoint to update the patient's delivery / ANC hospital."
+          }
+        },
+        {
+          "name": "Update Settings (Unified Settings Update)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hospital\": \"Gandhi Memorial Hospital\",\n  \"language_preference\": \"am\",\n  \"appointment_date\": \"2026-09-18\",\n  \"reminder_lead_days\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "settings"
+              ]
+            },
+            "description": "Unified settings endpoint to update language, hospital, appointment, and reminders in one call."
+          }
+        },
+        {
+          "name": "Get WHO 8-Contact ANC Schedule & Timeline",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/anc-schedule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "anc-schedule"
+              ]
+            },
+            "description": "Returns complete WHO 8-contact antenatal schedule calculated directly from gestational age, with target dates, trimesters, and immediate upcoming contact."
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Supplements Management",
+      "item": [
+        {
+          "name": "List User Supplements",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/supplements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "supplements"
+              ]
+            },
+            "description": "Returns list of all active/inactive supplements for the mother."
+          }
+        },
+        {
+          "name": "Create Supplement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.collectionVariables.set('supplement_id', jsonData.id);",
+                  "    console.log('Saved supplement_id:', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iron & folic acid\",\n  \"dosage\": \"60mg elemental iron / 400\\u00b5g folic acid\",\n  \"frequency\": \"daily\",\n  \"reminder_time\": \"08:00:00\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/supplements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "supplements"
+              ]
+            },
+            "description": "Adds a new prescribed supplement."
+          }
+        },
+        {
+          "name": "Update Supplement",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iron & folic acid\",\n  \"dosage\": \"60mg / 400\\u00b5g\",\n  \"reminder_time\": \"09:00:00\",\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/supplements/{{supplement_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "supplements",
+                "{{supplement_id}}"
+              ]
+            },
+            "description": "Updates an existing supplement."
+          }
+        },
+        {
+          "name": "Verify Supplement Intake Today (Auto-skips Stage 3 in Voice Check-in)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplement_name\": \"iron & folic acid\",\n  \"taken_today\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/supplements/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "supplements",
+                "verify"
+              ]
+            },
+            "description": "Manual 1-tap UI toggle for taking daily supplement. Logging this today automatically skips Stage 3 (Supplements) during voice check-in!"
+          }
+        },
+        {
+          "name": "Delete Supplement",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/supplements/{{supplement_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "supplements",
+                "{{supplement_id}}"
+              ]
+            },
+            "description": "Deletes a supplement."
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Food Logging (Ethiopian 4-Food-Group Checkbox)",
+      "item": [
+        {
+          "name": "Manual 4-Food-Group Logging (Auto-skips Stage 2 in Voice Check-in)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"food_groups\": [\n    \"grains\",\n    \"proteins\",\n    \"fruits_and_vegetables\"\n  ],\n  \"raw_text\": \"\\u12a5\\u1295\\u1300\\u122b\\u1363 \\u123d\\u122e \\u12a5\\u1293 \\u1230\\u120b\\u1323\",\n  \"items\": [\n    \"\\u12a5\\u1295\\u1300\\u122b\",\n    \"\\u123d\\u122e\",\n    \"\\u1230\\u120b\\u1323\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/food/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "food",
+                "verify"
+              ]
+            },
+            "description": "Allows patient to select food groups eaten today directly from a 4-group checkbox UI ('grains', 'proteins', 'dairy', 'fruits_and_vegetables'). Automatically skips Stage 2 (Food) during daily voice check-in!"
+          }
+        },
+        {
+          "name": "Manual Food Log Alias",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"food_groups\": [\n    \"grains\",\n    \"dairy\"\n  ],\n  \"raw_text\": \"\\u1308\\u1295\\u134e \\u1260\\u1245\\u1264 \\u12a5\\u1293 \\u12a5\\u122d\\u130e\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/food-log",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "food-log"
+              ]
+            },
+            "description": "Alias endpoint for manual food group logging."
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Appointments & Calendar Integration",
+      "item": [
+        {
+          "name": "Set or Update ANC Appointment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointment_date\": \"2026-09-18\",\n  \"reminder_lead_days\": 2,\n  \"anc_contact_number\": 2,\n  \"anc_contact_title\": \"2nd ANC Contact (20 Weeks)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/appointment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "appointment"
+              ]
+            },
+            "description": "Sets or edits ANC appointment date and reminder lead time."
+          }
+        },
+        {
+          "name": "Get 1-Tap Google Calendar Link & iCal Export Link",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/appointment/calendar-link",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "appointment",
+                "calendar-link"
+              ]
+            },
+            "description": "Generates 1-tap web URL to add ANC appointment to Google Calendar with device reminders, plus iCal download link."
+          }
+        },
+        {
+          "name": "Download Apple/Outlook Calendar File (.ics)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/appointment/calendar.ics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "appointment",
+                "calendar.ics"
+              ]
+            },
+            "description": "Directly downloads standard iCalendar .ics file."
+          }
+        },
+        {
+          "name": "Delete Appointment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/appointment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "appointment"
+              ]
+            },
+            "description": "Deletes the scheduled appointment."
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Push Notifications & Devices",
+      "item": [
+        {
+          "name": "Register Push Device Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"fcm_or_web_push_device_token_xyz\",\n  \"platform\": \"web\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/push-tokens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "push-tokens"
+              ]
+            },
+            "description": "Registers device push token for appointment and supplement alerts."
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Voice Check-in Intake Workflow",
+      "item": [
+        {
+          "name": "0. List Check-in Prompts & Metadata",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkin/prompts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "prompts"
+              ]
+            },
+            "description": "Returns all 4 standard check-in questions, localized Amharic/English categories, and audio playback URLs."
+          }
+        },
+        {
+          "name": "0. Stream Stored Prompt Audio (Zero Redundant TTS)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkin/prompts/symptoms/audio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "prompts",
+                "symptoms",
+                "audio"
+              ]
+            },
+            "description": "Streams pre-cached Amharic speech audio (MP3) for the question prompt without calling dynamic TTS repeatedly."
+          }
+        },
+        {
+          "name": "1. Start Check-in Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.session_id) {",
+                  "    pm.collectionVariables.set('session_id', jsonData.session_id);",
+                  "    console.log('Saved session_id:', jsonData.session_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkin/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "start"
+              ]
+            },
+            "description": "Starts daily check-in session. Returns first stage ('symptoms') and audio streaming URL."
+          }
+        },
+        {
+          "name": "2. Respond with Audio (Multipart Upload)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.pending_items && jsonData.pending_items.length > 0) {",
+                  "    pm.collectionVariables.set('item_id', jsonData.pending_items[0].item_id);",
+                  "    console.log('Saved item_id:', jsonData.pending_items[0].item_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "description": "Audio recording (.webm, .wav, .m4a, .mp3)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkin/{{session_id}}/respond",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "{{session_id}}",
+                "respond"
+              ]
+            },
+            "description": "Uploads recorded Amharic voice. Transcribes via Addis AI STT and extracts structured items."
+          }
+        },
+        {
+          "name": "3A. Verify Item (Single Item Confirmation or Edit)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item_id\": \"{{item_id}}\",\n  \"confirmed\": true,\n  \"corrected_value\": {\n    \"raw_text\": \"\\u1240\\u120b\\u120d \\u12e8\\u12f5\\u12ab\\u121d \\u1235\\u121c\\u1275 \\u1265\\u127b \\u1290\\u12cd\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkin/{{session_id}}/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "{{session_id}}",
+                "verify"
+              ]
+            },
+            "description": "Confirms or corrects an extracted item."
+          }
+        },
+        {
+          "name": "3B. Bulk Verify Items (All Items in Stage at Once)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"item_id\": \"{{item_id}}\",\n      \"confirmed\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkin/{{session_id}}/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "{{session_id}}",
+                "verify"
+              ]
+            },
+            "description": "Bulk confirms all pending items in one call."
+          }
+        },
+        {
+          "name": "3C. Voice Correction for Single Item",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "description": "Re-recorded audio correction"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkin/{{session_id}}/items/{{item_id}}/voice-correct",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "{{session_id}}",
+                "items",
+                "{{item_id}}",
+                "voice-correct"
+              ]
+            },
+            "description": "Re-records voice for a specific pending item."
+          }
+        },
+        {
+          "name": "4. Complete Stage & Advance / Finish Check-in",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.check_in_id) {",
+                  "    pm.collectionVariables.set('checkin_id', jsonData.check_in_id);",
+                  "    console.log('Saved checkin_id:', jsonData.check_in_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkin/{{session_id}}/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "{{session_id}}",
+                "complete"
+              ]
+            },
+            "description": "Advances to next stage. When finishing final stage ('closing'), saves check-in and returns localized Amharic summary text."
+          }
+        },
+        {
+          "name": "Get User Check-in History",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkin/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "history"
+              ]
+            },
+            "description": "Returns list of past check-ins with localized Amharic summaries and danger sign flags."
+          }
+        },
+        {
+          "name": "Get Single Check-in Detail",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkin/history/{{checkin_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "history",
+                "{{checkin_id}}"
+              ]
+            },
+            "description": "Returns full details of a specific check-in session."
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Clinician Summaries & Doctor Sharing",
+      "item": [
+        {
+          "name": "Generate Clinician Summary Report (Manual)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.share_link_slug) {",
+                  "    pm.collectionVariables.set('share_link_slug', jsonData.share_link_slug);",
+                  "    console.log('Saved share_link_slug:', jsonData.share_link_slug);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/summary/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "summary",
+                "generate"
+              ]
+            },
+            "description": "Generates immutable clinical summary with 2-tier symptoms ('danger_signs' vs 'recorded_symptoms'), 100% nutritional group distribution, ANC contact tags, and QR code URL."
+          }
+        },
+        {
+          "name": "Check & Trigger Automatic Pre-Appointment Summary",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/summary/check-automatic",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "summary",
+                "check-automatic"
+              ]
+            },
+            "description": "Checks if appointment is 1 day away. If so, generates report and automatically advances appointment to subsequent WHO ANC contact!"
+          }
+        },
+        {
+          "name": "Get Latest Summary",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/summary/latest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "summary",
+                "latest"
+              ]
+            },
+            "description": "Returns most recent clinician report."
+          }
+        },
+        {
+          "name": "Public Doctor Summary View (No Auth Required)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/summary/public/{{share_link_slug}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "summary",
+                "public",
+                "{{share_link_slug}}"
+              ]
+            },
+            "description": "Public doctor view for scanning patient QR code. Returns de-identified summary with 2-tier symptoms and nutritional variation."
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Notifications & Reminders",
+      "item": [
+        {
+          "name": "Get Active Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.length > 0) {",
+                  "    pm.collectionVariables.set('notification_id', jsonData[0].id);",
+                  "    console.log('Saved notification_id:', jsonData[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            },
+            "description": "Retrieves active notification alerts for supplements, appointments, and generated reports."
+          }
+        },
+        {
+          "name": "Dismiss Notification",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notification_id}}/dismiss",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{notification_id}}",
+                "dismiss"
+              ]
+            },
+            "description": "Dismisses a notification banner."
+          }
+        },
+        {
+          "name": "List Reminders",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reminders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reminders"
+              ]
+            },
+            "description": "Returns pending reminder items."
+          }
+        },
+        {
+          "name": "Trigger Daily Reminder Cron Job (Dev/Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reminders/run-daily",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reminders",
+                "run-daily"
+              ]
+            },
+            "description": "Manually triggers daily reminder job (creates daily supplement & appointment alerts)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Text-to-Speech (TTS)",
+      "item": [
+        {
+          "name": "Synthesize Speech (GET Query Audio Stream)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tts?text=%E1%8B%9B%E1%88%AC%20%E1%8C%BD%E1%8A%91%20%E1%88%AB%E1%88% his%20%E1%88%9D%E1%89%B3%E1%89%A5%20%E1%89%B0%E1%88%B0%E1%88%9D%E1%89%B6%E1%8B%8E%E1%89%B3%E1%88%8D%3F",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tts"
+              ],
+              "query": [
+                {
+                  "key": "text",
+                  "value": "ዛሬ ጽኑ ራስ ምታት ተሰምቶዎታል?"
+                }
+              ]
+            },
+            "description": "Synthesizes Amharic text into an MP3 audio stream via GET request."
+          }
+        },
+        {
+          "name": "Synthesize Speech (POST JSON Payload)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"\\u12a5\\u1295\\u12f0\\u121d\\u1295 \\u12a0\\u12f0\\u1229\\u1363 \\u12db\\u122c \\u1324\\u1293\\u12ce \\u12a5\\u1295\\u12f4\\u1275 \\u1290\\u12cd?\",\n  \"voice_id\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tts"
+              ]
+            },
+            "description": "Synthesizes Amharic text into an MP3 audio stream via POST JSON payload."
+          }
+        }
+      ]
+    }
+  ]
+}
