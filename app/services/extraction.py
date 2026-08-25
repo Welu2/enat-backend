@@ -9,6 +9,7 @@ from app.core.constants import DANGER_SIGN_CATEGORIES, NUTRITION_TOPICS
 from app.models.checkin import CheckInStage
 from app.services.addis_ai import AddisAIClient
 from app.services.danger_signs import check_danger_sign
+from app.services.nutrition import classify_ethiopian_food
 
 
 class SymptomsExtraction(BaseModel):
@@ -324,12 +325,12 @@ def _attach_item_ids(
             severity = str(item.get("severity") or "").lower()
             category = item.get("category")
             if severity == "mild" or not category or category in ("none", "null", "no_danger_sign_detected"):
-                item["category"] = "no_danger_sign_detected"
+                item["category"] = None
                 item["danger_sign"] = False
             else:
                 item["danger_sign"] = check_danger_sign(category)
                 if not item["danger_sign"]:
-                    item["category"] = "no_danger_sign_detected"
+                    item["category"] = None
 
             item["category_display"] = _category_display(item["category"], lang="am")
             item["category_display_en"] = _category_display(item["category"], lang="en")
@@ -338,13 +339,13 @@ def _attach_item_ids(
             item["verification_audio_url"] = build_tts_url(phrase)
             items.append(item)
 
-        if not items and clean_transcript:
+        if not items and clean_transcript and "symptoms" not in data:
             fallback = {
                 "item_id": str(uuid4()),
                 "raw_text": clean_transcript,
-                "category": "no_danger_sign_detected",
-                "category_display": _category_display("no_danger_sign_detected", lang="am"),
-                "category_display_en": _category_display("no_danger_sign_detected", lang="en"),
+                "category": None,
+                "category_display": _category_display(None, lang="am"),
+                "category_display_en": _category_display(None, lang="en"),
                 "duration": {"value": None, "unit": "unspecified"},
                 "severity": "unspecified",
                 "danger_sign": False,
@@ -368,15 +369,18 @@ def _attach_item_ids(
                 item = dict(f)
                 item["item_id"] = str(uuid4())
                 item["confirmed"] = False
+                raw = item.get("raw_text") or ""
+                item["food_groups"] = classify_ethiopian_food(raw)
                 phrase = build_verification_phrase(item, stage)
                 item["verification_phrase"] = phrase
                 item["verification_audio_url"] = build_tts_url(phrase)
                 items.append(item)
 
-        if not items and clean_transcript:
+        if not items and clean_transcript and "food_log" not in data:
             fallback = {
                 "item_id": str(uuid4()),
                 "raw_text": clean_transcript,
+                "food_groups": classify_ethiopian_food(clean_transcript),
                 "confirmed": False,
             }
             phrase = build_verification_phrase(fallback, stage)
@@ -398,7 +402,7 @@ def _attach_item_ids(
             item["verification_audio_url"] = build_tts_url(phrase)
             items.append(item)
 
-        if not items and clean_transcript:
+        if not items and clean_transcript and "supplement_check" not in data:
             taken = "አዎ" in clean_transcript or ("ወሰድ" in clean_transcript and "አልወሰድ" not in clean_transcript)
             fallback = {
                 "item_id": str(uuid4()),
@@ -425,7 +429,7 @@ def _attach_item_ids(
         item["verification_audio_url"] = build_tts_url(phrase)
         items.append(item)
 
-    if not items and clean_transcript:
+    if not items and clean_transcript and "closing_mentions" not in data:
         fallback = {
             "item_id": str(uuid4()),
             "raw_text": clean_transcript,
@@ -459,9 +463,5 @@ class ExtractionService:
             except (json.JSONDecodeError, ValidationError, ValueError) as exc:
                 last_error = exc
                 continue
-
-        # If LLM failed after retries, fallback to creating item directly from transcript
-        if transcript.strip():
-            return _attach_item_ids(stage, {}, transcript=transcript)
 
         raise ValueError(f"Failed to extract valid JSON for stage {stage}") from last_error
