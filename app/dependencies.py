@@ -7,7 +7,7 @@ from uuid import UUID
 
 from fastapi import Header, HTTPException, status
 
-from app.config import settings
+from app.config import Settings
 from app.core.security import decode_access_token
 from app.db.repositories.users import UserRepository
 
