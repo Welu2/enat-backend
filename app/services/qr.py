@@ -49,4 +49,4 @@ def build_share_url(slug: str) -> str:
         base = os.getenv("FRONTEND_URL", "https://enat-tena.onrender.com")
         
     base = base.rstrip("/")
-    return f"{base}/summary/public/{slug}"
+    return f"{base}/summary/{slug}"

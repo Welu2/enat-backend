@@ -4,7 +4,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-# 1. Added 'tts' to the imported route modules
 from app.api.routes import auth, checkin, notifications, reminders, summary, tts, users
 from app.config import get_settings
 from app.services.addis_ai import AddisAIClient
@@ -41,13 +40,16 @@ app = FastAPI(
 
 settings = get_settings()
 
-# 2. Whitelist your production frontend and local dev environments
+# Whitelist production web, development, and Telegram Web clients
 allowed_origins = list(
     {
         *settings.cors_origin_list,
         "https://enat-tena.onrender.com",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://web.telegram.org",
+        "https://webk.telegram.org",
+        "https://webz.telegram.org",
     }
 )
 

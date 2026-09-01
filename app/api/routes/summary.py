@@ -26,7 +26,7 @@ def get_latest_summary(user_id: UUID = Depends(get_current_user_id)) -> SummaryL
     return SummaryLatestResponse(**summary)
 
 
-@router.get("/public/{share_link_slug}", response_model=PublicSummaryResponse)
+@router.get("/{share_link_slug}", response_model=PublicSummaryResponse)
 def get_public_summary(share_link_slug: str) -> PublicSummaryResponse:
     summary = SummaryService().get_public(share_link_slug)
     if not summary:

@@ -4,7 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",  # Prevents crashes if extra environment variables exist
+    )
 
     supabase_url: str
     supabase_service_role_key: str
@@ -15,10 +19,18 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     enable_dev_routes: bool = True
     reminder_cron_hour: int = 6
+    
+    # Telegram Bot Token from @BotFather
+    telegram_bot_token: str = ""
 
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+
+    @property
+    def is_telegram_configured(self) -> bool:
+        return bool(self.telegram_bot_token.strip())
 
 
 @lru_cache
