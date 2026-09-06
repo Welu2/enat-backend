@@ -1,12 +1,12 @@
 from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, Form, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import auth, checkin, notifications, reminders, summary, tts, users
 from app.config import get_settings
-from app.services.addis_ai import AddisAIClient
+from app.services.speech import get_asr_client
 from app.services.reminders import ReminderService
 
 scheduler = BackgroundScheduler()
@@ -78,11 +78,17 @@ def health() -> dict[str, str]:
 if settings.enable_dev_routes:
 
     @app.post("/dev/asr-test")
-    async def dev_asr_test(audio: UploadFile = File(...)) -> dict[str, str]:
+    async def dev_asr_test(
+        audio: UploadFile = File(...),
+        model: str = Form("addisai"),
+        model_query: str | None = Query(None, alias="model"),
+    ) -> dict[str, str]:
+        selected_model = model_query or model or "addisai"
         audio_bytes = await audio.read()
-        transcript = await AddisAIClient().transcribe(
+        client = get_asr_client(selected_model)
+        transcript = await client.transcribe(
             audio_bytes,
             audio.filename or "audio.wav",
             audio.content_type or "audio/wav",
         )
-        return {"transcript": transcript}
+        return {"transcript": transcript, "model": selected_model}

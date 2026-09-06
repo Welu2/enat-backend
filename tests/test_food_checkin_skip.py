@@ -52,7 +52,7 @@ def test_manual_food_logging_endpoint(test_user: dict) -> None:
     app.dependency_overrides.clear()
 
 
-def test_build_stage_order_skips_food_when_already_logged_today() -> None:
+def test_build_stage_order_never_skips_food_even_if_already_logged_today() -> None:
     service = CheckInSessionService()
     user_id = uuid4()
 
@@ -63,16 +63,21 @@ def test_build_stage_order_skips_food_when_already_logged_today() -> None:
         stages = service._build_stage_order(user_id)
         assert stages == ["symptoms", "food", "supplement", "closing"]
 
-    # Case 2: Food logged today, supplement not logged today
+    # Case 2: Food logged today, supplement not logged today -> food is NOT skipped
     with patch.object(service.check_ins, "has_food_logged_today", return_value=True), \
          patch.object(service.check_ins, "has_supplement_logged_today", return_value=False), \
          patch.object(service.supplements, "list_active", return_value=[{"name": "iron"}]):
         stages = service._build_stage_order(user_id)
-        assert stages == ["symptoms", "supplement", "closing"]
+        assert stages == ["symptoms", "food", "supplement", "closing"]
 
-    # Case 3: Both food and supplement logged today
+    # Case 3: Both food and supplement logged today -> food remains, only supplement is skipped
     with patch.object(service.check_ins, "has_food_logged_today", return_value=True), \
          patch.object(service.check_ins, "has_supplement_logged_today", return_value=True), \
          patch.object(service.supplements, "list_active", return_value=[{"name": "iron"}]):
         stages = service._build_stage_order(user_id)
-        assert stages == ["symptoms", "closing"]
+        assert stages == ["symptoms", "food", "closing"]
+
+    # Case 4: No active supplements -> only supplement is omitted
+    with patch.object(service.supplements, "list_active", return_value=[]):
+        stages = service._build_stage_order(user_id)
+        assert stages == ["symptoms", "food", "closing"]

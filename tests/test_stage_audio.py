@@ -65,6 +65,20 @@ def test_checkin_prompt_audio_endpoint() -> None:
         assert resp.content == b"MOCK_AUDIO_PAYLOAD"
 
 
+def test_checkin_prompt_audio_endpoint_english() -> None:
+    client = TestClient(app)
+
+    with patch("app.api.routes.checkin.get_or_synthesize_stage_audio", new_callable=AsyncMock) as mock_get:
+        mock_get.return_value = b"MOCK_ENGLISH_AUDIO_PAYLOAD"
+
+        resp = client.get("/checkin/prompts/symptoms/audio?language=en")
+        assert resp.status_code == 200
+        assert resp.headers["content-type"] == "audio/mpeg"
+        assert resp.content == b"MOCK_ENGLISH_AUDIO_PAYLOAD"
+        mock_get.assert_called_once_with("symptoms", language="en")
+
+
+
 def test_start_session_returns_static_stage_audio_url() -> None:
     service = CheckInSessionService()
     user_id = uuid4()

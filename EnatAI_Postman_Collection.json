@@ -992,7 +992,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/checkin/prompts/symptoms/audio",
+              "raw": "{{baseUrl}}/checkin/prompts/symptoms/audio?language=am",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1001,9 +1001,16 @@
                 "prompts",
                 "symptoms",
                 "audio"
+              ],
+              "query": [
+                {
+                  "key": "language",
+                  "value": "am",
+                  "description": "Language: 'am' (Amharic) or 'en' (English)"
+                }
               ]
             },
-            "description": "Streams pre-cached Amharic speech audio (MP3) for the question prompt without calling dynamic TTS repeatedly."
+            "description": "Streams pre-cached speech audio (MP3) for the question prompt in Amharic or English without calling dynamic TTS repeatedly."
           }
         },
         {
@@ -1037,16 +1044,23 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/checkin/start",
+              "raw": "{{baseUrl}}/checkin/start?language=am",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "checkin",
                 "start"
+              ],
+              "query": [
+                {
+                  "key": "language",
+                  "value": "am",
+                  "description": "Language choice: 'am' (Amharic, default) or 'en' (English)"
+                }
               ]
             },
-            "description": "Starts daily check-in session. Returns first stage ('symptoms') and audio streaming URL."
+            "description": "Starts daily check-in session in chosen language ('am' or 'en'). Returns first stage ('symptoms'), question prompt, and audio streaming URL."
           }
         },
         {
@@ -1086,6 +1100,18 @@
                   "key": "audio",
                   "type": "file",
                   "description": "Audio recording (.webm, .wav, .m4a, .mp3)"
+                },
+                {
+                  "key": "model",
+                  "value": "addisai",
+                  "type": "text",
+                  "description": "Voice model engine: 'addisai' (default, Amharic-only), 'sahara' (Intron Voice), 'gemini' (Google Gemini), 'elevenlabs' (English only), or 'deepgram' (English only)"
+                },
+                {
+                  "key": "language",
+                  "value": "am",
+                  "type": "text",
+                  "description": "Optional language override: 'am' (default) or 'en'. Inherited from session if omitted."
                 }
               ]
             },
@@ -1100,7 +1126,7 @@
                 "respond"
               ]
             },
-            "description": "Uploads recorded Amharic voice. Transcribes via Addis AI STT and extracts structured items."
+            "description": "Uploads recorded voice (Amharic or English). Transcribes via selected ASR engine ('addisai', 'sahara', 'gemini') and extracts structured clinical items."
           }
         },
         {
@@ -1201,6 +1227,18 @@
                   "key": "audio",
                   "type": "file",
                   "description": "Re-recorded audio correction"
+                },
+                {
+                  "key": "model",
+                  "value": "addisai",
+                  "type": "text",
+                  "description": "Voice model engine: 'addisai' (default), 'sahara', or 'gemini'"
+                },
+                {
+                  "key": "language",
+                  "value": "am",
+                  "type": "text",
+                  "description": "Language: 'am' (default) or 'en'"
                 }
               ]
             },
@@ -1217,7 +1255,7 @@
                 "voice-correct"
               ]
             },
-            "description": "Re-records voice for a specific pending item."
+            "description": "Re-records voice for a specific pending item using selected model and language."
           }
         },
         {
@@ -1592,7 +1630,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/tts?text=%E1%8B%9B%E1%88%AC%20%E1%8C%BD%E1%8A%91%20%E1%88%AB%E1%88% his%20%E1%88%9D%E1%89%B3%E1%89%A5%20%E1%89%B0%E1%88%B0%E1%88%9D%E1%89%B6%E1%8B%8E%E1%89%B3%E1%88%8D%3F",
+              "raw": "{{baseUrl}}/tts?text=%E1%8B%9B%E1%88%AC%20%E1%8C%BD%E1%8A%91%20%E1%88%AB%E1%88%9D%E1%89%B3%E1%89%A5%20%E1%89%B0%E1%88%B0%E1%88%9D%E1%89%B6%E1%8B%8E%E1%89%B3%E1%88%8D%3F&model=addisai&language=am",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1603,10 +1641,20 @@
                 {
                   "key": "text",
                   "value": "ዛሬ ጽኑ ራስ ምታት ተሰምቶዎታል?"
+                },
+                {
+                  "key": "model",
+                  "value": "addisai",
+                  "description": "Voice engine: 'addisai' (default), 'sahara' (Intron Voice), 'elevenlabs' (English only), or 'deepgram' (English only)"
+                },
+                {
+                  "key": "language",
+                  "value": "am",
+                  "description": "Language: 'am' (default, Amharic) or 'en' (English)"
                 }
               ]
             },
-            "description": "Synthesizes Amharic text into an MP3 audio stream via GET request."
+            "description": "Synthesizes Amharic or English text into an MP3 audio stream via GET request with model and language parameters."
           }
         },
         {
@@ -1624,7 +1672,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"\\u12a5\\u1295\\u12f0\\u121d\\u1295 \\u12a0\\u12f0\\u1229\\u1363 \\u12db\\u122c \\u1324\\u1293\\u12ce \\u12a5\\u1295\\u12f4\\u1275 \\u1290\\u12cd?\",\n  \"voice_id\": null\n}"
+              "raw": "{\n  \"text\": \"Did you experience any severe headache or abdominal pain today?\",\n  \"voice_id\": null,\n  \"model\": \"sahara\",\n  \"language\": \"en\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/tts",
@@ -1635,7 +1683,7 @@
                 "tts"
               ]
             },
-            "description": "Synthesizes Amharic text into an MP3 audio stream via POST JSON payload."
+            "description": "Synthesizes Amharic or English text into an MP3 audio stream via POST JSON payload with model and language choice."
           }
         }
       ]

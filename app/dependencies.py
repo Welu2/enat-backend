@@ -5,14 +5,15 @@ import os
 from urllib.parse import parse_qsl
 from uuid import UUID
 
-from fastapi import Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 
-from app.config import Settings
+from app.config import get_settings
 from app.core.security import decode_access_token
 from app.db.repositories.users import UserRepository
 
+settings = get_settings()
 TELEGRAM_BOT_TOKEN = getattr(
-    settings, "TELEGRAM_BOT_TOKEN", os.getenv("TELEGRAM_BOT_TOKEN", "")
+    settings, "telegram_bot_token", os.getenv("TELEGRAM_BOT_TOKEN", "")
 )
 
 

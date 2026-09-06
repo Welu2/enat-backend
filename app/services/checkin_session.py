@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from app.core.constants import CHECKIN_STAGES, STAGE_PROMPTS
+from app.core.constants import CHECKIN_STAGES, STAGE_PROMPTS, STAGE_PROMPTS_EN, get_stage_prompt
 from app.db.repositories.check_in_sessions import CheckInSessionRepository
 from app.db.repositories.check_ins import CheckInRepository
 from app.db.repositories.supplements import SupplementRepository
@@ -11,6 +11,7 @@ from app.services.addis_ai import AddisAIClient
 from app.services.anc_schedule import generate_checkin_summary_text
 from app.services.danger_signs import check_danger_sign
 from app.services.extraction import ExtractionService, build_tts_url, build_verification_phrase
+from app.services.speech import get_asr_client, normalize_language, normalize_voice_model
 from app.services.stage_audio import get_stage_audio_url
 
 
@@ -20,10 +21,9 @@ def _empty_draft_data() -> dict[str, Any]:
         "food_log": None,
         "supplement_check": None,
         "closing_mentions": [],
+        "language": "am",
     }
 
-
-from datetime import timezone
 
 def _parse_datetime(val: str | datetime) -> datetime:
     if isinstance(val, datetime):
@@ -44,31 +44,33 @@ class CheckInSessionService:
         self.extraction = ExtractionService()
 
     def _build_stage_order(self, user_id: UUID) -> list[CheckInStage]:
-        stages: list[CheckInStage] = ["symptoms"]
-        if not self.check_ins.has_food_logged_today(user_id):
-            stages.append("food")
+        stages: list[CheckInStage] = ["symptoms", "food"]
         if self.supplements.list_active(user_id) and not self.check_ins.has_supplement_logged_today(user_id):
             stages.append("supplement")
         stages.append("closing")
         return stages
 
-    def start_session(self, user_id: UUID) -> dict[str, Any]:
+    def start_session(self, user_id: UUID, language: str = "am") -> dict[str, Any]:
+        norm_lang = normalize_language(language)
         stage_order = self._build_stage_order(user_id)
+        draft = _empty_draft_data()
+        draft["language"] = norm_lang
         session = self.sessions.create(
             user_id,
             {
                 "current_stage": stage_order[0],
                 "stage_order": stage_order,
-                "draft_data": _empty_draft_data(),
+                "draft_data": draft,
                 "pending_items": [],
             },
         )
-        prompt = STAGE_PROMPTS[stage_order[0]]
+        prompt = get_stage_prompt(stage_order[0], language=norm_lang)
         return {
             "session_id": session["id"],
             "stage": stage_order[0],
             "question_prompt": prompt,
-            "question_audio_url": get_stage_audio_url(stage_order[0]),
+            "question_audio_url": get_stage_audio_url(stage_order[0], language=norm_lang),
+            "language": norm_lang,
         }
 
     async def respond(
@@ -78,11 +80,28 @@ class CheckInSessionService:
         audio_bytes: bytes,
         filename: str,
         content_type: str,
+        model: str = "addisai",
+        language: str | None = None,
     ) -> dict[str, Any]:
         session = self._get_active_session(user_id, session_id)
         stage = session["current_stage"]
-        transcript = await self.asr.transcribe(audio_bytes, filename, content_type)
-        pending_items = await self.extraction.extract(transcript, stage)
+        canonical_model = normalize_voice_model(model)
+
+        session_lang = (
+            normalize_language(language)
+            if language
+            else normalize_language(session.get("draft_data", {}).get("language"))
+        )
+
+        if canonical_model == "addisai" or (canonical_model in ("elevenlabs", "deepgram") and session_lang == "am"):
+            asr_client = self.asr
+            asr_lang = "am"
+        else:
+            asr_client = get_asr_client(canonical_model)
+            asr_lang = session_lang
+
+        transcript = await asr_client.transcribe(audio_bytes, filename, content_type, language=asr_lang)
+        pending_items = await self.extraction.extract(transcript, stage, language=session_lang)
 
         if stage == "supplement" and pending_items:
             active_supplements = self.supplements.list_active(user_id)
@@ -90,7 +109,9 @@ class CheckInSessionService:
                 raw_name = str(item.get("supplement_name") or "").lower().strip()
                 if raw_name in ("unknown", "other", "none", "") and active_supplements:
                     item["supplement_name"] = active_supplements[0]["name"]
-                    item["verification_phrase"] = build_verification_phrase(item, stage)
+                    item["verification_phrase"] = build_verification_phrase(item, stage, lang=session_lang)
+                    item["verification_phrase_am"] = build_verification_phrase(item, stage, lang="am")
+                    item["verification_phrase_en"] = build_verification_phrase(item, stage, lang="en")
 
         self.sessions.update(
             session_id,
@@ -164,7 +185,10 @@ class CheckInSessionService:
                         else:
                             matched_item["danger_sign"] = check_danger_sign(matched_item.get("category"))
                     if "verification_phrase" not in v_corrected:
-                        matched_item["verification_phrase"] = build_verification_phrase(matched_item, stage)
+                        session_lang = normalize_language(draft_data.get("language"))
+                        matched_item["verification_phrase"] = build_verification_phrase(matched_item, stage, lang=session_lang)
+                        matched_item["verification_phrase_am"] = build_verification_phrase(matched_item, stage, lang="am")
+                        matched_item["verification_phrase_en"] = build_verification_phrase(matched_item, stage, lang="en")
 
                 matched_item["confirmed"] = v_confirmed
                 if v_confirmed:
@@ -194,11 +218,19 @@ class CheckInSessionService:
         audio_bytes: bytes,
         filename: str,
         content_type: str,
+        model: str = "addisai",
+        language: str | None = None,
     ) -> dict[str, Any]:
         """Record voice again specifically to correct a single pending item."""
         session = self._get_active_session(user_id, session_id)
         stage = session["current_stage"]
         pending_items = list(session.get("pending_items") or [])
+
+        session_lang = (
+            normalize_language(language)
+            if language
+            else normalize_language(session.get("draft_data", {}).get("language"))
+        )
 
         # Support fallback when user passes session_id instead of item_id on single-item stages
         target_item_id = item_id
@@ -206,8 +238,16 @@ class CheckInSessionService:
         if not matching_items and len(pending_items) == 1:
             target_item_id = pending_items[0].get("item_id", item_id)
 
-        correction_transcript = await self.asr.transcribe(audio_bytes, filename, content_type)
-        extracted_corrections = await self.extraction.extract(correction_transcript, stage)
+        canonical_model = normalize_voice_model(model)
+        if canonical_model == "addisai" or (canonical_model in ("elevenlabs", "deepgram") and session_lang == "am"):
+            asr_client = self.asr
+            asr_lang = "am"
+        else:
+            asr_client = get_asr_client(canonical_model)
+            asr_lang = session_lang
+
+        correction_transcript = await asr_client.transcribe(audio_bytes, filename, content_type, language=asr_lang)
+        extracted_corrections = await self.extraction.extract(correction_transcript, stage, language=session_lang)
 
         item_updated = False
         if extracted_corrections:
@@ -224,7 +264,9 @@ class CheckInSessionService:
                             item["danger_sign"] = False
                         else:
                             item["danger_sign"] = check_danger_sign(item.get("category"))
-                    item["verification_phrase"] = build_verification_phrase(item, stage)
+                    item["verification_phrase"] = build_verification_phrase(item, stage, lang=session_lang)
+                    item["verification_phrase_am"] = build_verification_phrase(item, stage, lang="am")
+                    item["verification_phrase_en"] = build_verification_phrase(item, stage, lang="en")
                     item["correction_transcript"] = correction_transcript
                     item_updated = True
                     break
@@ -294,14 +336,15 @@ class CheckInSessionService:
             user_id,
             {"current_stage": next_stage, "pending_items": []},
         )
-        next_prompt = STAGE_PROMPTS[next_stage]
+        session_lang = normalize_language(session.get("draft_data", {}).get("language"))
+        next_prompt = get_stage_prompt(next_stage, language=session_lang)
         return {
             "session_id": session_id,
             "stage_completed": current_stage,
             "danger_sign_triggered": False,
             "next_stage": next_stage,
             "question_prompt": next_prompt,
-            "question_audio_url": get_stage_audio_url(next_stage),
+            "question_audio_url": get_stage_audio_url(next_stage, language=session_lang),
             "session_completed": False,
             "check_in_id": None,
         }

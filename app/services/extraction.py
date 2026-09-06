@@ -9,141 +9,289 @@ from app.core.constants import DANGER_SIGN_CATEGORIES, NUTRITION_TOPICS
 from app.models.checkin import CheckInStage
 from app.services.addis_ai import AddisAIClient
 from app.services.danger_signs import check_danger_sign
+from app.services.gemini import GeminiTranscribeClient
 from app.services.nutrition import classify_ethiopian_food
 
 
-class SymptomsExtraction(BaseModel):
-    symptoms: list[dict[str, Any]]
+class SymptomItem(BaseModel):
+    raw_text: str
+    category: str | None = None
+    duration: dict[str, Any] | None = None
+    severity: str = "unspecified"
 
 
-class FoodExtraction(BaseModel):
-    food_log: dict[str, Any] | None = None
+class FoodItem(BaseModel):
+    raw_text: str
 
 
-class SupplementExtraction(BaseModel):
-    supplement_check: dict[str, Any] | None = None
+class SupplementItem(BaseModel):
+    raw_text: str
+    supplement_name: str = "unknown"
+    taken_today: bool = False
 
 
-class ClosingExtraction(BaseModel):
-    closing_mentions: list[dict[str, Any]]
+class ClosingItem(BaseModel):
+    raw_text: str
+    topic: str = "general_closing"
 
 
+# Stage to per-item Pydantic schema mapping
 STAGE_SCHEMAS: dict[CheckInStage, type[BaseModel]] = {
-    "symptoms": SymptomsExtraction,
-    "food": FoodExtraction,
-    "supplement": SupplementExtraction,
-    "closing": ClosingExtraction,
+    "symptoms": SymptomItem,
+    "food": FoodItem,
+    "supplement": SupplementItem,
+    "closing": ClosingItem,
 }
 
 # Canonical danger-sign category values the LLM must choose from.
-# Injected verbatim into every stage's system prompt so the model cannot
-# hallucinate a non-existent category that would silently bypass the rules engine.
 _CATEGORY_LIST = ", ".join(sorted(DANGER_SIGN_CATEGORIES))
 
-# Human-readable display labels for the per-item verification read-back phrase.
-_CATEGORY_DISPLAY: dict[str, str] = {
-    "vaginal_bleeding": "vaginal bleeding",
-    "swelling_hands_face": "swelling of hands or face",
-    "blurred_vision": "blurred vision",
-    "severe_abdominal_pain": "severe abdominal pain",
-    "fluid_leakage": "fluid leakage",
-    "severe_headache": "severe headache",
-    "persistent_nausea_vomiting": "persistent nausea or vomiting",
-    "high_fever": "high fever",
-    "convulsions_loss_of_consciousness": "convulsions or loss of consciousness",
-    "difficulty_breathing": "difficulty breathing",
-    "severe_weakness_or_backache": "severe weakness or backache",
-    "abnormal_fetal_movement": "abnormal fetal movement",
+# Explicit JSON tool definitions per check-in stage
+# NOTE: danger_sign is strictly omitted from tool schemas — it is computed in Python via check_danger_sign()
+STAGE_TOOLS: dict[CheckInStage, dict[str, Any]] = {
+    "symptoms": {
+        "type": "function",
+        "function": {
+            "name": "log_symptom",
+            "description": "Log an extracted maternal symptom. Call this tool once for each distinct symptom reported by the patient.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "raw_text": {
+                        "type": "string",
+                        "description": "The exact patient words describing the symptom, preserved without translation or paraphrasing.",
+                    },
+                    "category": {
+                        "type": ["string", "null"],
+                        "enum": [*sorted(DANGER_SIGN_CATEGORIES), None],
+                        "description": (
+                            "One of the 12 danger sign categories if the patient reports a severe, persistent, "
+                            "or alarming danger sign, or null if this is a mild, non-danger, or general pregnancy symptom."
+                        ),
+                    },
+                    "duration": {
+                        "type": "object",
+                        "description": "Duration of the symptom.",
+                        "properties": {
+                            "value": {
+                                "type": ["integer", "null"],
+                                "description": "Numeric duration value or null if unspecified.",
+                            },
+                            "unit": {
+                                "type": "string",
+                                "enum": ["hour", "day", "week", "month", "unspecified"],
+                                "description": "Time unit for the duration.",
+                            },
+                        },
+                        "required": ["unit"],
+                        "additionalProperties": False,
+                    },
+                    "severity": {
+                        "type": "string",
+                        "enum": ["mild", "moderate", "severe", "unspecified"],
+                        "description": "Symptom severity level.",
+                    },
+                },
+                "required": ["raw_text"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "food": {
+        "type": "function",
+        "function": {
+            "name": "log_food_entry",
+            "description": "Log an extracted food or beverage item consumed by the patient. Call this tool once per distinct food item or combination.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "raw_text": {
+                        "type": "string",
+                        "description": "The exact patient words describing the food or drink consumed.",
+                    },
+                },
+                "required": ["raw_text"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "supplement": {
+        "type": "function",
+        "function": {
+            "name": "log_supplement_check",
+            "description": "Log whether the patient took their prescribed daily prenatal supplements.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "raw_text": {
+                        "type": "string",
+                        "description": "The exact patient words regarding supplement intake.",
+                    },
+                    "supplement_name": {
+                        "type": "string",
+                        "description": "Name of the supplement (e.g. iron, folic_acid, calcium, multivitamin, or unknown).",
+                    },
+                    "taken_today": {
+                        "type": "boolean",
+                        "description": "True if the patient took the supplement today, False if not taken or skipped.",
+                    },
+                },
+                "required": ["raw_text", "supplement_name", "taken_today"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "closing": {
+        "type": "function",
+        "function": {
+            "name": "log_closing_mention",
+            "description": "Log a question, concern, or general closing remark from the patient.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "raw_text": {
+                        "type": "string",
+                        "description": "The exact patient words describing questions, concerns, or closing statement.",
+                    },
+                    "topic": {
+                        "type": "string",
+                        "enum": [*NUTRITION_TOPICS, "general_closing"],
+                        "description": "Topic category of the question/statement or general_closing.",
+                    },
+                },
+                "required": ["raw_text"],
+                "additionalProperties": False,
+            },
+        },
+    },
 }
 
 FEW_SHOT_PROMPTS: dict[CheckInStage, str] = {
-    "symptoms": f"""\
+    "symptoms": """\
 Examples:
 
 Input: "ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው"
-Output: {{"symptoms":[{{"raw_text":"ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው","category":"severe_headache","duration":{{"value":2,"unit":"day"}},"severity":"severe"}}]}}
+Tool Call: log_symptom(raw_text="ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው", category="severe_headache", duration={"value":2,"unit":"day"}, severity="severe")
 
 Input: "ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ"
-Output: {{"symptoms":[{{"raw_text":"ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ","category":null,"duration":{{"value":null,"unit":"unspecified"}},"severity":"mild"}}]}}
+Tool Call: log_symptom(raw_text="ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ", category=null, duration={"value":null,"unit":"unspecified"}, severity="mild")
 
 Input: "ማቅለሽለሽ ማስታወክ እና ትኩሳት አለብኝ"
-Output: {{"symptoms":[
-  {{"raw_text":"ማቅለሽለሽ እና ማስታወክ","category":"persistent_nausea_vomiting","duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}},
-  {{"raw_text":"ትኩሳት","category":"high_fever","duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}}
-]}}
+Tool Calls:
+log_symptom(raw_text="ማቅለሽለሽ እና ማስታወክ", category="persistent_nausea_vomiting", duration={"value":null,"unit":"unspecified"}, severity="unspecified")
+log_symptom(raw_text="ትኩሳት", category="high_fever", duration={"value":null,"unit":"unspecified"}, severity="unspecified")
 
 Input: "እግሮቼ ለሶስት ቀናት እያበጡ ነው እና ከባድ ራስ ምታት አለኝ"
-Output: {{"symptoms":[
-  {{"raw_text":"እግሮቼ ለሶስት ቀናት እያበጡ ነው","category":"swelling_hands_face","duration":{{"value":3,"unit":"day"}},"severity":"moderate"}},
-  {{"raw_text":"ከባድ ራስ ምታት አለኝ","category":"severe_headache","duration":{{"value":null,"unit":"unspecified"}},"severity":"severe"}}
-]}}
+Tool Calls:
+log_symptom(raw_text="ከባድ ራስ ምታት አለኝ", category="severe_headache", duration={"value":null,"unit":"unspecified"}, severity="severe")
 
-Input: "አይ ምንም ይለኛል"
-Output: {{"symptoms":[{{"raw_text":"አይ ምንም ይለኛል","category":null,"duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}}]}}
+Input: "Severe headache አለብኝ"
+Tool Call: log_symptom(raw_text="Severe headache አለብኝ", category="severe_headache", duration={"value":null,"unit":"unspecified"}, severity="severe")
 
-Input: "ምንም ምልክት የለም ደህና ነኝ"
-Output: {{"symptoms":[{{"raw_text":"ምንም ምልክት የለም ደህና ነኝ","category":null,"duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}}]}}
+Input: "ትንሽ dizziness ይሰማኛል ግን ደህና ነኝ"
+Tool Call: log_symptom(raw_text="ትንሽ dizziness ይሰማኛል ግን ደህና ነኝ", category=null, duration={"value":null,"unit":"unspecified"}, severity="mild")
+
+Input: "I have had a severe headache and high fever for 2 days"
+Tool Calls:
+log_symptom(raw_text="severe headache", category="severe_headache", duration={"value":2,"unit":"day"}, severity="severe")
+log_symptom(raw_text="high fever", category="high_fever", duration={"value":2,"unit":"day"}, severity="severe")
+
+Input: "I feel completely fine, no symptoms today"
+Tool Call: log_symptom(raw_text="I feel completely fine, no symptoms today", category=null, duration={"value":null,"unit":"unspecified"}, severity="unspecified")
 """,
     "food": """\
 Examples:
 
 Input: "ዛሬ ጤፍ እና ስንዴ በላሁ"
-Output: {"food_log":{"raw_text":"ዛሬ ጤፍ እና ስንዴ በላሁ"}}
+Tool Call: log_food_entry(raw_text="ዛሬ ጤፍ እና ስንዴ በላሁ")
 
 Input: "ዛሬ ጤፍ፣ ስንዴ እና ወተት ጠጣሁ"
-Output: {"food_log":[{"raw_text":"ጤፍ እና ስንዴ"},{"raw_text":"ወተት"}]}
+Tool Calls:
+log_food_entry(raw_text="ጤፍ እና ስንዴ")
+log_food_entry(raw_text="ወተት")
+
+Input: "ዛሬ bread እና ሻይ ጠጣሁ"
+Tool Call: log_food_entry(raw_text="ዛሬ bread እና ሻይ ጠጣሁ")
 
 Input: "ምንም አልበላሁም"
-Output: {"food_log":{"raw_text":"ምንም አልበላሁም"}}
+Tool Call: log_food_entry(raw_text="ምንም አልበላሁም")
+
+Input: "Today I ate eggs, bread and drank milk"
+Tool Calls:
+log_food_entry(raw_text="eggs and bread")
+log_food_entry(raw_text="milk")
+
+Input: "I haven't eaten anything today"
+Tool Call: log_food_entry(raw_text="I haven't eaten anything today")
 """,
     "supplement": """\
 Examples:
 
 Input: "የብረት tablet ዛሬ ወስጄያለሁ"
-Output: {"supplement_check":{"raw_text":"የብረት tablet ዛሬ ወስጄያለሁ","supplement_name":"iron","taken_today":true}}
+Tool Call: log_supplement_check(raw_text="የብረት tablet ዛሬ ወስጄያለሁ", supplement_name="iron", taken_today=true)
 
 Input: "ዛሬ አልወስድኩም"
-Output: {"supplement_check":{"raw_text":"ዛሬ አልወስድኩም","supplement_name":"unknown","taken_today":false}}
+Tool Call: log_supplement_check(raw_text="ዛሬ አልወስድኩም", supplement_name="unknown", taken_today=false)
 
 Input: "አይ ምንም አልወሰድኩም"
-Output: {"supplement_check":{"raw_text":"አይ ምንም አልወሰድኩም","supplement_name":"unknown","taken_today":false}}
+Tool Call: log_supplement_check(raw_text="አይ ምንም አልወሰድኩም", supplement_name="unknown", taken_today=false)
+
+Input: "Yes, I took my iron tablet today"
+Tool Call: log_supplement_check(raw_text="iron tablet", supplement_name="iron", taken_today=true)
+
+Input: "No, I missed my supplement today"
+Tool Call: log_supplement_check(raw_text="missed my supplement today", supplement_name="unknown", taken_today=false)
 """,
     "closing": """\
 Examples:
 
 Input: "በወራት ላይ ጡት መክተት እፈልጋለሁ"
-Output: {"closing_mentions":[{"raw_text":"በወራት ላይ ጡት መክተት እፈልጋለሁ","topic":"breastfeeding_intent"}]}
+Tool Call: log_closing_mention(raw_text="በወራት ላይ ጡት መክተት እፈልጋለሁ", topic="breastfeeding_intent")
 
 Input: "በወራት ላይ ጡት መክተት እፈልጋለሁ እና ስለ አመጋገብ ማወቅ እፈልጋለሁ"
-Output: {"closing_mentions":[
-  {"raw_text":"በወራት ላይ ጡት መክተት እፈልጋለሁ","topic":"breastfeeding_intent"},
-  {"raw_text":"ስለ አመጋገብ ማወቅ እፈልጋለሁ","topic":"dietary_intake"}
-]}
+Tool Calls:
+log_closing_mention(raw_text="በወራት ላይ ጡት መክተት እፈልጋለሁ", topic="breastfeeding_intent")
+log_closing_mention(raw_text="ስለ አመጋገብ ማወቅ እፈልጋለሁ", topic="dietary_intake")
+
+Input: "ስለ ultrasound appointment ማወቅ እፈልጋለሁ"
+Tool Call: log_closing_mention(raw_text="ስለ ultrasound appointment ማወቅ እፈልጋለሁ", topic="general_closing")
 
 Input: "ምንም ጥያቄ የለኝም"
-Output: {"closing_mentions":[{"raw_text":"ምንም ጥያቄ የለኝም","topic":"general_closing"}]}
+Tool Call: log_closing_mention(raw_text="ምንም ጥያቄ የለኝም", topic="general_closing")
 
 Input: "ሌላ ነገር የለም"
-Output: {"closing_mentions":[{"raw_text":"ሌላ ነገር የለም","topic":"general_closing"}]}
+Tool Call: log_closing_mention(raw_text="ሌላ ነገር የለም", topic="general_closing")
+
+Input: "When should I come for my next ultrasound check?"
+Tool Call: log_closing_mention(raw_text="When should I come for my next ultrasound check?", topic="general_closing")
+
+Input: "I have no other questions, thank you"
+Tool Call: log_closing_mention(raw_text="I have no other questions, thank you", topic="general_closing")
 """,
 }
 
 # Base system prompt shared across all stages.
 _SYSTEM_PROMPT_BASE = (
-    "You are a structured data extractor for a maternal health intake system in Ethiopia. "
-    "Your ONLY job is to convert Amharic speech transcripts into the requested JSON schema — "
-    "you must NEVER give medical advice, diagnosis, or any clinical opinion. "
-    "Return ONLY valid JSON with no markdown fences, no explanation, no commentary outside the JSON. "
+    "You are a structured clinical data extractor for a maternal health intake system. "
+    "Your ONLY job is to extract structured items from patient speech transcripts (which may be in Amharic, English, or mixed code-switching) by invoking the provided tools. "
+    "You must NEVER give medical advice, diagnosis, or any clinical opinion. "
     "CRITICAL MULTI-ITEM MANDATE: If the transcript contains multiple distinct symptoms, multiple food items, "
-    "or multiple questions/topics, YOU MUST EXTRACT EVERY SINGLE ITEM as a separate object in the output JSON list! "
-    "For example, if the transcript mentions nausea, vomiting, AND fever, extract 'nausea/vomiting' AND 'fever' "
-    "as separate objects in the symptoms array. NEVER drop items or extract only one item when multiple items are spoken. "
+    "or multiple questions/topics, YOU MUST CALL THE RELEVANT TOOL SEPARATELY FOR EVERY SINGLE ITEM! "
+    "For example, if the transcript mentions nausea, vomiting, AND fever, call log_symptom for 'nausea and vomiting' "
+    "AND call log_symptom for 'fever'. NEVER drop items or extract only one item when multiple items are spoken. "
     "CRITICAL MANDATORY TRANSCRIPTION CAPTURE: Every spoken utterance from the patient is valuable clinical information. "
     "If the patient states they feel fine, have no symptoms, ate nothing, or have no questions (e.g. 'አይ ምንም ይለኛል', "
-    "'ምንም ምልክት የለም', 'ደህና ነኝ', 'ምንም አልበላሁም', 'ምንም የለም'), YOU MUST STILL EXTRACT IT into the output JSON with "
-    "raw_text set to their exact words, category set to null, and duration set to null. NEVER return an empty array if the patient gave a spoken response. "
+    "'ምንም ምልክት የለም', 'ደህና ነኝ', 'ምንም አልበላሁም', 'ምንም የለም', 'I feel fine', 'no symptoms'), YOU MUST STILL CALL THE TOOL with raw_text set to "
+    "their exact words, category set to null, duration set to null, and severity set to 'unspecified'. "
+    "NEVER return without calling the tool if the patient gave a spoken response. "
     "Preserve the raw_text field exactly as it appears in the transcript — do not translate or paraphrase. "
-    "Never set the danger_sign field — that is computed deterministically by the rules engine, not by you. "
+    "CODE-SWITCHING AWARENESS: Patients frequently mix Amharic and English within a single sentence, "
+    "especially for medical/clinical terms (e.g., 'tablet', 'BP', 'ultrasound', 'ANC card', 'HIV', drug names, numbers). "
+    "This is normal, natural Ethiopian speech, not a transcription error to fix. When it occurs: preserve the exact "
+    "mixed-language wording in raw_text without translating the English portion into Amharic or vice versa. "
+    "Use the English term as a meaningful signal for classification (e.g., 'tablet' near 'የብረት' signals an iron "
+    "supplement), but never alter how the words actually appeared in speech. "
+    "Never attempt to output or set the danger_sign field — that is computed deterministically by the rules engine, not by you. "
     "duration must be an object: {\"value\": <integer or null>, \"unit\": \"hour|day|week|month|unspecified\"}. "
     "If no duration is mentioned, use {\"value\": null, \"unit\": \"unspecified\"}. "
     "severity must be exactly one of: mild, moderate, severe, unspecified. "
@@ -259,12 +407,42 @@ def _supplement_display(name: str | None) -> str:
     return _SUPPLEMENT_NAME_AMHARIC.get(clean_name, str(name))
 
 
-def build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
-    """Build the human-readable Amharic read-back string shown to the patient for confirmation.
+def build_verification_phrase(item: dict[str, Any], stage: CheckInStage, lang: str = "am") -> str:
+    """Build the human-readable read-back string shown to the patient for confirmation in Amharic or English."""
+    clean_lang = "en" if str(lang).lower().startswith("en") else "am"
 
-    PRD §4 step 6: "App reads back each extracted item individually for
-    confirmation ('swelling, 3 days — is that correct?')."
-    """
+    if clean_lang == "en":
+        if stage == "symptoms":
+            raw_text = (item.get("raw_text") or "").strip()
+            category = item.get("category")
+            severity = str(item.get("severity") or "").lower()
+            duration_str = _format_duration(item.get("duration"), lang="en")
+
+            if category and category not in ("no_danger_sign_detected", "normal_or_expected", "none", "null") and severity != "mild" and item.get("danger_sign", True):
+                display = _category_display(category, lang="en")
+            else:
+                display = raw_text if raw_text else "symptom"
+
+            parts: list[str] = [display]
+            if duration_str and duration_str not in display:
+                parts.append(duration_str)
+            return f"{', '.join(parts)} — is that correct?"
+
+        if stage == "food":
+            raw = (item.get("raw_text") or "").strip()
+            return f"Food eaten: {raw} — is that correct?"
+
+        if stage == "supplement":
+            raw_name = item.get("supplement_name") or "supplement"
+            display_name = raw_name.replace("_", " ").title()
+            taken = "taken today" if item.get("taken_today") else "not taken today"
+            return f"{display_name} {taken} — is that correct?"
+
+        # closing
+        raw = (item.get("raw_text") or "").strip()
+        return f"Mentioned: {raw} — is that correct?"
+
+    # Default Amharic
     if stage == "symptoms":
         raw_text = (item.get("raw_text") or "").strip()
         category = item.get("category")
@@ -304,16 +482,53 @@ _build_verification_phrase = build_verification_phrase
 from urllib.parse import quote
 
 
-def build_tts_url(text: str) -> str:
-    return f"/tts?text={quote(text)}"
+def build_tts_url(text: str, language: str = "am") -> str:
+    encoded = quote(text)
+    clean_lang = str(language).lower().strip()
+    is_en = clean_lang.startswith("en") or (not any("\u1200" <= c <= "\u137F" for c in text))
+    if is_en:
+        return f"/tts?text={encoded}&language=en"
+    return f"/tts?text={encoded}"
+
+
+def _detect_symptom_category_from_text(text: str) -> tuple[str | None, str]:
+    """Heuristic fallback for emergency danger sign recognition if LLM fails completely."""
+    low = text.lower()
+    if any(k in low for k in ["headache", "ራስ ምታት"]):
+        if any(k in low for k in ["severe", "bad", "terrible", "ከባድ", "ጽኑ", "ከፍተኛ"]):
+            return "severe_headache", "severe"
+        return "severe_headache", "moderate"
+    if any(k in low for k in ["bleeding", "bleed", "ደም መፍሰስ", "ደም"]):
+        return "vaginal_bleeding", "severe"
+    if any(k in low for k in ["blurred vision", "blurry vision", "blurry", "ብዥታ", "የእይታ ብዥታ"]):
+        return "blurred_vision", "severe"
+    if any(k in low for k in ["abdominal pain", "belly pain", "stomach pain", "የሆድ ህመም"]):
+        return "severe_abdominal_pain", "severe"
+    if any(k in low for k in ["fluid leak", "water break", "fluid leakage", "ፈሳሽ መፍሰስ"]):
+        return "fluid_leakage", "severe"
+    if any(k in low for k in ["high fever", "ከፍተኛ ትኩሳት", "ትኩሳት"]):
+        return "high_fever", "severe"
+    if any(k in low for k in ["swelling", "swollen", "እብጠት"]):
+        return "swelling_hands_face", "severe"
+    if any(k in low for k in ["difficulty breathing", "shortness of breath", "የመተንፈስ ችግር"]):
+        return "difficulty_breathing", "severe"
+    if any(k in low for k in ["convulsion", "seizure", "መንቀጥቀጥ"]):
+        return "convulsions_loss_of_consciousness", "severe"
+    if any(k in low for k in ["vomiting", "nausea", "ማስታወክ", "ማቅለሽለሽ"]):
+        return "persistent_nausea_vomiting", "moderate"
+    if any(k in low for k in ["fetal movement", "baby moving", "የፅንስ እንቅስቃሴ"]):
+        return "abnormal_fetal_movement", "severe"
+    return None, "unspecified"
 
 
 def _attach_item_ids(
     stage: CheckInStage,
     data: dict[str, Any],
     transcript: str = "",
+    language: str = "am",
 ) -> list[dict[str, Any]]:
     clean_transcript = transcript.strip()
+    is_english = str(language).lower().startswith("en") or (clean_transcript and not any("\u1200" <= c <= "\u137F" for c in clean_transcript))
 
     if stage == "symptoms":
         items = []
@@ -334,26 +549,36 @@ def _attach_item_ids(
 
             item["category_display"] = _category_display(item["category"], lang="am")
             item["category_display_en"] = _category_display(item["category"], lang="en")
-            phrase = build_verification_phrase(item, stage)
+            phrase_am = build_verification_phrase(item, stage, lang="am")
+            phrase_en = build_verification_phrase(item, stage, lang="en")
+            item["verification_phrase_am"] = phrase_am
+            item["verification_phrase_en"] = phrase_en
+            phrase = phrase_en if is_english else phrase_am
             item["verification_phrase"] = phrase
-            item["verification_audio_url"] = build_tts_url(phrase)
+            item["verification_audio_url"] = build_tts_url(phrase, language="en" if is_english else "am")
             items.append(item)
 
         if not items and clean_transcript and "symptoms" not in data:
+            fallback_category, fallback_severity = _detect_symptom_category_from_text(clean_transcript)
+            is_danger = check_danger_sign(fallback_category) if fallback_category else False
             fallback = {
                 "item_id": str(uuid4()),
                 "raw_text": clean_transcript,
-                "category": None,
-                "category_display": _category_display(None, lang="am"),
-                "category_display_en": _category_display(None, lang="en"),
+                "category": fallback_category,
+                "category_display": _category_display(fallback_category, lang="am"),
+                "category_display_en": _category_display(fallback_category, lang="en"),
                 "duration": {"value": None, "unit": "unspecified"},
-                "severity": "unspecified",
-                "danger_sign": False,
+                "severity": fallback_severity,
+                "danger_sign": is_danger,
                 "confirmed": False,
             }
-            phrase = build_verification_phrase(fallback, stage)
+            phrase_am = build_verification_phrase(fallback, stage, lang="am")
+            phrase_en = build_verification_phrase(fallback, stage, lang="en")
+            fallback["verification_phrase_am"] = phrase_am
+            fallback["verification_phrase_en"] = phrase_en
+            phrase = phrase_en if is_english else phrase_am
             fallback["verification_phrase"] = phrase
-            fallback["verification_audio_url"] = build_tts_url(phrase)
+            fallback["verification_audio_url"] = build_tts_url(phrase, language="en" if is_english else "am")
             items.append(fallback)
 
         return items
@@ -371,7 +596,11 @@ def _attach_item_ids(
                 item["confirmed"] = False
                 raw = item.get("raw_text") or ""
                 item["food_groups"] = classify_ethiopian_food(raw)
-                phrase = build_verification_phrase(item, stage)
+                phrase_am = build_verification_phrase(item, stage, lang="am")
+                phrase_en = build_verification_phrase(item, stage, lang="en")
+                item["verification_phrase_am"] = phrase_am
+                item["verification_phrase_en"] = phrase_en
+                phrase = phrase_en if is_english else phrase_am
                 item["verification_phrase"] = phrase
                 item["verification_audio_url"] = build_tts_url(phrase)
                 items.append(item)
@@ -383,7 +612,11 @@ def _attach_item_ids(
                 "food_groups": classify_ethiopian_food(clean_transcript),
                 "confirmed": False,
             }
-            phrase = build_verification_phrase(fallback, stage)
+            phrase_am = build_verification_phrase(fallback, stage, lang="am")
+            phrase_en = build_verification_phrase(fallback, stage, lang="en")
+            fallback["verification_phrase_am"] = phrase_am
+            fallback["verification_phrase_en"] = phrase_en
+            phrase = phrase_en if is_english else phrase_am
             fallback["verification_phrase"] = phrase
             fallback["verification_audio_url"] = build_tts_url(phrase)
             items.append(fallback)
@@ -397,13 +630,23 @@ def _attach_item_ids(
             item = dict(supplement)
             item["item_id"] = str(uuid4())
             item["confirmed"] = False
-            phrase = _build_verification_phrase(item, stage)
+            phrase_am = build_verification_phrase(item, stage, lang="am")
+            phrase_en = build_verification_phrase(item, stage, lang="en")
+            item["verification_phrase_am"] = phrase_am
+            item["verification_phrase_en"] = phrase_en
+            phrase = phrase_en if is_english else phrase_am
             item["verification_phrase"] = phrase
             item["verification_audio_url"] = build_tts_url(phrase)
             items.append(item)
 
         if not items and clean_transcript and "supplement_check" not in data:
-            taken = "አዎ" in clean_transcript or ("ወሰድ" in clean_transcript and "አልወሰድ" not in clean_transcript)
+            low = clean_transcript.lower()
+            taken = (
+                "አዎ" in clean_transcript
+                or ("ወሰድ" in clean_transcript and "አልወሰድ" not in clean_transcript)
+                or "yes" in low
+                or ("took" in low and "not" not in low and "didn't" not in low and "miss" not in low)
+            )
             fallback = {
                 "item_id": str(uuid4()),
                 "supplement_name": "unknown",
@@ -411,7 +654,11 @@ def _attach_item_ids(
                 "raw_text": clean_transcript,
                 "confirmed": False,
             }
-            phrase = _build_verification_phrase(fallback, stage)
+            phrase_am = build_verification_phrase(fallback, stage, lang="am")
+            phrase_en = build_verification_phrase(fallback, stage, lang="en")
+            fallback["verification_phrase_am"] = phrase_am
+            fallback["verification_phrase_en"] = phrase_en
+            phrase = phrase_en if is_english else phrase_am
             fallback["verification_phrase"] = phrase
             fallback["verification_audio_url"] = build_tts_url(phrase)
             items.append(fallback)
@@ -424,7 +671,11 @@ def _attach_item_ids(
         item = dict(mention)
         item["item_id"] = str(uuid4())
         item["confirmed"] = False
-        phrase = _build_verification_phrase(item, stage)
+        phrase_am = build_verification_phrase(item, stage, lang="am")
+        phrase_en = build_verification_phrase(item, stage, lang="en")
+        item["verification_phrase_am"] = phrase_am
+        item["verification_phrase_en"] = phrase_en
+        phrase = phrase_en if is_english else phrase_am
         item["verification_phrase"] = phrase
         item["verification_audio_url"] = build_tts_url(phrase)
         items.append(item)
@@ -436,7 +687,11 @@ def _attach_item_ids(
             "topic": "general_closing",
             "confirmed": False,
         }
-        phrase = _build_verification_phrase(fallback, stage)
+        phrase_am = build_verification_phrase(fallback, stage, lang="am")
+        phrase_en = build_verification_phrase(fallback, stage, lang="en")
+        fallback["verification_phrase_am"] = phrase_am
+        fallback["verification_phrase_en"] = phrase_en
+        phrase = phrase_en if is_english else phrase_am
         fallback["verification_phrase"] = phrase
         fallback["verification_audio_url"] = build_tts_url(phrase)
         items.append(fallback)
@@ -446,22 +701,66 @@ def _attach_item_ids(
 
 class ExtractionService:
     def __init__(self) -> None:
-        self.client = AddisAIClient()
+        self.addis_client = AddisAIClient()
+        self.gemini_client = GeminiTranscribeClient()
+        self.client = self.addis_client
 
-    async def extract(self, transcript: str, stage: CheckInStage) -> list[dict[str, Any]]:
-        schema = STAGE_SCHEMAS[stage]
+    async def extract(
+        self,
+        transcript: str,
+        stage: CheckInStage,
+        language: str = "am",
+    ) -> list[dict[str, Any]]:
+        tool_def = STAGE_TOOLS[stage]
+        expected_tool_name = tool_def["function"]["name"]
+        item_schema = STAGE_SCHEMAS[stage]
+
         system_prompt = _build_system_prompt(stage)
-        user_prompt = f"Stage: {stage}\nTranscript:\n{transcript}"
+        user_prompt = f"Stage: {stage}\nPatient Transcript:\n{transcript}"
+
+        has_geez = any("\u1200" <= c <= "\u137F" for c in transcript)
+        is_english = str(language).lower().startswith("en") or (not has_geez and bool(transcript.strip()))
+        primary_client = self.gemini_client if is_english else self.addis_client
+        fallback_client = self.addis_client if is_english else self.gemini_client
 
         last_error: Exception | None = None
-        for _ in range(3):
+        for attempt in range(3):
+            current_client = primary_client if attempt < 2 else fallback_client
             try:
-                raw = await self.client.generate_json(system_prompt, user_prompt)
-                parsed = _parse_json_response(raw)
-                validated = schema.model_validate(parsed)
-                return _attach_item_ids(stage, validated.model_dump(), transcript=transcript)
-            except (json.JSONDecodeError, ValidationError, ValueError) as exc:
+                raw_tool_calls = await current_client.generate_with_tools(
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    tools=[tool_def],
+                    tool_choice="auto",
+                )
+
+                validated_items: list[dict[str, Any]] = []
+                for tool_name, args in raw_tool_calls:
+                    if tool_name == expected_tool_name:
+                        item = item_schema.model_validate(args).model_dump()
+                        validated_items.append(item)
+
+                if not validated_items and transcript.strip() and attempt < 2:
+                    # Current client returned no structured tool calls for a non-empty patient transcript;
+                    # failover to fallback client on next attempt.
+                    continue
+
+                # Assemble into stage data dict matching _attach_item_ids expectations
+                stage_data: dict[str, Any] = {}
+                if stage == "symptoms":
+                    stage_data = {"symptoms": validated_items} if validated_items else {}
+                elif stage == "food":
+                    stage_data = {"food_log": validated_items} if validated_items else {}
+                elif stage == "supplement":
+                    stage_data = {"supplement_check": validated_items[0]} if validated_items else {}
+                elif stage == "closing":
+                    stage_data = {"closing_mentions": validated_items} if validated_items else {}
+
+                return _attach_item_ids(stage, stage_data, transcript=transcript, language="en" if is_english else "am")
+            except (ValidationError, ValueError, RuntimeError, Exception) as exc:
                 last_error = exc
                 continue
 
-        raise ValueError(f"Failed to extract valid JSON for stage {stage}") from last_error
+        # If all attempts failed or returned no tools, safely fall back to attached raw item with heuristic detection
+        return _attach_item_ids(stage, {}, transcript=transcript, language="en" if is_english else "am")
+

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 
 from app.dependencies import get_current_user_id
@@ -30,14 +30,17 @@ def list_checkin_prompts() -> list[dict]:
 
 
 @router.get("/prompts/{stage}/audio")
-async def get_stage_prompt_audio(stage: str) -> Response:
-    """Streams the stored/pre-cached Amharic question prompt audio for the given stage (zero redundant TTS calls)."""
+async def get_stage_prompt_audio(
+    stage: str,
+    language: str = Query("am", description="Language of prompt audio: 'am' (Amharic) or 'en' (English)"),
+) -> Response:
+    """Streams the stored/pre-cached question prompt audio for the given stage and language."""
     try:
-        audio_bytes = await get_or_synthesize_stage_audio(stage)
+        audio_bytes = await get_or_synthesize_stage_audio(stage, language=language)
         return Response(
             content=audio_bytes,
             media_type="audio/mpeg",
-            headers={"Content-Disposition": f"inline; filename=prompt_{stage}.mp3"},
+            headers={"Content-Disposition": f"inline; filename=prompt_{stage}_{language}.mp3"},
         )
     except ValueError as exc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
@@ -46,8 +49,11 @@ async def get_stage_prompt_audio(stage: str) -> Response:
 
 
 @router.post("/start", response_model=CheckInStartResponse)
-def start_checkin(user_id: UUID = Depends(get_current_user_id)) -> CheckInStartResponse:
-    result = CheckInSessionService().start_session(user_id)
+def start_checkin(
+    language: str = Query("am", description="Preferred language for check-in session: 'am' or 'en'"),
+    user_id: UUID = Depends(get_current_user_id),
+) -> CheckInStartResponse:
+    result = CheckInSessionService().start_session(user_id, language=language)
     return CheckInStartResponse(**result)
 
 
@@ -55,8 +61,14 @@ def start_checkin(user_id: UUID = Depends(get_current_user_id)) -> CheckInStartR
 async def respond_to_checkin(
     session_id: UUID,
     audio: UploadFile = File(...),
+    model: str = Form("addisai"),
+    model_query: str | None = Query(None, alias="model"),
+    language: str | None = Form(None),
+    language_query: str | None = Query(None, alias="language"),
     user_id: UUID = Depends(get_current_user_id),
 ) -> CheckInRespondResponse:
+    selected_model = model_query or model or "addisai"
+    selected_language = language_query or language
     audio_bytes = await audio.read()
     try:
         result = await CheckInSessionService().respond(
@@ -65,6 +77,8 @@ async def respond_to_checkin(
             audio_bytes,
             audio.filename or "audio.webm",
             audio.content_type or "audio/webm",
+            model=selected_model,
+            language=selected_language,
         )
     except ValueError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
@@ -97,8 +111,14 @@ async def voice_correct_item(
     session_id: UUID,
     item_id: str,
     audio: UploadFile = File(...),
+    model: str = Form("addisai"),
+    model_query: str | None = Query(None, alias="model"),
+    language: str | None = Form(None),
+    language_query: str | None = Query(None, alias="language"),
     user_id: UUID = Depends(get_current_user_id),
 ) -> VoiceCorrectItemResponse:
+    selected_model = model_query or model or "addisai"
+    selected_language = language_query or language
     audio_bytes = await audio.read()
     try:
         result = await CheckInSessionService().voice_correct_item(
@@ -108,6 +128,8 @@ async def voice_correct_item(
             audio_bytes,
             audio.filename or "correction.webm",
             audio.content_type or "audio/webm",
+            model=selected_model,
+            language=selected_language,
         )
     except ValueError as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc

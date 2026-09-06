@@ -10,12 +10,23 @@ class AddisAIClient:
     def __init__(self) -> None:
         self.settings = get_settings()
 
-    async def transcribe(self, audio_bytes: bytes, filename: str, content_type: str) -> str:
-        """Send audio to Addis AI STT and return the Amharic transcript string."""
+    async def transcribe(
+        self,
+        audio_bytes: bytes,
+        filename: str = "audio.wav",
+        content_type: str = "audio/wav",
+        language: str = "am",
+        **kwargs: Any,
+    ) -> str:
+        """Send audio to Addis AI STT and return the transcript string.
+
+        Addis AI STT supports Amharic ('am') and Afaan Oromo ('om').
+        """
         url = f"{self.settings.addis_api_base_url}/api/v2/stt"
         headers = {"x-api-key": self.settings.addis_api_key}
+        clean_lang = "om" if str(language).lower().startswith("om") else "am"
         # target_language / language_code tells the ASR which language to decode.
-        request_data = json.dumps({"language_code": "am"})
+        request_data = json.dumps({"language_code": clean_lang})
 
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
@@ -96,7 +107,102 @@ class AddisAIClient:
                             return message[k]
         return ""
 
-    async def synthesize_speech(self, text: str, voice_id: str | None = None) -> bytes:
+    async def generate_with_tools(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        tools: list[dict[str, Any]],
+        tool_choice: str | dict[str, Any] = "auto",
+        temperature: float = 0.1,
+        target_language: str = "am",
+    ) -> list[tuple[str, dict[str, Any]]]:
+        """Call Addis AI endpoint with function tools and return list of (tool_name, parsed_args) tuples."""
+        url = f"{self.settings.addis_api_base_url}/api/v1/chat_generate"
+        headers = {
+            "x-api-key": self.settings.addis_api_key,
+            "Content-Type": "application/json",
+        }
+        body = {
+            "prompt": user_prompt,
+            "system": system_prompt,
+            "target_language": target_language,
+            "tools": tools,
+            "tool_choice": tool_choice,
+            "generation_config": {
+                "temperature": temperature,
+                "maxOutputTokens": 2048,
+            },
+        }
+
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(url, headers=headers, json=body)
+            response.raise_for_status()
+            payload = response.json()
+
+        return self._extract_tool_calls(payload)
+
+    @staticmethod
+    def _extract_tool_calls(payload: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+        """Extract and parse tool calls from diverse response structures into (name, arguments_dict)."""
+        raw_calls: list[Any] = []
+
+        # 1. OpenAI-style choices format: choices[0].message.tool_calls
+        if "choices" in payload and isinstance(payload["choices"], list) and payload["choices"]:
+            choice = payload["choices"][0]
+            if isinstance(choice, dict):
+                msg = choice.get("message") or choice
+                if isinstance(msg, dict) and "tool_calls" in msg and isinstance(msg["tool_calls"], list):
+                    raw_calls = msg["tool_calls"]
+
+        # 2. Native chat_generate envelope format: data.tool_calls
+        if not raw_calls and "data" in payload and isinstance(payload["data"], dict):
+            if "tool_calls" in payload["data"] and isinstance(payload["data"]["tool_calls"], list):
+                raw_calls = payload["data"]["tool_calls"]
+
+        # 3. Top-level tool_calls
+        if not raw_calls and "tool_calls" in payload and isinstance(payload["tool_calls"], list):
+            raw_calls = payload["tool_calls"]
+
+        results: list[tuple[str, dict[str, Any]]] = []
+        for call in raw_calls:
+            if not isinstance(call, dict):
+                continue
+            name = ""
+            raw_arguments: Any = {}
+
+            if "function" in call and isinstance(call["function"], dict):
+                name = call["function"].get("name", "")
+                raw_arguments = call["function"].get("arguments", {})
+            else:
+                name = call.get("name", "")
+                raw_arguments = call.get("arguments", call.get("parameters", {}))
+
+            if not name:
+                continue
+
+            # Arguments can be JSON string or pre-parsed dict
+            if isinstance(raw_arguments, str):
+                try:
+                    parsed_args = json.loads(raw_arguments)
+                except Exception:
+                    parsed_args = {}
+            elif isinstance(raw_arguments, dict):
+                parsed_args = raw_arguments
+            else:
+                parsed_args = {}
+
+            if isinstance(parsed_args, dict):
+                results.append((name, parsed_args))
+
+        return results
+
+    async def synthesize_speech(
+        self,
+        text: str,
+        voice_id: str | None = None,
+        language: str = "am",
+        **kwargs: Any,
+    ) -> bytes:
         """Synthesize Amharic text into audio bytes (MP3) via TTS with robust fallback."""
         clean_text = text.strip()
         if not clean_text:

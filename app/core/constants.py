@@ -62,3 +62,29 @@ STAGE_PROMPTS = {
     "supplement": CHECKIN_STAGE_METADATA["supplement"]["prompt_am"],
     "closing": CHECKIN_STAGE_METADATA["closing"]["prompt_am"],
 }
+
+STAGE_PROMPTS_EN = {
+    "symptoms": CHECKIN_STAGE_METADATA["symptoms"]["prompt_en"],
+    "food": CHECKIN_STAGE_METADATA["food"]["prompt_en"],
+    "supplement": CHECKIN_STAGE_METADATA["supplement"]["prompt_en"],
+    "closing": CHECKIN_STAGE_METADATA["closing"]["prompt_en"],
+}
+
+
+def get_stage_prompt(stage: str, language: str = "am") -> str:
+    """Return the question prompt for a stage in the requested language ('am' or 'en')."""
+    clean_stage = stage.lower().strip()
+    clean_lang = (language or "am").lower().strip()
+    if clean_lang in ("en", "english", "en-us"):
+        return STAGE_PROMPTS_EN.get(clean_stage, STAGE_PROMPTS.get(clean_stage, ""))
+    return STAGE_PROMPTS.get(clean_stage, "")
+
+
+def get_stage_category(stage: str, language: str = "am") -> str:
+    """Return the display category name for a stage in the requested language."""
+    clean_stage = stage.lower().strip()
+    clean_lang = (language or "am").lower().strip()
+    meta = CHECKIN_STAGE_METADATA.get(clean_stage, {})
+    if clean_lang in ("en", "english", "en-us"):
+        return meta.get("category_en", clean_stage)
+    return meta.get("category_am", clean_stage)

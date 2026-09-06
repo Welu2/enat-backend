@@ -44,6 +44,7 @@ class CheckInStartResponse(BaseModel):
     stage: CheckInStage
     question_prompt: str
     question_audio_url: str | None = None
+    language: str = "am"
 
 
 class CheckInRespondResponse(BaseModel):
