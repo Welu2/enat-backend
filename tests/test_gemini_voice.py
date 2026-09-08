@@ -1,4 +1,5 @@
-﻿import pytest
+import json
+import pytest
 from unittest.mock import patch, MagicMock
 import httpx
 
@@ -34,129 +35,86 @@ async def test_gemini_transcribe_missing_api_key():
 
 
 @pytest.mark.asyncio
-async def test_gemini_transcribe_primary_interactions_flow():
+async def test_gemini_transcribe_amharic_success():
     client = GeminiTranscribeClient()
 
     async def mock_handler(request: httpx.Request) -> httpx.Response:
         url_str = str(request.url)
-        if "/upload/v1beta/files" in url_str:
-            return httpx.Response(
-                200,
-                headers={"x-goog-upload-url": "https://upload.test/session-123"},
-                json={"file": {}},
-            )
-        elif "https://upload.test/session-123" in url_str:
-            return httpx.Response(
-                200,
-                json={
-                    "file": {
-                        "name": "files/sample123",
-                        "uri": "https://generativelanguage.googleapis.com/v1beta/files/sample123",
-                    }
-                },
-            )
-        elif "/v1beta/interactions" in url_str:
-            return httpx.Response(
-                200,
-                json={
-                    "status": "completed",
-                    "steps": [
-                        {
-                            "id": "step_001",
-                            "type": "model_output",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": "ከፍተኛ ራስ ምታት አለብኝ",
-                                }
-                            ],
+        assert "models/gemini-3.5-transcribe:generateContent" in url_str
+        assert "key=test_gemini_key" in url_str
+        body = json.loads(request.content)
+        parts = body["contents"][0]["parts"]
+        assert "Amharic" in parts[0]["text"]
+        assert parts[1]["inline_data"]["mime_type"] == "audio/wav"
+        return httpx.Response(
+            200,
+            json={
+                "candidates": [
+                    {
+                        "content": {
+                            "parts": [
+                                {"text": "ከፍተኛ ራስ ምታት አለብኝ"}
+                            ]
                         }
-                    ],
-                },
-            )
-        elif "/v1beta/files/sample123" in url_str:
-            return httpx.Response(200, json={"status": "deleted"})
-        return httpx.Response(404)
+                    }
+                ]
+            },
+        )
 
     transport = httpx.MockTransport(mock_handler)
 
     with patch.object(client.settings, "gemini_api_key", "test_gemini_key"):
         with patch("httpx.AsyncClient", return_value=httpx.AsyncClient(transport=transport)):
-            result = await client.transcribe(b"audio-bytes-123", "sample.wav", "audio/wav")
+            result = await client.transcribe(
+                b"audio-bytes-123", "sample.wav", "audio/wav", language="am", model="gemini-3.5-transcribe"
+            )
             assert result == "ከፍተኛ ራስ ምታት አለብኝ"
 
 
 @pytest.mark.asyncio
-async def test_gemini_transcribe_output_text_field():
+async def test_gemini_transcribe_english_success():
     client = GeminiTranscribeClient()
 
     async def mock_handler(request: httpx.Request) -> httpx.Response:
         url_str = str(request.url)
-        if "/upload/v1beta/files" in url_str:
-            return httpx.Response(
-                200,
-                headers={"x-goog-upload-url": "https://upload.test/session-456"},
-                json={"file": {}},
-            )
-        elif "https://upload.test/session-456" in url_str:
-            return httpx.Response(
-                200,
-                json={
-                    "file": {
-                        "name": "files/sample456",
-                        "uri": "https://generativelanguage.googleapis.com/v1beta/files/sample456",
+        assert ":generateContent" in url_str
+        body = json.loads(request.content)
+        parts = body["contents"][0]["parts"]
+        assert "English" in parts[0]["text"]
+        return httpx.Response(
+            200,
+            json={
+                "candidates": [
+                    {
+                        "content": {
+                            "parts": [
+                                {"text": "I have severe headache"}
+                            ]
+                        }
                     }
-                },
-            )
-        elif "/v1beta/interactions" in url_str:
-            return httpx.Response(
-                200,
-                json={
-                    "status": "completed",
-                    "output_text": "ደህና ነኝ ምንም ህመም የለም",
-                },
-            )
-        elif "/v1beta/files/sample456" in url_str:
-            return httpx.Response(200, json={"status": "deleted"})
-        return httpx.Response(404)
+                ]
+            },
+        )
 
     transport = httpx.MockTransport(mock_handler)
 
     with patch.object(client.settings, "gemini_api_key", "test_gemini_key"):
         with patch("httpx.AsyncClient", return_value=httpx.AsyncClient(transport=transport)):
-            result = await client.transcribe(b"audio-bytes-456", "sample.wav", "audio/wav")
-            assert result == "ደህና ነኝ ምንም ህመም የለም"
+            result = await client.transcribe(b"audio-bytes-english", "sample.wav", "audio/wav", language="en")
+            assert result == "I have severe headache"
 
 
 @pytest.mark.asyncio
-async def test_gemini_transcribe_fallback_to_generate_content():
+async def test_gemini_transcribe_error_handling():
     client = GeminiTranscribeClient()
 
     async def mock_handler(request: httpx.Request) -> httpx.Response:
-        url_str = str(request.url)
-        if "/upload/v1beta/files" in url_str:
-            # Files API fails
-            return httpx.Response(500, text="Internal Files API error")
-        elif "generateContent" in url_str:
-            return httpx.Response(
-                200,
-                json={
-                    "candidates": [
-                        {
-                            "content": {
-                                "parts": [
-                                    {"text": "የደም መፍሰስ አጋጥሞኛል"}
-                                ]
-                            }
-                        }
-                    ]
-                },
-            )
-        return httpx.Response(404)
+        return httpx.Response(429, text='{"error": {"code": 429, "message": "Resource exhausted"}}')
 
     transport = httpx.MockTransport(mock_handler)
 
     with patch.object(client.settings, "gemini_api_key", "test_gemini_key"):
         with patch("httpx.AsyncClient", return_value=httpx.AsyncClient(transport=transport)):
-            result = await client.transcribe(b"audio-bytes-fallback", "sample.wav", "audio/wav")
-            assert result == "የደም መፍሰስ አጋጥሞኛል"
+            with pytest.raises(RuntimeError, match="Gemini Transcribe request failed"):
+                await client.transcribe(b"audio-bytes", "sample.wav", "audio/wav")
+

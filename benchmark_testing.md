@@ -25,6 +25,9 @@ ADDIS_API_KEY=your_addis_ai_api_key_here
 ADDIS_API_BASE_URL=https://api.addisassistant.com
 
 GEMINI_API_KEY=your_gemini_api_key_here
+# Optional Gemini model choice (default: gemini-2.5-flash)
+# If you hit 429 quota limits, rotate to: gemini-2.0-flash, gemini-1.5-flash, or gemini-1.5-flash-8b
+GEMINI_TRANSCRIBE_MODEL=gemini-2.5-flash
 
 DEEPGRAM_API_KEY=your_deepgram_api_key_here
 ```

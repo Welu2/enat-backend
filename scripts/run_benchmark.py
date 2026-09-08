@@ -7,6 +7,7 @@ persists results incrementally after each file, and supports resuming.
 
 import argparse
 import json
+from datetime import datetime, timezone
 import os
 from pathlib import Path
 import re
@@ -53,14 +54,23 @@ def run_benchmark(
     voices_dir: str | Path = "enat_voices",
     output_file: str | Path | None = None,
     endpoint_url: str = "http://localhost:8000/dev/benchmark-stt",
-    delay: float = 2.0,
+    delay: float = 3.5,
     resume: bool = True,
     timeout: float = 120.0,
+    gemini_model: str | None = None,
 ) -> dict[str, Any]:
     """Run sequential benchmark requests across a range of voice audio files."""
     voices_path = Path(voices_dir)
     lang_code = "en" if str(language).lower().startswith("en") else "am"
     effective_stage = stage.strip() or "symptoms"
+
+    effective_gemini_model = (gemini_model or "").strip()
+    if not effective_gemini_model:
+        try:
+            from dotenv import dotenv_values
+            effective_gemini_model = (dotenv_values(".env").get("GEMINI_TRANSCRIBE_MODEL") or "").strip()
+        except Exception:
+            pass
 
     if output_file:
         out_path = Path(output_file)
@@ -109,6 +119,8 @@ def run_benchmark(
     print(f"• Stage Label   : {effective_stage}")
     print(f"• Voices Dir    : {voices_path.resolve()}")
     print(f"• Endpoint URL  : {endpoint_url}")
+    if effective_gemini_model:
+        print(f"• Gemini Model  : {effective_gemini_model}")
     print(f"• Rate Delay    : {delay}s between requests")
     print(f"• Output Path   : {out_path.resolve()}")
     print("=" * 65)
@@ -126,51 +138,44 @@ def run_benchmark(
                 "end_index": end,
                 "total_requested": total_requested,
                 "completed_count": fully_complete,
-                "last_updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "last_updated": datetime.now(timezone.utc).isoformat(),
             },
             "results": results,
         }
 
     client = httpx.Client(timeout=timeout)
-
     try:
         for idx, voice_num in enumerate(target_indices, start=1):
             voice_id = f"v{voice_num}"
             filename = f"{voice_id}.wav"
+
+            # Check nested folder v{n}/v{n}.wav then flat fallback
             audio_file = voices_path / voice_id / filename
+            if not audio_file.exists():
+                audio_file = voices_path / filename
 
             if not audio_file.exists():
-                alt_file = voices_path / filename
-                if alt_file.exists():
-                    audio_file = alt_file
-                else:
-                    print(
-                        f"[{idx}/{total_requested}] [SKIP] Audio file not found: {audio_file}"
-                    )
-                    continue
+                print(f"[{idx}/{total_requested}] [MISSING] File '{audio_file}' not found. Skipping.")
+                continue
 
             existing_entry = results_by_filename.get(filename)
             models_to_run = expected_models
-
-            if existing_entry:
+            if existing_entry and resume:
                 existing_models = existing_entry.get("models", {})
-                # Find models that are missing or encountered an error
-                models_to_run = [
+                failed_or_missing = [
                     m for m in expected_models
-                    if m not in existing_models or "error" in existing_models.get(m, {})
+                    if m not in existing_models or "error" in existing_models[m]
                 ]
-                if not models_to_run:
-                    print(
-                        f"[{idx}/{total_requested}] [SKIP] '{filename}' all models succeeded."
-                    )
+                if not failed_or_missing:
+                    print(f"[{idx}/{total_requested}] [SKIP] '{filename}' already fully completed.")
                     continue
-                else:
-                    retry_str = ", ".join(models_to_run)
-                    print(
-                        f"[{idx}/{total_requested}] [RETRY] '{filename}' ({audio_file.stat().st_size / 1024:.1f} KB) - retrying {retry_str}...",
-                        end="",
-                        flush=True,
-                    )
+                models_to_run = failed_or_missing
+                retry_str = ", ".join(models_to_run)
+                print(
+                    f"[{idx}/{total_requested}] [RETRY] '{filename}' ({audio_file.stat().st_size / 1024:.1f} KB) - retrying {retry_str}...",
+                    end="",
+                    flush=True,
+                )
             else:
                 print(
                     f"[{idx}/{total_requested}] Benchmarking '{filename}' ({audio_file.stat().st_size / 1024:.1f} KB)...",
@@ -186,6 +191,8 @@ def run_benchmark(
                     "language_code": lang_code,
                     "stage_label": effective_stage,
                 }
+                if effective_gemini_model:
+                    req_data["gemini_model"] = effective_gemini_model
                 # Pass targeted models if only a subset needs retrying
                 if models_to_run != expected_models:
                     req_data["models"] = ",".join(models_to_run)
@@ -363,8 +370,8 @@ def main() -> None:
         "--delay",
         "-d",
         type=float,
-        default=2.0,
-        help="Delay in seconds between requests to prevent API rate-limiting. Default: 2.0.",
+        default=3.5,
+        help="Delay in seconds between requests to prevent API rate-limiting. Default: 3.5.",
     )
     parser.add_argument(
         "--resume",
@@ -385,6 +392,12 @@ def main() -> None:
         default=120.0,
         help="HTTP request timeout in seconds per audio file. Default: 120.0.",
     )
+    parser.add_argument(
+        "--gemini-model",
+        type=str,
+        default=None,
+        help="Explicit Gemini model to use (e.g. 'gemini-3.5-flash', 'gemini-3.5-transcribe'). Defaults to GEMINI_TRANSCRIBE_MODEL in .env.",
+    )
 
     args = parser.parse_args()
 
@@ -403,6 +416,7 @@ def main() -> None:
         delay=args.delay,
         resume=args.resume,
         timeout=args.timeout,
+        gemini_model=args.gemini_model,
     )
 
 

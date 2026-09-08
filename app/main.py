@@ -105,6 +105,8 @@ if settings.enable_dev_routes:
         stage_query: str | None = Query(None, alias="stage_label"),
         models: str | None = Form(None),
         models_query: str | None = Query(None, alias="models"),
+        gemini_model: str | None = Form(None),
+        gemini_model_query: str | None = Query(None, alias="gemini_model"),
     ) -> dict[str, Any]:
         """Dev-only benchmark endpoint comparing STT models sequentially on an audio batch.
 
@@ -154,11 +156,19 @@ if settings.enable_dev_routes:
             for model_name, client in model_pipeline:
                 start_time = time.perf_counter()
                 try:
+                    kwargs: dict[str, Any] = {
+                        "filename": filename,
+                        "content_type": content_type,
+                        "language": clean_lang,
+                    }
+                    if model_name == "gemini":
+                        effective_gemini_model = gemini_model_query or gemini_model
+                        if effective_gemini_model:
+                            kwargs["model"] = effective_gemini_model
+
                     transcript = await client.transcribe(
                         audio_bytes,
-                        filename=filename,
-                        content_type=content_type,
-                        language=clean_lang,
+                        **kwargs,
                     )
                     latency = round(time.perf_counter() - start_time, 2)
                     models_output[model_name] = {

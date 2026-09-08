@@ -21,10 +21,10 @@ class GeminiTranscribeClient:
         content_type: str = "audio/wav",
         language_code: str = "am-ET",
         language: str | None = None,
+        model: str | None = None,
     ) -> str:
-        """Transcribe speech audio into Amharic or English text using Gemini 3.5 Transcribe."""
+        """Transcribe speech audio into Amharic or English text using Google Gemini generateContent."""
         is_english = str(language or language_code).lower().startswith("en")
-        effective_lang_code = "en-US" if is_english else "am-ET"
         api_key = self.settings.gemini_api_key.strip()
         if not api_key:
             raise RuntimeError(
@@ -32,126 +32,25 @@ class GeminiTranscribeClient:
             )
 
         base_url = self.settings.gemini_api_base_url.rstrip("/")
-        model_name = self.settings.gemini_transcribe_model.strip() or "gemini-3.5-transcribe"
-        uploaded_file_name: str | None = None
+        
+        # Model resolution: explicit param -> live .env on disk -> os.environ -> cached settings
+        model_name = (model or "").strip()
+        if not model_name:
+            try:
+                from dotenv import dotenv_values
+                model_name = (dotenv_values(".env").get("GEMINI_TRANSCRIBE_MODEL") or "").strip()
+            except Exception:
+                model_name = ""
+        if not model_name:
+            model_name = (os.getenv("GEMINI_TRANSCRIBE_MODEL") or getattr(self.settings, "gemini_transcribe_model", "") or "").strip()
+        if not model_name:
+            model_name = "gemini-3.5-transcribe"
 
-        try:
-            async with httpx.AsyncClient(timeout=90.0) as client:
-                try:
-                    # 1. Initiate resumable upload via Google AI Files API
-                    init_url = f"{base_url}/upload/v1beta/files?key={api_key}"
-                    init_headers = {
-                        "X-Goog-Upload-Protocol": "resumable",
-                        "X-Goog-Upload-Command": "start",
-                        "X-Goog-Upload-Header-Content-Length": str(len(audio_bytes)),
-                        "X-Goog-Upload-Header-Content-Type": content_type,
-                        "Content-Type": "application/json",
-                    }
-                    init_resp = await client.post(
-                        init_url,
-                        headers=init_headers,
-                        json={"file": {"display_name": filename}},
-                    )
-                    init_resp.raise_for_status()
+        logger.info(f"[Gemini Transcribe] Transcribing audio with model: {model_name}")
 
-                    upload_url = init_resp.headers.get("x-goog-upload-url") or init_resp.headers.get(
-                        "X-Goog-Upload-URL"
-                    )
-                    if not upload_url:
-                        raise RuntimeError(f"Files API did not return an upload URL: {init_resp.text}")
-
-                    # 2. Upload actual audio bytes
-                    upload_headers = {
-                        "Content-Length": str(len(audio_bytes)),
-                        "X-Goog-Upload-Offset": "0",
-                        "X-Goog-Upload-Command": "upload, finalize",
-                    }
-                    upload_resp = await client.post(
-                        upload_url,
-                        headers=upload_headers,
-                        content=audio_bytes,
-                    )
-                    upload_resp.raise_for_status()
-                    file_info = upload_resp.json().get("file") or {}
-                    file_uri = file_info.get("uri")
-                    uploaded_file_name = file_info.get("name")
-
-                    if not file_uri:
-                        raise RuntimeError(f"Files API response missing uri: {upload_resp.text}")
-
-                    # 3. Call Interactions API for gemini-3.5-transcribe
-                    interactions_url = f"{base_url}/v1beta/interactions?key={api_key}"
-                    interaction_payload = {
-                        "model": model_name,
-                        "input": [
-                            {
-                                "type": "audio",
-                                "uri": file_uri,
-                                "mime_type": content_type,
-                            }
-                        ],
-                        "generation_config": {
-                            "transcription_config": {
-                                "language_codes": [effective_lang_code],
-                            }
-                        },
-                    }
-
-                    interaction_resp = await client.post(
-                        interactions_url,
-                        json=interaction_payload,
-                    )
-                    interaction_resp.raise_for_status()
-                    data = interaction_resp.json()
-
-                    # 4. Extract transcript from Interactions response
-                    if "output_text" in data and data["output_text"]:
-                        return str(data["output_text"]).strip()
-
-                    for step in data.get("steps", []):
-                        for item in step.get("content", []):
-                            if item.get("type") == "text" and item.get("text"):
-                                return str(item["text"]).strip()
-
-                    raise RuntimeError(f"No transcript text found in Interactions response: {data}")
-
-                except Exception as primary_exc:
-                    logger.warning(
-                        f"[Gemini Transcribe] Primary Interactions API flow failed ({primary_exc}). "
-                        f"Attempting generateContent fallback..."
-                    )
-                    return await self._fallback_generate_content(
-                        client, base_url, api_key, audio_bytes, content_type, is_english=is_english
-                    )
-
-                finally:
-                    # Clean up uploaded file if name is known
-                    if uploaded_file_name:
-                        try:
-                            delete_url = f"{base_url}/v1beta/{uploaded_file_name}?key={api_key}"
-                            await client.delete(delete_url)
-                        except Exception as del_err:
-                            logger.debug(f"[Gemini Transcribe] Failed to delete temporary file: {del_err}")
-
-        except httpx.HTTPStatusError as exc:
-            logger.error(f"[Gemini Transcribe] HTTP error {exc.response.status_code}: {exc.response.text}")
-            raise RuntimeError(f"Gemini Transcribe request failed: {exc.response.text}") from exc
-        except Exception as exc:
-            logger.error(f"[Gemini Transcribe] Communication failure: {exc}", exc_info=True)
-            raise RuntimeError(f"Gemini Transcribe communication failure: {exc}") from exc
-
-    async def _fallback_generate_content(
-        self,
-        client: httpx.AsyncClient,
-        base_url: str,
-        api_key: str,
-        audio_bytes: bytes,
-        content_type: str,
-        is_english: bool = False,
-    ) -> str:
-        """Fallback to standard Gemini multimodal generateContent with inline base64 audio."""
         b64_audio = base64.b64encode(audio_bytes).decode("utf-8")
-        url = f"{base_url}/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        url = f"{base_url}/v1beta/models/{model_name}:generateContent?key={api_key}"
+
         if is_english:
             prompt_instruction = (
                 "Transcribe this audio verbatim in English. "
@@ -163,13 +62,12 @@ class GeminiTranscribeClient:
                 "Preserve any English medical or technical terms used (code-switching). "
                 "Return ONLY the raw transcription without explanations, quotes, or markdown."
             )
+
         payload = {
             "contents": [
                 {
                     "parts": [
-                        {
-                            "text": prompt_instruction
-                        },
+                        {"text": prompt_instruction},
                         {
                             "inline_data": {
                                 "mime_type": content_type,
@@ -180,19 +78,29 @@ class GeminiTranscribeClient:
                 }
             ]
         }
-        resp = await client.post(url, json=payload)
-        resp.raise_for_status()
-        data = resp.json()
+
+        try:
+            async with httpx.AsyncClient(timeout=90.0) as client:
+                resp = await client.post(url, json=payload)
+                resp.raise_for_status()
+                data = resp.json()
+        except httpx.HTTPStatusError as exc:
+            logger.error(f"[Gemini Transcribe] HTTP error {exc.response.status_code}: {exc.response.text}")
+            raise RuntimeError(f"Gemini Transcribe request failed: {exc.response.text}") from exc
+        except Exception as exc:
+            logger.error(f"[Gemini Transcribe] Communication failure: {exc}", exc_info=True)
+            raise RuntimeError(f"Gemini Transcribe communication failure: {exc}") from exc
+
         candidates = data.get("candidates") or []
         if not candidates:
-            raise RuntimeError(f"No candidates in fallback generateContent response: {data}")
+            raise RuntimeError(f"No candidates in generateContent response: {data}")
 
         parts = (candidates[0].get("content") or {}).get("parts") or []
         for part in parts:
             if "text" in part and part["text"]:
                 return str(part["text"]).strip()
 
-        raise RuntimeError(f"No text returned in fallback generateContent response: {data}")
+        raise RuntimeError(f"No text returned in generateContent response: {data}")
 
     async def generate_with_tools(
         self,
