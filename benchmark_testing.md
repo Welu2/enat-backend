@@ -209,32 +209,71 @@ curl -X POST "http://localhost:8000/dev/benchmark-stt" \
 
 ---
 
-## 7. Next Step: Calculating Accuracy (WER / CER)
+## 7. Evaluating Accuracy & Errors (`scripts/evaluate_stt.py`)
 
-Once you collect the benchmark output JSON files, feed the `hypothesis_text` values into an offline evaluation script using `jiwer`:
+A standalone, pure-Python evaluation script [`scripts/evaluate_stt.py`](scripts/evaluate_stt.py) is provided to calculate Total Words, Error Count, Word Error Rate (WER), Character Error Rate (CER), and visual word alignment with **zero external dependencies**.
 
-```python
-import json
-import jiwer
+### A. Quick Single Comparison (Direct from Benchmark JSON)
+Compare a specific audio file's model output from your test JSON against a reference transcript:
 
-# 1. Load benchmark hypotheses
-with open("benchmark_results_v1_v5_am.json", "r", encoding="utf-8") as f:
-    benchmark_data = json.load(f)
-
-# 2. Reference ground truth transcripts
-ground_truth = {
-    "v1.wav": "ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው",
-    # ...
-}
-
-# 3. Calculate Word Error Rate (WER) per model
-for item in benchmark_data["results"]:
-    filename = item["filename"]
-    ref = ground_truth.get(filename)
-    if not ref:
-        continue
-    for model_name, model_res in item["models"].items():
-        hyp = model_res.get("hypothesis_text", "")
-        wer = jiwer.wer(ref, hyp)
-        print(f"[{model_name}] {filename} WER: {wer:.2%}")
+```bash
+python scripts/evaluate_stt.py \
+  --results benchmark_results_v1_v5_am.json \
+  --file v2.wav \
+  --model gemini \
+  --ref "እረ ምንም የለም ራስ ምታትም ሆነ የወር አበባ ቁርጠት አልተሰማኝም ሰላም ነኝ"
 ```
+
+**Output:**
+```text
+=================================================================
+STT TRANSCRIPT EVALUATION REPORT
+=================================================================
+Reference  : እረ ምንም የለም ራስ ምታትም ሆነ የወር አበባ ቁርጠት አልተሰማኝም ሰላም ነኝ
+Hypothesis : እረ ምንም የለም ራስ ምታትም ሆነ የወር አበባ ቁርጠት አልተሰማኝም ሰላም ነኝ።
+-----------------------------------------------------------------
+• Total Words (Reference) : 12
+• Error Count (S + D + I) : 0
+    - Substitutions (S)   : 0
+    - Deletions     (D)   : 0
+    - Insertions    (I)   : 0
+• Word Error Rate (WER)   : 0.0%
+• Word Accuracy           : 100.0%
+• Character Error (CER)   : 0.0%
+-----------------------------------------------------------------
+WORD ALIGNMENT VISUALIZER:
+REF : እረ   ምንም   የለም   ራስ   ምታትም   ሆነ   የወር   አበባ   ቁርጠት   አልተሰማኝም   ሰላም   ነኝ  
+HYP : እረ   ምንም   የለም   ራስ   ምታትም   ሆነ   የወር   አበባ   ቁርጠት   አልተሰማኝም   ሰላም   ነኝ  
+EVAL: ✓    ✓     ✓     ✓    ✓      ✓    ✓     ✓     ✓      ✓         ✓     ✓   
+=================================================================
+```
+
+### B. Direct String Comparison
+```bash
+python scripts/evaluate_stt.py \
+  --ref "I have a severe headache" \
+  --hyp "I have severe headache"
+```
+
+### C. JSON Output (for Programmatic Processing)
+Add the `--json` flag to get a clean JSON object with all metrics:
+```bash
+python scripts/evaluate_stt.py --ref "..." --hyp "..." --json
+```
+
+### D. Batch Evaluation (All Models Across a Batch)
+Create a JSON file with ground truth mappings, e.g. `ground_truth.json`:
+```json
+{
+  "v1.wav": "አይ ምንም አልተሰማኝም ዛሬ በጣም ደህና ነኝ አመሰግናለሁ",
+  "v2.wav": "እረ ምንም የለም ራስ ምታትም ሆነ የወር አበባ ቁርጠት አልተሰማኝም ሰላም ነኝ"
+}
+```
+Run batch evaluation:
+```bash
+python scripts/evaluate_stt.py \
+  --results benchmark_results_v1_v5_am.json \
+  --ground-truth ground_truth.json
+```
+This prints a clean comparison table comparing **Sahara vs Addis AI vs Gemini** side-by-side with Word Error Rate, Character Error Rate, and Average Latency!
+
