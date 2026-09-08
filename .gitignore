@@ -53,7 +53,7 @@ Thumbs.db
 *.swp
 *.swo
 .vscode/
-
+/enat_voices
 /mlruns
 
 .coverage

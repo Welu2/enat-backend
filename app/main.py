@@ -9,6 +9,9 @@ from app.config import get_settings
 from app.services.speech import get_asr_client
 from app.services.reminders import ReminderService
 
+from typing import Any
+import time
+
 scheduler = BackgroundScheduler()
 
 
@@ -92,3 +95,79 @@ if settings.enable_dev_routes:
             audio.content_type or "audio/wav",
         )
         return {"transcript": transcript, "model": selected_model}
+
+    @app.post("/dev/benchmark-stt")
+    async def dev_benchmark_stt(
+        files: list[UploadFile] = File(...),
+        language_code: str | None = Form(None),
+        language_query: str | None = Query(None, alias="language_code"),
+        stage_label: str | None = Form(None),
+        stage_query: str | None = Query(None, alias="stage_label"),
+    ) -> dict[str, Any]:
+        """Dev-only benchmark endpoint comparing STT models sequentially on an audio batch.
+
+        - Amharic: Sahara, Addis AI, Gemini
+        - English: Sahara, Deepgram, Gemini
+        """
+        from app.services.addis_ai import AddisAIClient
+        from app.services.deepgram import DeepgramClient
+        from app.services.gemini import GeminiTranscribeClient
+        from app.services.sahara import SaharaVoiceClient
+
+        raw_lang = language_query or language_code or "am"
+        clean_lang = "en" if str(raw_lang).strip().lower().startswith("en") else "am"
+        effective_stage = (stage_query or stage_label or "").strip() or "symptoms"
+
+        sahara_client = SaharaVoiceClient()
+        gemini_client = GeminiTranscribeClient()
+
+        if clean_lang == "en":
+            deepgram_client = DeepgramClient()
+            model_pipeline = [
+                ("sahara", sahara_client),
+                ("deepgram", deepgram_client),
+                ("gemini", gemini_client),
+            ]
+        else:
+            addis_client = AddisAIClient()
+            model_pipeline = [
+                ("sahara", sahara_client),
+                ("addis_ai", addis_client),
+                ("gemini", gemini_client),
+            ]
+
+        results = []
+        for file in files:
+            filename = file.filename or "audio.wav"
+            content_type = file.content_type or "audio/wav"
+            audio_bytes = await file.read()
+
+            models_output: dict[str, Any] = {}
+            for model_name, client in model_pipeline:
+                start_time = time.perf_counter()
+                try:
+                    transcript = await client.transcribe(
+                        audio_bytes,
+                        filename=filename,
+                        content_type=content_type,
+                        language=clean_lang,
+                    )
+                    latency = round(time.perf_counter() - start_time, 2)
+                    models_output[model_name] = {
+                        "hypothesis_text": transcript,
+                        "latency_seconds": latency,
+                    }
+                except Exception as exc:
+                    latency = round(time.perf_counter() - start_time, 2)
+                    models_output[model_name] = {
+                        "error": str(exc),
+                        "latency_seconds": latency,
+                    }
+
+            results.append({
+                "filename": filename,
+                "stage_label": effective_stage,
+                "models": models_output,
+            })
+
+        return {"results": results}
