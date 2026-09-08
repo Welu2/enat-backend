@@ -103,6 +103,8 @@ if settings.enable_dev_routes:
         language_query: str | None = Query(None, alias="language_code"),
         stage_label: str | None = Form(None),
         stage_query: str | None = Query(None, alias="stage_label"),
+        models: str | None = Form(None),
+        models_query: str | None = Query(None, alias="models"),
     ) -> dict[str, Any]:
         """Dev-only benchmark endpoint comparing STT models sequentially on an audio batch.
 
@@ -135,6 +137,12 @@ if settings.enable_dev_routes:
                 ("addis_ai", addis_client),
                 ("gemini", gemini_client),
             ]
+
+        raw_models = models_query or models
+        if raw_models:
+            requested = [m.strip().lower() for m in raw_models.split(",") if m.strip()]
+            if requested:
+                model_pipeline = [p for p in model_pipeline if p[0] in requested]
 
         results = []
         for file in files:

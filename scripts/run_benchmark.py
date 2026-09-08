@@ -69,23 +69,35 @@ def run_benchmark(
 
     # Load existing results if resuming
     results: list[dict[str, Any]] = []
-    completed_filenames: set[str] = set()
+    results_by_filename: dict[str, dict[str, Any]] = {}
+
+    expected_models = (
+        ["sahara", "addis_ai", "gemini"]
+        if lang_code == "am"
+        else ["sahara", "deepgram", "gemini"]
+    )
 
     if resume and out_path.exists():
         try:
             with open(out_path, "r", encoding="utf-8") as f:
                 existing_data = json.load(f)
                 results = existing_data.get("results", [])
-                completed_filenames = {
-                    r.get("filename") for r in results if r.get("filename")
-                }
+                for r in results:
+                    fname = r.get("filename")
+                    if fname:
+                        results_by_filename[fname] = r
+            fully_complete = sum(
+                1 for r in results
+                if r.get("models") and not any("error" in m for m in r["models"].values())
+            )
             print(
-                f"[RESUME] Found existing output file '{out_path}' with {len(results)} completed results."
+                f"[RESUME] Found existing output file '{out_path}' with {len(results)} records "
+                f"({fully_complete} fully successful, {len(results) - fully_complete} needing model retries)."
             )
         except Exception as e:
             print(f"[WARN] Could not parse existing '{out_path}' ({e}). Starting fresh.")
             results = []
-            completed_filenames = set()
+            results_by_filename = {}
 
     target_indices = list(range(start, end + 1))
     total_requested = len(target_indices)
@@ -102,6 +114,10 @@ def run_benchmark(
     print("=" * 65)
 
     def build_payload() -> dict[str, Any]:
+        fully_complete = sum(
+            1 for r in results
+            if r.get("models") and not any("error" in m for m in r["models"].values())
+        )
         return {
             "metadata": {
                 "language_code": lang_code,
@@ -109,7 +125,7 @@ def run_benchmark(
                 "start_index": start,
                 "end_index": end,
                 "total_requested": total_requested,
-                "completed_count": len(results),
+                "completed_count": fully_complete,
                 "last_updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             },
             "results": results,
@@ -133,61 +149,89 @@ def run_benchmark(
                     )
                     continue
 
-            if filename in completed_filenames:
-                print(
-                    f"[{idx}/{total_requested}] [SKIP] '{filename}' already in results."
-                )
-                continue
+            existing_entry = results_by_filename.get(filename)
+            models_to_run = expected_models
 
-            print(
-                f"[{idx}/{total_requested}] Benchmarking '{filename}' ({audio_file.stat().st_size / 1024:.1f} KB)...",
-                end="",
-                flush=True,
-            )
+            if existing_entry:
+                existing_models = existing_entry.get("models", {})
+                # Find models that are missing or encountered an error
+                models_to_run = [
+                    m for m in expected_models
+                    if m not in existing_models or "error" in existing_models.get(m, {})
+                ]
+                if not models_to_run:
+                    print(
+                        f"[{idx}/{total_requested}] [SKIP] '{filename}' all models succeeded."
+                    )
+                    continue
+                else:
+                    retry_str = ", ".join(models_to_run)
+                    print(
+                        f"[{idx}/{total_requested}] [RETRY] '{filename}' ({audio_file.stat().st_size / 1024:.1f} KB) - retrying {retry_str}...",
+                        end="",
+                        flush=True,
+                    )
+            else:
+                print(
+                    f"[{idx}/{total_requested}] Benchmarking '{filename}' ({audio_file.stat().st_size / 1024:.1f} KB)...",
+                    end="",
+                    flush=True,
+                )
 
             try:
                 with open(audio_file, "rb") as af:
                     audio_bytes = af.read()
 
+                req_data: dict[str, Any] = {
+                    "language_code": lang_code,
+                    "stage_label": effective_stage,
+                }
+                # Pass targeted models if only a subset needs retrying
+                if models_to_run != expected_models:
+                    req_data["models"] = ",".join(models_to_run)
+
                 resp = client.post(
                     endpoint_url,
                     files={"files": (filename, audio_bytes, "audio/wav")},
-                    data={
-                        "language_code": lang_code,
-                        "stage_label": effective_stage,
-                    },
+                    data=req_data,
                 )
 
                 if resp.status_code != 200:
                     err_msg = f"HTTP {resp.status_code}: {resp.text[:150]}"
                     print(f" FAILED ({err_msg})")
-                    failed_entry = {
-                        "filename": filename,
-                        "stage_label": effective_stage,
-                        "request_error": err_msg,
-                        "models": {},
-                    }
-                    results.append(failed_entry)
+                    if not existing_entry:
+                        failed_entry = {
+                            "filename": filename,
+                            "stage_label": effective_stage,
+                            "request_error": err_msg,
+                            "models": {},
+                        }
+                        results.append(failed_entry)
+                        results_by_filename[filename] = failed_entry
                 else:
                     data = resp.json()
                     file_results = data.get("results", [])
-                    if file_results:
-                        item = file_results[0]
+                    returned_item = file_results[0] if file_results else {}
+                    new_models = returned_item.get("models", {})
+
+                    if existing_entry:
+                        # Patch in-place without losing other successful models!
+                        existing_entry.setdefault("models", {}).update(new_models)
+                        item = existing_entry
                     else:
                         item = {
                             "filename": filename,
                             "stage_label": effective_stage,
-                            "models": {},
+                            "models": new_models,
                         }
-
-                    results.append(item)
-                    completed_filenames.add(filename)
+                        results.append(item)
+                        results_by_filename[filename] = item
 
                     # Summarize model latencies
                     models = item.get("models", {})
                     lat_parts = []
                     for m_name, m_val in models.items():
-                        if "latency_seconds" in m_val:
+                        if "latency_seconds" in m_val and "error" not in m_val:
                             lat_parts.append(f"{m_name}={m_val['latency_seconds']}s")
                         elif "error" in m_val:
                             lat_parts.append(f"{m_name}=ERR")

@@ -118,16 +118,19 @@ python scripts/run_benchmark.py --range 1-5 --language am --output amharic_batch
 
 ---
 
-## 4. Crash Recovery & Resuming Interrupted Runs
+## 4. Crash Recovery, Resuming & Smart Model-Level Retries
 
-The script is built with zero-data-loss guarantees:
+The script is built with zero-data-loss and zero-quota-waste guarantees:
 - **Instant Persistence**: After each file finishes, the output JSON file on disk is immediately updated.
-- **Automatic Resume**: If a run is interrupted (via `Ctrl+C`, network timeout, or rate limiting), simply run the **exact same command again**:
+- **Smart Model-Level Retries**: A file is only considered truly complete if **all models succeeded without errors**. If one model (e.g. Gemini) failed due to a rate limit while Sahara and Addis AI succeeded:
+  - Running the command again will **only re-call the failed model (Gemini)**.
+  - It will **not** re-run or waste quota on the models that already succeeded.
+  - Once the failed model succeeds, it patches its result **in-place** into the existing JSON entry!
+- **Automatic Resume**: Re-running the command skips all files where all models succeeded and only processes incomplete/pending items:
   ```bash
-  python scripts/run_benchmark.py --range 1-5 --language am
+  python scripts/run_benchmark.py --range 46-50 --language am
   ```
-  The script will detect the existing JSON file, see which files are already completed, skip them, and resume from the next pending file.
-- **Start Fresh**: If you want to overwrite previous results instead of resuming, pass `--no-resume`:
+- **Start Fresh**: If you ever want to discard previous results instead of resuming/retrying, pass `--no-resume`:
   ```bash
   python scripts/run_benchmark.py --range 1-5 --language am --no-resume
   ```

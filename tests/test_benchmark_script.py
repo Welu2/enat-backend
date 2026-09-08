@@ -86,14 +86,18 @@ def test_run_benchmark_resumes_skipping_completed(tmp_path: Path) -> None:
         (v_folder / f"v{v_num}.wav").write_bytes(b"dummy audio wav")
 
     out_file = tmp_path / "benchmark_out.json"
-    # Pre-populate v1.wav as completed
+    # Pre-populate v1.wav as fully completed (all models without errors)
     existing_data = {
         "metadata": {"completed_count": 1},
         "results": [
             {
                 "filename": "v1.wav",
                 "stage_label": "symptoms",
-                "models": {"sahara": {"hypothesis_text": "already done", "latency_seconds": 1.0}},
+                "models": {
+                    "sahara": {"hypothesis_text": "already done", "latency_seconds": 1.0},
+                    "addis_ai": {"hypothesis_text": "already done", "latency_seconds": 1.1},
+                    "gemini": {"hypothesis_text": "already done", "latency_seconds": 1.2},
+                },
             }
         ],
     }
@@ -107,7 +111,11 @@ def test_run_benchmark_resumes_skipping_completed(tmp_path: Path) -> None:
             {
                 "filename": "v2.wav",
                 "stage_label": "symptoms",
-                "models": {"sahara": {"hypothesis_text": "new", "latency_seconds": 0.8}},
+                "models": {
+                    "sahara": {"hypothesis_text": "new", "latency_seconds": 0.8},
+                    "addis_ai": {"hypothesis_text": "new", "latency_seconds": 0.9},
+                    "gemini": {"hypothesis_text": "new", "latency_seconds": 1.0},
+                },
             }
         ]
     }
@@ -129,6 +137,72 @@ def test_run_benchmark_resumes_skipping_completed(tmp_path: Path) -> None:
     filenames = [r["filename"] for r in payload["results"]]
     assert "v1.wav" in filenames
     assert len(payload["results"]) == 3
+
+
+def test_run_benchmark_retries_failed_model_in_place(tmp_path: Path) -> None:
+    """When a file has an error for Gemini but Sahara & Addis AI succeeded, retry only Gemini and patch in-place."""
+    voices_dir = tmp_path / "enat_voices"
+    v_folder = voices_dir / "v46"
+    v_folder.mkdir(parents=True)
+    (v_folder / "v46.wav").write_bytes(b"audio")
+
+    out_file = tmp_path / "benchmark_results_v46_v46_am.json"
+    # Pre-populate v46.wav with Sahara/Addis AI succeeded, Gemini failed with 429
+    existing_data = {
+        "metadata": {"completed_count": 0},
+        "results": [
+            {
+                "filename": "v46.wav",
+                "stage_label": "symptoms",
+                "models": {
+                    "sahara": {"hypothesis_text": "sahara ok", "latency_seconds": 2.0},
+                    "addis_ai": {"hypothesis_text": "addis ok", "latency_seconds": 3.0},
+                    "gemini": {"error": "HTTP 429 rate limit", "latency_seconds": 6.0},
+                },
+            }
+        ],
+    }
+    with open(out_file, "w", encoding="utf-8") as f:
+        json.dump(existing_data, f)
+
+    # Mock response returning only gemini
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {
+        "results": [
+            {
+                "filename": "v46.wav",
+                "stage_label": "symptoms",
+                "models": {
+                    "gemini": {"hypothesis_text": "gemini recovered!", "latency_seconds": 1.5},
+                },
+            }
+        ]
+    }
+
+    with patch("httpx.Client.post", return_value=mock_resp) as mock_post:
+        payload = run_benchmark(
+            start=46,
+            end=46,
+            language="am",
+            voices_dir=voices_dir,
+            output_file=out_file,
+            delay=0.0,
+            resume=True,
+        )
+
+    assert mock_post.call_count == 1
+    # Verify 'models' requested in the POST call was 'gemini'
+    called_data = mock_post.call_args[1]["data"]
+    assert called_data.get("models") == "gemini"
+
+    # Verify results in-place patch: sahara and addis_ai preserved, gemini updated!
+    res = payload["results"][0]
+    assert res["models"]["sahara"]["hypothesis_text"] == "sahara ok"
+    assert res["models"]["addis_ai"]["hypothesis_text"] == "addis ok"
+    assert res["models"]["gemini"]["hypothesis_text"] == "gemini recovered!"
+    assert "error" not in res["models"]["gemini"]
+    assert payload["metadata"]["completed_count"] == 1
 
 
 def test_run_benchmark_network_error_retains_prior_results(tmp_path: Path) -> None:

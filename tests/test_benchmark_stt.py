@@ -193,3 +193,36 @@ def test_benchmark_stt_error_resilience_preserves_latency(client: TestClient) ->
     # Gemini still ran and succeeded
     assert models["gemini"]["hypothesis_text"] == "Gemini succeeded"
     assert "error" not in models["gemini"]
+
+
+def test_benchmark_stt_filter_models(client: TestClient) -> None:
+    """When models='gemini' is passed, only Gemini is called; Sahara and Addis AI are skipped."""
+    mock_sahara = AsyncMock(return_value="Sahara")
+    mock_addis = AsyncMock(return_value="Addis")
+    mock_gemini = AsyncMock(return_value="Gemini only")
+
+    files = [
+        ("files", ("voice.wav", io.BytesIO(b"audio"), "audio/wav")),
+    ]
+
+    with patch.object(SaharaVoiceClient, "transcribe", mock_sahara), \
+         patch.object(AddisAIClient, "transcribe", mock_addis), \
+         patch.object(GeminiTranscribeClient, "transcribe", mock_gemini):
+        
+        response = client.post(
+            "/dev/benchmark-stt",
+            files=files,
+            data={"language_code": "am", "models": "gemini"},
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    models = data["results"][0]["models"]
+
+    assert "gemini" in models
+    assert models["gemini"]["hypothesis_text"] == "Gemini only"
+    assert "sahara" not in models
+    assert "addis_ai" not in models
+    assert mock_sahara.call_count == 0
+    assert mock_addis.call_count == 0
+    assert mock_gemini.call_count == 1
