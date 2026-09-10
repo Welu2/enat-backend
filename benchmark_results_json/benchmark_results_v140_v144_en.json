@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 140,
+    "end_index": 144,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:11:49.925145+00:00"
+  },
+  "results": [
+    {
+      "filename": "v140.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No, I haven't felt anything. I'm very well today. Thank you.",
+          "latency_seconds": 5.55
+        },
+        "deepgram": {
+          "hypothesis_text": "No. I haven't felt anything. I'm very well today. Thank you.",
+          "latency_seconds": 3.25
+        },
+        "gemini": {
+          "hypothesis_text": "No, I haven't felt anything. I'm very well today. Thank you.",
+          "latency_seconds": 3.92
+        }
+      }
+    },
+    {
+      "filename": "v141.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Not at all. I haven't felt a headache or abdominal cramps. I'm fine.",
+          "latency_seconds": 5.06
+        },
+        "deepgram": {
+          "hypothesis_text": "Not at all. I haven't felt the headache or abdominal cramps. I'm fine.",
+          "latency_seconds": 3.28
+        },
+        "gemini": {
+          "hypothesis_text": "Not at all, I haven't felt a headache or abdominal cramps, I'm fine.",
+          "latency_seconds": 4.21
+        }
+      }
+    },
+    {
+      "filename": "v142.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No, in fact, I feel better today.",
+          "latency_seconds": 5.37
+        },
+        "deepgram": {
+          "hypothesis_text": "No. In fact, I feel better today.",
+          "latency_seconds": 2.9
+        },
+        "gemini": {
+          "hypothesis_text": "No, in fact, I feel better today.",
+          "latency_seconds": 3.93
+        }
+      }
+    },
+    {
+      "filename": "v143.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Nothing unusual, everything is normal.",
+          "latency_seconds": 3.85
+        },
+        "deepgram": {
+          "hypothesis_text": "Nothing unusual. Everything is normal.",
+          "latency_seconds": 2.98
+        },
+        "gemini": {
+          "hypothesis_text": "Nothing unusual, everything is normal.",
+          "latency_seconds": 3.29
+        }
+      }
+    },
+    {
+      "filename": "v144.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No, none of the things you mentioned happened to me.",
+          "latency_seconds": 5.06
+        },
+        "deepgram": {
+          "hypothesis_text": "No. None of the things you mentioned happened to me.",
+          "latency_seconds": 3.28
+        },
+        "gemini": {
+          "hypothesis_text": "No, none of the things you mentioned happened to me.",
+          "latency_seconds": 3.68
+        }
+      }
+    }
+  ]
+}

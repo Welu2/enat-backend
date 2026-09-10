@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 36,
+    "end_index": 40,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T01:47:18Z"
+  },
+  "results": [
+    {
+      "filename": "v36.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "መተንፈስ አቅቶኛል አየር ወደ ውስጥ መሳብም አልቻልኩም ልቤም በጣም ይመሳል።",
+          "latency_seconds": 2.6
+        },
+        "addis_ai": {
+          "hypothesis_text": "መተንፈስ አቅቶኛል። አየር ወደ ውስጥ መሳብም አልቻልኩም። ልቤም በጣም ይመታል።",
+          "latency_seconds": 4.31
+        },
+        "gemini": {
+          "hypothesis_text": "መተንፈስ አቅቶኛል አየር ወደ ውስጥ መሳብም አልቻልኩም ልቤም በጣም ይመታል",
+          "latency_seconds": 8.39
+        }
+      }
+    },
+    {
+      "filename": "v37.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ውሃ እንኳን ብጠጣ መልሶ ዛሬ ብቻ ከ10 ጊዜ በላይ አስታወቀኝ በጣም ዝያለሁ።",
+          "latency_seconds": 2.76
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ውሃ እንኳን ብጠጣው መልሶ ይወጣል። ዛሬ ብቻ ከአስር ጊዜ በላይ አስታወከኝ። በጣም ዝያለሁ።",
+          "latency_seconds": 3.29
+        },
+        "gemini": {
+          "hypothesis_text": "ውሃ እንኳን ብጠጣው መልሶ ይወጣል ዛሬ ብቻ ከአስር ጊዜ በላይ አስታወከኝ በጣም ዘያለሁ",
+          "latency_seconds": 10.15
+        }
+      }
+    },
+    {
+      "filename": "v38.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሰውነቴ እየነደደ ነው። ብርድ ብርድ ራሱ እያንቀጠቀጠ ነው።",
+          "latency_seconds": 2.58
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሰውነቴ እየነደደ ነው፤ ብርድ ብርድ ራሱ እያንቀጠቀጠኝ ነው።",
+          "latency_seconds": 3.68
+        },
+        "gemini": {
+          "hypothesis_text": "ሰውነቴ እየነደደ ነው። ብርድ ብርድ ራሱ ያንቀጠቅጠኝ ነው።",
+          "latency_seconds": 6.91
+        }
+      }
+    },
+    {
+      "filename": "v39.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ወገቤን ከአጥንቴ ውስጥ የሚቆርጠኝ ይመስላል አልጋ ላይ መንገላይ ዋብጥ እንኳን አልቻልኩም",
+          "latency_seconds": 3.23
+        },
+        "addis_ai": {
+          "hypothesis_text": "ወገቤን ከአጥንቴ ውስጥ የሚቆርጠኝ ይመስላል፣ አልጋ ላይ መገላያዋ በጥ እንኳን አልቻልኩም።",
+          "latency_seconds": 2.96
+        },
+        "gemini": {
+          "hypothesis_text": "ወገቤን ከአጥንቴ ውስጥ የሚቆርጠኝ ይመስላል። አልጋ ላይ መገላበጥ እንኳን አልቻልኩም።",
+          "latency_seconds": 8.8
+        }
+      }
+    },
+    {
+      "filename": "v40.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "የተቀመጥኩበት ድረስ የደረሰን ንጹህ ፈሶች በድንገት ፈሰሰኝ መቆጣጠረው አልቻልኩም",
+          "latency_seconds": 2.57
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"የተቀመጥኩበት ድረስ የደረሰ ንፁህ ፈሳሽ በድንገት ፈሰሰኝ፣ መቆጣጠር አልቻልኩም።",
+          "latency_seconds": 3.38
+        },
+        "gemini": {
+          "hypothesis_text": "የተቀመጥኩበት ድረስ የደረሰ ንፁህ ፈሶሽ በድንገት ፈሰሰኝ መቆጣጠር አልቻልኩም",
+          "latency_seconds": 11.01
+        }
+      }
+    }
+  ]
+}

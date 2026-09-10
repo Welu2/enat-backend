@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 96,
+    "end_index": 100,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:55:45.520731+00:00"
+  },
+  "results": [
+    {
+      "filename": "v96.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "severe crump አይደለም just slight bloating and in digestion ነው I to cantacid",
+          "latency_seconds": 3.31
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሰቪር ካምፕ አይደለም ጀስት ስላይት ብሎቲንግ ኤንድ ኢንዳይጀሽን ነው አይቱ ካንታሲድ",
+          "latency_seconds": 3.58
+        },
+        "gemini": {
+          "hypothesis_text": "ሰቪርክራም አይደለም ጀስት ስላይት ብሎቲንግ ኤንድ ኢንዲጀስሽን ነው አይ ቱካንታሲድ",
+          "latency_seconds": 3.38
+        }
+      }
+    },
+    {
+      "filename": "v97.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እግሬ ላይ mild swelling አለ። because of the standing but my hand face totally clear noto swelling",
+          "latency_seconds": 3.02
+        },
+        "addis_ai": {
+          "hypothesis_text": "እግሬ ላይ ማይልድ ስዌሊንግ አለ ቢኮዝ ኦፍ ዘ ስታንዲንግ በት ማይ ሃንድስ ኤንድ ፌስ ቶታሊ ክሊር ናቸው ኖ ስዌሊንግ",
+          "latency_seconds": 4.3
+        },
+        "gemini": {
+          "hypothesis_text": "እግሬ ላይ mild swelling አለ because of the standing but my hands and face totally clear ነው show no swelling",
+          "latency_seconds": 3.89
+        }
+      }
+    },
+    {
+      "filename": "v98.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "sharp pain አይደለም just ligament stretch muscling ቶሎ ሪሊፍ ያገኘሁት",
+          "latency_seconds": 3.43
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሻርፕ ፔይን አይደለም ጀስት ሪሊጋመንት ስትረች መሰለኝ ቶሎ ነው ሪሊፍ ያገኘሁት",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "sharp pain አይደለም just ligament stretch መሰልኝ ቶሎ ነው relief የሚያገኘውት",
+          "latency_seconds": 3.07
+        }
+      }
+    },
+    {
+      "filename": "v99.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Morning nausea ነበረኝ but nor persistant vomiting breakfast በልቼ ኖሮ ማለት ሆኗል።",
+          "latency_seconds": 3.22
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሞርኒንግ ኖርሺያ ነበረኝ በት ኖ ፕሪዝስተንት ቫሚቲንግ ብሬክፋስት በልቼ ኖርማል ሆኗል",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "ሞርኒንግ ናውሺያ ነበረኝ፣ በት ናው ፕሪስትንት ቫሚቲንግ ብሬክፋስት በልቼ ኢን ኖርማል ሆኗል።",
+          "latency_seconds": 3.8
+        }
+      }
+    },
+    {
+      "filename": "v100.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Pelvic pressure ይሰማኛል as the baby drops lavor contraction ደረጃ አይደለም",
+          "latency_seconds": 3.73
+        },
+        "addis_ai": {
+          "hypothesis_text": "ፔልቪክ ፕሬዘር ይሰማኛል አስደ ቤቢ ድሮፕስ በት ሊቨር ኮንትራክሽን ደረጃ አይደለም",
+          "latency_seconds": 3.48
+        },
+        "gemini": {
+          "hypothesis_text": "pelvic pressure ይሰማኛል አስደ baby drops በ liver contraction ደረጃ አይደለም",
+          "latency_seconds": 3.48
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 180,
+    "end_index": 184,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:27:09.267547+00:00"
+  },
+  "results": [
+    {
+      "filename": "v180.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Clear fluid suddenly poured out down to my seat. It's not urination. I couldn't control it.",
+          "latency_seconds": 5.95
+        },
+        "deepgram": {
+          "hypothesis_text": "Clear fluid suddenly poured out down to my seats. It's not urination. I couldn't control it.",
+          "latency_seconds": 4.97
+        },
+        "gemini": {
+          "hypothesis_text": "clear fluid suddenly poured out down to my seats. It's not urination. I couldn't control it.",
+          "latency_seconds": 3.47
+        }
+      }
+    },
+    {
+      "filename": "v181.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I'm bleeding. It started flowing red, just like a menstrual period.",
+          "latency_seconds": 4.92
+        },
+        "deepgram": {
+          "hypothesis_text": "I'm bleeding. It started flowing red just like menstrual period.",
+          "latency_seconds": 4.18
+        },
+        "gemini": {
+          "hypothesis_text": "I'm bleeding. It started flowing red just like menstrual period.",
+          "latency_seconds": 4.53
+        }
+      }
+    },
+    {
+      "filename": "v182.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, I have a headache throbbing violently on my forehead. On top of that, my vision is blurry and my hands are so swollen I can't close my fingers.",
+          "latency_seconds": 5.05
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. I have a headache throbbing violently on my forehead. On top of that, my vision is blurry, and my hands are so swollen, I can't close my fingers.",
+          "latency_seconds": 4.71
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, I have a headache throbbing violently on my forehead. On top of that, my vision is blurry, and my hands are so swollen I can't close my fingers.",
+          "latency_seconds": 7.58
+        }
+      }
+    },
+    {
+      "filename": "v183.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My abdomen feels stiff like a rock and hurts, and fluid mixed with blood is leaking down.",
+          "latency_seconds": 5.37
+        },
+        "deepgram": {
+          "hypothesis_text": "My abdomen feels stiff like a rock and hurts, and fluid mixed with blood is leaking down.",
+          "latency_seconds": 4.3
+        },
+        "gemini": {
+          "hypothesis_text": "My abdomen feels stiff like a rock and hurts, and fluid mixed with blood is leaking down.",
+          "latency_seconds": 9.12
+        }
+      }
+    },
+    {
+      "filename": "v184.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My body is burning hot with fever, and along with that, my lower abdomen is cramping.",
+          "latency_seconds": 5.47
+        },
+        "deepgram": {
+          "hypothesis_text": "My body is burning hot with fever, and along with that, my lower abdomen is cramping.",
+          "latency_seconds": 3.74
+        },
+        "gemini": {
+          "hypothesis_text": "My body is burning hot with fever and along with that, my lower abdomen is cramping.",
+          "latency_seconds": 3.22
+        }
+      }
+    }
+  ]
+}

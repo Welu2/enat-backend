@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 81,
+    "end_index": 85,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:51:18.666673+00:00"
+  },
+  "results": [
+    {
+      "filename": "v81.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I have severe shortness of breath lie down sade jest taily pressure ይሰማኛል።",
+          "latency_seconds": 2.88
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይ ሃቭ ሰቪር ሾርትነስ ኦፍ ብሬት ላይ ዳውን ሳደርግ ቸስቴ ላይ ሄቪ ፕሬዘር ይሰማኛል",
+          "latency_seconds": 4.4
+        },
+        "gemini": {
+          "hypothesis_text": "I have severe shortness of breath. ላይ ዳውን ስታደርግ ቼስቴ ላይ ሄቪ ፕሬዠር ይሰማኛል።",
+          "latency_seconds": 3.58
+        }
+      }
+    },
+    {
+      "filename": "v82.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እጆቼ እና ፊቴ completely swollen ሆነዋል። my wedding ring ራሱ ማውለቅ አልቻልኩም አይኖቼም puffy ናቸው",
+          "latency_seconds": 3.94
+        },
+        "addis_ai": {
+          "hypothesis_text": "እጆቼና ፊቴ ኮምፕሊትሊ ስዋልን ሆነዋል። ማይ ዌዲንግ ሪንግ ራሱ ማውለቅ አልቻልኩም። አይኖቼም ፐፊ ናቸው።",
+          "latency_seconds": 4.37
+        },
+        "gemini": {
+          "hypothesis_text": "እጆቼና ፊቴ completely swollen ሆኗል። ማይ Wedding ring ራሱ ማውለቅ አልቻልኩም።  ይሄኖቼም puffy ናቸው።",
+          "latency_seconds": 4.03
+        }
+      }
+    },
+    {
+      "filename": "v83.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Frequent vomiting አለብኝ even water እንኳን keep ማድረግ አልቻልኩም I feel very hydrated",
+          "latency_seconds": 3.02
+        },
+        "addis_ai": {
+          "hypothesis_text": "ፍሪኩዌንት <0xE1><0x89><0xAE>ሚቲንግ አለብኝ ኢቭን ዋተር እንኳን ኪፕ ማድረግ አልቻልኩም አይ ፊል ቬሪ ሃይድሬትድ",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "Frequent vomiting አለብኝ። ኢቨን ዋተር እንኳን ኪፕ ማድረግ አልቻልኩም። I feel very hydrated.",
+          "latency_seconds": 3.48
+        }
+      }
+    },
+    {
+      "filename": "v84.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yeah terrible migraine like headache አለብኝ clus vision በጣም ይዥ ላይ strong swelling አለብኝ",
+          "latency_seconds": 4.45
+        },
+        "addis_ai": {
+          "hypothesis_text": "ያ ቴሬቨር ማይግሪን ላይክ ሄድክ አለብኝ ክላስ ቪዥኔ በጣም ይጎረጎራል እናም ፊቴ ላይ ስትሮንግ ስዌሊንግ አለብኝ",
+          "latency_seconds": 3.82
+        },
+        "gemini": {
+          "hypothesis_text": "ያ Terrible migraine-like headache አለብኝ plus vision በጣም ይጎረጎራል እናም ፊቴ ላይ strong swelling አለብኝ",
+          "latency_seconds": 3.55
+        }
+      }
+    },
+    {
+      "filename": "v85.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "sharp abdominal pain አለኝታniously ደግሞ bright read blood እየፈሰሰኝ ነው። please advise me",
+          "latency_seconds": 3.32
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሻርፕ አብዶሜናል ፔን አለኝ ሳይመልታኒየስሊ ደሞ ብራይት ሬድ ብለድ እየፈሰሰኝ ነው ፕሊስ አድቫይዝ ሚ",
+          "latency_seconds": 3.59
+        },
+        "gemini": {
+          "hypothesis_text": "sharp abdominal pain አለኝ simultaneous ደሙ bright red blood እየፈሰሰኝ ነው please advise me",
+          "latency_seconds": 3.48
+        }
+      }
+    }
+  ]
+}

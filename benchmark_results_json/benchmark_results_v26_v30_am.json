@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 26,
+    "end_index": 30,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T10:53:08.644708+00:00"
+  },
+  "results": [
+    {
+      "filename": "v26.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አይ ምንም አልተሰማኝም ህፃኑ በደንብ እየተንቀሳቀሰ ነው፣ ገና ነኝ",
+          "latency_seconds": 18.29
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"አይ ምንም አልተሰማኝም፤ ሕፃኑ በደንብ እየተንቀሳቀሰ ነው፤ ደህና ነኝ።",
+          "latency_seconds": 4.3
+        },
+        "gemini": {
+          "hypothesis_text": "ай ምን አልተሰማኝም ሕፃኑም በደንብ እየተንቀሳቀሰ ነው ደህና ነኝ",
+          "latency_seconds": 14.13
+        }
+      }
+    },
+    {
+      "filename": "v27.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ምንም የለም ዛሬሞ ተሽሎኛል የቤት ስራዬንም እየሰራው ነው።",
+          "latency_seconds": 4.24
+        },
+        "addis_ai": {
+          "hypothesis_text": "ምንም የለም ዛሬማ ተሽሎኛል የቤት ስራዬንም እየሰራሁ ነው።",
+          "latency_seconds": 7.58
+        },
+        "gemini": {
+          "hypothesis_text": "ምንንም የለም ሳሪምሞ ተሽሎኛል የቤት ስራዬንም እየሰራሁ ነው።",
+          "latency_seconds": 3.89
+        }
+      }
+    },
+    {
+      "filename": "v28.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "",
+          "latency_seconds": 4.24
+        },
+        "addis_ai": {
+          "hypothesis_text": "ኧረ እነዚህ ከጠቀስካቸው ውስጥ አንዳቸውም አልታዩብኝም እግዚአብሔር ይመስገን",
+          "latency_seconds": 4.84
+        },
+        "gemini": {
+          "hypothesis_text": "አራ እነዚህ ከጠቀስካቸው ውስጥ አንዳቸውም አልታዩብኝም እግዚአብሔር ይመስገን",
+          "latency_seconds": 4.79
+        }
+      }
+    },
+    {
+      "filename": "v29.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ራስ ምታትም ሆነ የሆድ ህመም የለም ትንሽ እንቅልፍ ማጣት ብቻ ነው የተሰማኝ።",
+          "latency_seconds": 3.42
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"እራስ ምታትም ሆነ የሆድ ህመም የለም፣ ትንሽ እንቅልፍ ማጣት ብቻ ነው የተሰማኝ።",
+          "latency_seconds": 5.32
+        },
+        "gemini": {
+          "hypothesis_text": "ራስ ምታትም ሆነ የሆድ ምመም የለም ትንሽ እንቅልፍ ማጣት ብቻ ነው የተሰማኝ",
+          "latency_seconds": 4.71
+        }
+      }
+    },
+    {
+      "filename": "v30.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሁሉም ነገር ሰላም ነው። ምንም የሚያስፈራ ምልክት የለም",
+          "latency_seconds": 4.76
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ሁሉም ነገር ሰላም ነው። ምንም የሚያስፈራ ምልክት የለም።",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "ሁሉም ነገር ሰላም ነው፣ ምንም የሚያስፈራ ምልክት የለም።",
+          "latency_seconds": 6.25
+        }
+      }
+    }
+  ]
+}

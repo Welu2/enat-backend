@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 136,
+    "end_index": 139,
+    "total_requested": 4,
+    "completed_count": 4,
+    "last_updated": "2026-09-08T03:10:13.358543+00:00"
+  },
+  "results": [
+    {
+      "filename": "v136.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No actually apptiget የለኝም just morning like tost እና T ብቻ እኔ ቀመስኩት extra meal ምንም አልወሰድኩም",
+          "latency_seconds": 4.22
+        },
+        "addis_ai": {
+          "hypothesis_text": "ኖ አክችዋሊ አፕታይት የለኝም ጀስት ሞርኒንግ ላይ ቶስት እና ቲ ብቻ ነው የቀመስኩት ኤክስትራ ሚል ምንም አልወሰድኩም",
+          "latency_seconds": 4.71
+        },
+        "gemini": {
+          "hypothesis_text": "ኖ አፕታይት የለኝምጀስት ሞርኒንግ ላይ ቶስት እና ቲ ብቻ ነው የቀመሥኩትኤክስትራ ሚል ምንም ማልወስድኩም",
+          "latency_seconds": 4.54
+        }
+      }
+    },
+    {
+      "filename": "v137.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ extrasnack ወስጃለሁ። avocados music ከወተት ጋር ጠጣሁ lunch ላይ ደግሞ እቺ constitute በልቻለሁ",
+          "latency_seconds": 3.8
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ኤክስትራ ስናክ ወስጃለሁ አ<0xE1><0x89><0xAE>ካዶ ስሙዚ ከወተት ጋር ጠጣሁ ላንች ላይ ደግሞ ቺከን ስቲው በልቻለሁ",
+          "latency_seconds": 4.71
+        },
+        "gemini": {
+          "hypothesis_text": "או extra snacks መብላት ይቻለኝ? አቮካዶ ስሙዚ ከቶስት ጋር መብላት እችላለሁ? ላንች ላይ ደግሞ chicken stew መብላት እችላለሁ?",
+          "latency_seconds": 4.3
+        }
+      }
+    },
+    {
+      "filename": "v138.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Pastor frout እና Beach Table አላገኘውም So balanced አይደለም",
+          "latency_seconds": 3.62
+        },
+        "addis_ai": {
+          "hypothesis_text": "ይሄ እዚህ ካርብስ ብቻ ነው የበላሁት ራይስ እና ፓስታ ፉርት እና ቤጅ ቴብል አላገኘሁም ሶ ባላንስድ አይደለም",
+          "latency_seconds": 4.27
+        },
+        "gemini": {
+          "hypothesis_text": "ሄዚ ካርብስት ቻን ivelout አራይስ እና ፓስታ ፍሩትና ቢጂቴብል እዚህ ላይ አገኘን ሶ ባላንስድ አይደል?",
+          "latency_seconds": 3.68
+        }
+      }
+    },
+    {
+      "filename": "v139.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Iran እና vitamin እንዲኖረው ብዬ oranges ጠጣሁበት severe nausea ስላለኝ የሄስትራ food መብላት አልቻልኩም",
+          "latency_seconds": 4.98
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይረን እና ቪታሚን እንዲኖረው ብዬ ኦሬንጅ ውስጥ ጠጣሁ በት ሰቪር ናሽያ ስላለኝ ሄቪ ኤክስትራ ፉድ መብላት አልቻልኩም።",
+          "latency_seconds": 3.53
+        },
+        "gemini": {
+          "hypothesis_text": "አይረን እና ቪታሚን እንዲኖረው ብዬ ኦሬንጅ جوس ጠጣሁ። በት ሴቨር ናውሻ ስላለኝ ሄቪ ኤክስትራ ፉድ መብላት አልቻልኩም።",
+          "latency_seconds": 3.87
+        }
+      }
+    }
+  ]
+}

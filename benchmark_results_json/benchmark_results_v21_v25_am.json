@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 21,
+    "end_index": 25,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T01:41:36Z"
+  },
+  "results": [
+    {
+      "filename": "v21.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "የበላሁትን ሁሉ እያስመለሰኝ ነው። ውሃ እንኳን መያዝ አልቻልኩም መነሳት የማልችልበት ድጋፍ ተሰምቶኛል።",
+          "latency_seconds": 2.81
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"የበላሁትን ሁሉ እያስመለሰኝ ነው፣ ውኃ እንኳን መያዝ አልቻልኩም፣ መነሳት የማልችልበት ድጋም ተሰምቶኛል።",
+          "latency_seconds": 3.51
+        },
+        "gemini": {
+          "hypothesis_text": "የበላሁትን ሁሉ እያስመለሰኝ ነው ውሃ እንኳን መያዝ አልቻልኩም መነሳት የማልችልበት ድጋም ተሰምቶኛል",
+          "latency_seconds": 8.13
+        }
+      }
+    },
+    {
+      "filename": "v22.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እረኔ እንጆኝ ትንሽ ያመኛል ግን የተለመደው የጽንሱ ክፊት ይሁን ሌላ ነገር መለየት",
+          "latency_seconds": 2.72
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ኧረ እኔንጃ ሆዴን ትንሽ ያመኛል ግን የተለመደው የፅንስ ግፊት ይሁን ሌላ ነገር መለየት አልቻልኩም።",
+          "latency_seconds": 3.32
+        },
+        "gemini": {
+          "hypothesis_text": "አረ እኔንጃ ሆዴን ትንሽ ያመኛል ግን የተለመደው የጽንሱ ግፊት ይሁን ሌላ ነገር መለየት አልቻልኩም",
+          "latency_seconds": 8.4
+        }
+      }
+    },
+    {
+      "filename": "v23.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ፈሳሽ ነገር አለ ግን ሽንቴ አምልጦኝ ይሁን ውሃ አላወቅኩም ምን ላድርግ?",
+          "latency_seconds": 2.86
+        },
+        "addis_ai": {
+          "hypothesis_text": "ፈሳሽ ነገር አለ ግን ሽንቴ አምልጦኝ ይሁን ውሃዬ ፈሶ አላወቅኩም ምን ላድርግ",
+          "latency_seconds": 3.02
+        },
+        "gemini": {
+          "hypothesis_text": "ፈሳሽ ነገር አለ ግን ሽንትም ልጦኝ ይሁን ውሃዬ ፈሶ አላወኩም ምን ላድርግ?",
+          "latency_seconds": 7.86
+        }
+      }
+    },
+    {
+      "filename": "v24.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ደግሞ አይደለም ግን ቡናንማ መልክ ያለው ፈሳሽ ትንሽ አያለው እንደ አደገኛ ምልክት",
+          "latency_seconds": 2.96
+        },
+        "addis_ai": {
+          "hypothesis_text": "ደም አይደለም ግን ቡናን ማመልክ ያለው ፈሳሽ ትንሽ አያለው እንደ አደገኛው ምልክት ይቆጠራል።",
+          "latency_seconds": 3.54
+        },
+        "gemini": {
+          "hypothesis_text": "ደሞ አይደለም ግን ቡናንማ መልክ ያለው ፈሳሽ ትንሽ አያለሁ እንደ አደገኛ ምልክት ይቆጠር?",
+          "latency_seconds": 9.17
+        }
+      }
+    },
+    {
+      "filename": "v25.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ራስ ምታቱ አለ። አይኔም ትንሽ ይደበዝዛል ግን ደም መፍሰስ የለም:",
+          "latency_seconds": 2.85
+        },
+        "addis_ai": {
+          "hypothesis_text": "እራስ ምታቱ አለ። አይኔም ትንሽ ይደበዝዛል ግን ደም መፍሰስ የለም።",
+          "latency_seconds": 2.93
+        },
+        "gemini": {
+          "hypothesis_text": "እ ራስ ምታት አለ አይኔም ትንሽ ይደበዝዛል ግን እንደ መፍዘዝ የለም",
+          "latency_seconds": 7.23
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 145,
+    "end_index": 149,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:13:43.796896+00:00"
+  },
+  "results": [
+    {
+      "filename": "v145.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "It's not severe pain, but my lower back aches a bit from the weight. Otherwise, I'm fine.",
+          "latency_seconds": 4.59
+        },
+        "deepgram": {
+          "hypothesis_text": "It's not severe pain, but my lower back aches a bit from the weight. Otherwise, I'm fine.",
+          "latency_seconds": 8.19
+        },
+        "gemini": {
+          "hypothesis_text": "It's not severe pain, but my lower back exhibits from the waist. Otherwise I'm fine.",
+          "latency_seconds": 4.1
+        }
+      }
+    },
+    {
+      "filename": "v146.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Well, I have a bit of morning nausea, but no headache and no bleeding.",
+          "latency_seconds": 4.45
+        },
+        "deepgram": {
+          "hypothesis_text": "Well, I have a bit of morning nausea, but no headache and no bleeding.",
+          "latency_seconds": 3.7
+        },
+        "gemini": {
+          "hypothesis_text": "Well, I have a bit of morning nausea, but no headache and no bleeding.",
+          "latency_seconds": 3.88
+        }
+      }
+    },
+    {
+      "filename": "v147.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My belly feels a bit heavy, but there's no severe pain or leaking fluid.",
+          "latency_seconds": 4.86
+        },
+        "deepgram": {
+          "hypothesis_text": "My belly feels a bit heavy, but there's no severe pain or leaking fluid.",
+          "latency_seconds": 3.53
+        },
+        "gemini": {
+          "hypothesis_text": "My belly feels a bit heavy, but there's no severe pain or leaking fluid.",
+          "latency_seconds": 3.57
+        }
+      }
+    },
+    {
+      "filename": "v148.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I just feel fatigued, but my eyes aren't blurry and my head isn't spinning.",
+          "latency_seconds": 4.92
+        },
+        "deepgram": {
+          "hypothesis_text": "I just feel fatigued, but my eyes aren't blurry and my head isn't spinning.",
+          "latency_seconds": 3.48
+        },
+        "gemini": {
+          "hypothesis_text": "I just feel fatigued, but my eyes aren't blurry and my head isn't spinning.",
+          "latency_seconds": 3.84
+        }
+      }
+    },
+    {
+      "filename": "v149.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, in the morning they've had a severe, heavy headache. Even after taking Paracetamol, it hasn't stopped.",
+          "latency_seconds": 4.81
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. In the morning, they've had a severe heavy headache. Even after taking paracetamol, it hasn't stopped.",
+          "latency_seconds": 3.65
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, and the morning, I've had a severe heavy headache. Even after taking paracetamol, it hasn't stopped.",
+          "latency_seconds": 4.03
+        }
+      }
+    }
+  ]
+}

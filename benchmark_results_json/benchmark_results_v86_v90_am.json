@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 86,
+    "end_index": 90,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:52:54.716889+00:00"
+  },
+  "results": [
+    {
+      "filename": "v86.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Chest pain እና breathing difficulty አለብኝ in addition to that I could stand",
+          "latency_seconds": 3.35
+        },
+        "addis_ai": {
+          "hypothesis_text": "እና አለብኝ ወገቤን ወጥሮ ይዞኛል",
+          "latency_seconds": 3.38
+        },
+        "gemini": {
+          "hypothesis_text": "chest pain ነው breathing difficulty አለብኝ In addition to that ውጋቢ ነው ወጥሮ ይዞኛል I couldn't stand",
+          "latency_seconds": 3.55
+        }
+      }
+    },
+    {
+      "filename": "v87.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I'm not sure ፈሳሹ water leakage ይሁን normal vaginal discharget አልቻልኩም",
+          "latency_seconds": 3.57
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"አም ኖት ሹር ፈሳሹ ዋተር ሊኬጅ ይሁን ኖርማል ቫጅናል ዲስቸርጅ መለየት አልቻልኩም።",
+          "latency_seconds": 4.91
+        },
+        "gemini": {
+          "hypothesis_text": "I am not sure ፈሳሹ water leakage ይሆን normal vaginal discharge መለየት አልቻልኩም።",
+          "latency_seconds": 3.69
+        }
+      }
+    },
+    {
+      "filename": "v88.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ራስ ምታቱ አለ። but it's not that severe ቡና ባለመጠጣት ይሁን ናዝ complication አላወቅኩም",
+          "latency_seconds": 3.43
+        },
+        "addis_ai": {
+          "hypothesis_text": "ራስ ምታቱ አለ በት ኢትስ ኖት ዛት ሰቪር ቡና ባለመጠጣት ይሁን አናዘር ኮምፕሊኬሽን አላወቅኩም",
+          "latency_seconds": 3.84
+        },
+        "gemini": {
+          "hypothesis_text": "ራሽ መታቶ አለህ ብት ኢትስ ኖት ዳት ሴቭየር ቡና ባለመጠጣቴሁን አናዘር ኮምፕሊኬሽን አላወቅኩም",
+          "latency_seconds": 3.87
+        }
+      }
+    },
+    {
+      "filename": "v89.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Hodin ይቆርጠኛል Is it normal contractions way I should visit the clinic right now?",
+          "latency_seconds": 3.33
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሆዴን ይቆርጠኛል ኢዝ ኢት ኖርማል ኮንትራክሽንስ ወይስ አይ ሹድ ቪዚት ዘ ክሊኒክ ራይት ናው",
+          "latency_seconds": 3.65
+        },
+        "gemini": {
+          "hypothesis_text": "ሆዴን ይቆርጠኛል इज इट नॉर्मल contractions ወይስ I should visit the clinic right now?",
+          "latency_seconds": 4.51
+        }
+      }
+    },
+    {
+      "filename": "v90.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Brownish spot ነው Does that come to danger sign",
+          "latency_seconds": 2.81
+        },
+        "addis_ai": {
+          "hypothesis_text": "አረ ብለድ ሳይሆን ትንሽ ብራውኒሽ ስፖት ነው ደዝ ዳዝ ካውንታ ሰ ዳንጀር ሳይን",
+          "latency_seconds": 3.48
+        },
+        "gemini": {
+          "hypothesis_text": "አረ በልድ ሳዮን ትንሽ ብራውን እሽ ስፖት ነው። ደዝ ዘት ካውንት አስ ኤ ዳንጀር ሳይን?",
+          "latency_seconds": 5.53
+        }
+      }
+    }
+  ]
+}

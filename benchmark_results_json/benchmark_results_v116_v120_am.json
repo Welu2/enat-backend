@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 116,
+    "end_index": 120,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:02:51.191296+00:00"
+  },
+  "results": [
+    {
+      "filename": "v116.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "stomachin streat አርጎኛል painful አይደለም ግን definitely tight ነው ሚሰማኝ",
+          "latency_seconds": 3.76
+        },
+        "addis_ai": {
+          "hypothesis_text": "ስቶማኬን ስትርች አድርጎኛል ፔይፎን አይደለም ግን ዴፊኔትሊ ታይት ነው የሚሰማኝ",
+          "latency_seconds": 3.87
+        },
+        "gemini": {
+          "hypothesis_text": "ስታማኪኝ ስትሬች አድርጎኛል ፔን ፉል አይደለም ግን ዴፊኔትሊ ታይት ነው የሚሰማኝ",
+          "latency_seconds": 3.79
+        }
+      }
+    },
+    {
+      "filename": "v117.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ጠዋት እንቁላል ፍርፍር በዳቦ በልቻለሁ ምሳ ደግሞ እንጀራ በስጋ ወጥ እና ጎመን ማታ ከመደበኛው ውጪ አንድ ተጨማሪ ብርጭቆ ወተት እና ሙዝ ወስጃለሁ።",
+          "latency_seconds": 6.1
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ጠዋት እንቁላል ፍርፍር በዳቦ በልቻለሁ ምሳ ደግሞ እንጀራ በስጋ ወጥ እና ጎመን ማታ ከመደበኛው ውጪ አንድ ተጨማሪ ብርጭቆ ወተት እና ሙዝ ወስጃለሁ",
+          "latency_seconds": 4.94
+        },
+        "gemini": {
+          "hypothesis_text": "ኧረ ጣዕሙን እንቁላል ፈርፍር በዳቦ በልቻለሁ። ምሳ ደግሞ እንጀራ በስጋ ወጥ እና ጎመን ማታ ከመደወያው ውጪ አንድ ተጨማሪ ብርጭቆ ተተት እና ሙዞ ስጃለሁ።",
+          "latency_seconds": 4.79
+        }
+      }
+    },
+    {
+      "filename": "v118.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "በደንብ ተመግቤያለሁ። ቀን ምስር እና ሰላጣ በልቼ ነበር መክሰስ ላይ ተጨማሪ የተቀቀለ እንቁላል እና avocado ወስጄ አለው።",
+          "latency_seconds": 3.34
+        },
+        "addis_ai": {
+          "hypothesis_text": "በደንብ ተመግቤያለሁ ቀን ምስርክክና ሰላጣ በልቼ ነበር መክሰስ ላይ ተጨማሪ የተቀቀለ እንቁላልና አ<0xE1><0x89><0xAE>ካዶ ሰላጣ ወስጄዋለሁ",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "በደንብ ተመግቤያለሁ ቀን ምስር ክክ እና ሰላጣ በልቼ ነበር መክሰስ ላይ ተጨማሪ የተቀቀለ እንቁላል እና አቮካዶ ሰላጣ ወስጃለሁ",
+          "latency_seconds": 3.38
+        }
+      }
+    },
+    {
+      "filename": "v119.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ተጨማሪ ምግብ ወስጃለሁ። ምሳይን ከበላሁ በኋላ ረፋድ ላይ ገንፎ በቅቤ በልቻለሁ ፍርፍሬንም በብርቱካን እና በማንጎ በልቻለሁ",
+          "latency_seconds": 3.12
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ተጨማሪ ምግብ በልቻለሁ ምሳዬን ከበላሁ በኋላ ረፋድ ላይ ገንፎ በቅቤ በልቻለሁ ፍርፍሬንም በብርትኳንና በማንጎ በልቻለሁ",
+          "latency_seconds": 4.33
+        },
+        "gemini": {
+          "hypothesis_text": "ው ተጨማሪ ምግብ እጅ አለው። ምሳዬን ከበላሁ በኋላ ረፋድ ላይ ገንፎ በቅቤ እበላቻለሁ። ፍርፍሬን በብርቱካን እና በማንጎ በልቻለሁ።",
+          "latency_seconds": 3.56
+        }
+      }
+    },
+    {
+      "filename": "v120.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ጠዋት አጃ አጥሚት በወተት ጠጥቻለሁ ምሳ ዶሮ ወጥ በልቼ ከሳሞ የተጠበሰ ቆሎ እና ለውዝ ከወተት ጋር ወስጃለሁ።",
+          "latency_seconds": 4.75
+        },
+        "addis_ai": {
+          "hypothesis_text": "ጠዋት አጃ አጥሚት በወተት ጠጥቻለሁ ምሳ ዶሮ ወጥ በልቼ ከሳት ደግሞ የተጠበሰ ቆሎና ለውዝ ከወተት ጋር ወስጃለሁ",
+          "latency_seconds": 4.61
+        },
+        "gemini": {
+          "hypothesis_text": "ከወትሮ ሃጅ አድሚት በወተት አጠጣቻለሁ። እሳቸው ዶሮ ወጥ ወለጄ ከሳል ደሞ የተጠበሰ ቆሎውን ከወተት ጋር ወስጃለሁ።",
+          "latency_seconds": 3.69
+        }
+      }
+    }
+  ]
+}

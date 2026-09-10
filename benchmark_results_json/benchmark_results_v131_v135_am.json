@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 131,
+    "end_index": 135,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:08:20.228774+00:00"
+  },
+  "results": [
+    {
+      "filename": "v131.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ጠዋት የገብስ አጥሚት በደንብ ጠጥቻለሁ ምሳሌ ደግሞ የስንዴ ቂጣ በቅቤ በልቼዋለሁ ጉልበት እንዴ ሆነኝ",
+          "latency_seconds": 3.48
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ጣዋት የገብስ አጥሚት በደንብ ጠጥቻለሁ ምሳ ላይ ደግሞ የስንዴ ቂጣ በቅቤ በልቻለሁ ጉልበት እንዲሆነኝ",
+          "latency_seconds": 4.53
+        },
+        "gemini": {
+          "hypothesis_text": "ው ውሃውት የገብሳ ጭሚት በደንብ ጠጥቻቸው ምሳ ላይ ደግሞ የስንዴ ቂጣ በቁብ ይበልቻለሁ ጉልበት እንዴሆነው",
+          "latency_seconds": 23.42
+        }
+      }
+    },
+    {
+      "filename": "v132.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "በሱ ነው የሰሊጥ ገንፎ ወስጄዋለሁ ለህፃኑ እድገት ጥሩ ነው ስለተባልኩ ተጨማሪ ምግብ በደንብ እየወሰድኩ ነው።",
+          "latency_seconds": 5.17
+        },
+        "addis_ai": {
+          "hypothesis_text": "በሶና የሰሊጥ ገንፎ ወስጄዋለሁ ለህፃኑም ምድገት ጥሩ ነው ስለተባልኩ ተጨማሪ ምግብ በደንብ እየወሰድኩ ነው",
+          "latency_seconds": 4.41
+        },
+        "gemini": {
+          "hypothesis_text": "በሶና የሰሊጥ ገንፎ ወስጃለሁ ለህፃኑም ምግብ እጅ ጥሩ ነው ስለተባልኩ ተጨማሪ ምግብ በየወሰድኩ ነው።",
+          "latency_seconds": 4.91
+        }
+      }
+    },
+    {
+      "filename": "v133.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እንጀራ በአልጫ ስጋ ተመግቤያለሁ መክሰስ ላይ ደግሞ ተልባ ተበዝብጦ ተጥቻለሁ።",
+          "latency_seconds": 5.06
+        },
+        "addis_ai": {
+          "hypothesis_text": "እንጀራ በአልጫ ስጋ ተመግቤያለሁ መክሰስ ላይ ደግሞ ተልባ ተበዝብጦ ተሰጥቻለሁ",
+          "latency_seconds": 6.04
+        },
+        "gemini": {
+          "hypothesis_text": "እንጀራ አልጫ ስጋ ተመግቤያለሁ መክሰስ ላይ ደግሞ የተልባ ተበጥብጦ ተጠጥቻለሁ",
+          "latency_seconds": 3.9
+        }
+      }
+    },
+    {
+      "filename": "v134.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ የሽምብራ ሳና ወተት በደንብ ወስጃለሁ። የተመጣጠን እንዲሆንም ብርቱካን ጨምሬበታለሁ",
+          "latency_seconds": 3.54
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ። የሽምብራሳ እና ወተት በደንብ ወስጃለሁ፤ የተመጣጠን እንዲሆንም ብርቱካን ጨምሬበታለሁ።",
+          "latency_seconds": 4.11
+        },
+        "gemini": {
+          "hypothesis_text": "ኦ, የሽምብራ ሳና ውህደት ቫይታሚን B6 አለው። የተመጣጠነ እንዲሆንም ብርትኳን ጨምሬበታለሁ።",
+          "latency_seconds": 3.88
+        }
+      }
+    },
+    {
+      "filename": "v135.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes perfectly balanced mill ነው የወሰድኩት lanch ላይ እንጀራች በልቻለሁ then afternoo ላይ boild ech እና fruit naco",
+          "latency_seconds": 4.23
+        },
+        "addis_ai": {
+          "hypothesis_text": "የስ ፐርፌክትሊ ባላንስድ ሚል ነው የወሰድኩት ላንቺ ላይ እንጀራ ዊድ ሌንቴልስ ኤንድ ስፒናች በልቻለሁ ዘን አፍተርኑ ላይ ቦይልድ ኤግ እና ፍሩት ስናክ ወስጃለሁ",
+          "latency_seconds": 5.53
+        },
+        "gemini": {
+          "hypothesis_text": "Yes perfectly balanced meal ነው ሰርኩት ላንች ላይ እንጀራ with lentils and spinach በልቻለሁ Then afternoon ላይ boiled egg እና fruit እናኮስጃለው",
+          "latency_seconds": 4.29
+        }
+      }
+    }
+  ]
+}

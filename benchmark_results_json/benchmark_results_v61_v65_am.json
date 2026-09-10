@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 61,
+    "end_index": 65,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:43:20.460798+00:00"
+  },
+  "results": [
+    {
+      "filename": "v61.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ማስመለስ የለም ጠዋት ጠዋት ግን የምግብ ሽታ ሲመጣብኝ ትንሽ ጨቅለሽ በኋላ ግን ይተዋኛል",
+          "latency_seconds": 3.84
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ማስመለስ የለም ጠዋት ጠዋት ግን የምግብ ሽታ ሲመጣብኝ ትንሽ ያቅለሸልሸኛል በኋላ ግን ይተወኛል።\"",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "ማስመለስ የለም። ጧት ጧት ግን የምግብ ሽታ ሲመጣብኝ ትንሽ ያቅለሸልሸኛል። በኋላ ግን ይተውኛል።",
+          "latency_seconds": 7.8
+        }
+      }
+    },
+    {
+      "filename": "v62.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "የሚፈስ ፈሳሽ የለም ህጻኑ ወደ ታች ሲገፋኝ ግን ሽንት ቤት ቶሎ ቶሎ መመላለስ አበዛ እንጂ ህመም አይሰማኝም",
+          "latency_seconds": 3.48
+        },
+        "addis_ai": {
+          "hypothesis_text": "የሚፈስ ፈሳሽ የለም ህፃኑ ወደ ታች ሲገፋኝ ግን ሽንት ቤት ቶሎ ቶሎ መመላለስ አበዛለሁ እንጂ ህመም አይሰማኝም",
+          "latency_seconds": 3.42
+        },
+        "gemini": {
+          "hypothesis_text": "የሚፈስ ፈሳሽ የለም ህፃኑ ወደታች ሲገፋኝ ግን ሽንት ቤት ቶሎ ቶሎ መመላለስ አብዝቻለሁ እንጂ ህመም አይሰማኝም",
+          "latency_seconds": 9.42
+        }
+      }
+    },
+    {
+      "filename": "v63.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አልፎ አልፎ ሆዴ ጥብቅ ይላል ግን አይቆርጠኝም ቶሎ የሚለቀው አለ። የማቋረጥ ህመም አይደለም",
+          "latency_seconds": 3.43
+        },
+        "addis_ai": {
+          "hypothesis_text": "አልፎ አልፎ ሆዴ ጥብቅ ይላል ግን አይቆርጠኝም ቶሎም ይለቀዋል የማቋረጥ ህመም አይደለም",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "አልፋልፋው ሆዴ ይጠብቅ ይላል ግን አይቆርጠኝም ቶሎም ይለቀኛል የመቁረጥ ህመም አይደለም",
+          "latency_seconds": 4.7
+        }
+      }
+    },
+    {
+      "filename": "v64.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እረ እንደዚህ አይነት ከባድ ነገር የለም የተለመደው የሆድ መክበድና የጀርባ ህመም ብቻ ነው።",
+          "latency_seconds": 3.22
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ኧረ እንደዚህ ዓይነት ከባድ ነገር የለም። የተለመደው የሆድ መክበድና የጀርባ ህመም ብቻ ነው።",
+          "latency_seconds": 3.76
+        },
+        "gemini": {
+          "hypothesis_text": "ኧረ እንደዚህ አይነት ከባድ ነገር የለም የተለመደው የሆድ መክበድና የጀርባ ህመም ብቻ ነው",
+          "latency_seconds": 5.05
+        }
+      }
+    },
+    {
+      "filename": "v65.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ምንም የሚያሰጋ ነገር አይሰማኝም ልጁ አልፎ አልፎ ሲረግጠኝ ከሚሰማኝ በፊት ውጪ ሰላሜ",
+          "latency_seconds": 3.13
+        },
+        "addis_ai": {
+          "hypothesis_text": "ምንም የሚያሰጋ ነገር አይሰማኝም ልጁ አልፎ አልፎ ሲረግጠኝ ከሚሰማኝ ከፊት ውጪ ሰላም ነኝ",
+          "latency_seconds": 4.05
+        },
+        "gemini": {
+          "hypothesis_text": "ምንም የሚያሰጋ ነገር አይሰማኝም። ልጁ አልፎ አልፎ ሲረግጠኝ ከሚሰማኝ ውጪ ሰላም ነኝ።",
+          "latency_seconds": 9.15
+        }
+      }
+    }
+  ]
+}

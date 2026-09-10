@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 165,
+    "end_index": 169,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:21:03.092753+00:00"
+  },
+  "results": [
+    {
+      "filename": "v165.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No, I haven't felt anything, and the baby's kicking. Well, I'm fine.",
+          "latency_seconds": 5.67
+        },
+        "deepgram": {
+          "hypothesis_text": "No. I haven't felt anything, and the baby's kicking well. I'm fine.",
+          "latency_seconds": 3.35
+        },
+        "gemini": {
+          "hypothesis_text": "No, I haven't felt anything and the baby's kicking well. I'm fine.",
+          "latency_seconds": 4.23
+        }
+      }
+    },
+    {
+      "filename": "v166.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Nothing at all today. I actually feel much better. I'm even doing my house chores.",
+          "latency_seconds": 5.06
+        },
+        "deepgram": {
+          "hypothesis_text": "Nothing at all today. I actually feel much better. I'm even doing my house chores.",
+          "latency_seconds": 3.79
+        },
+        "gemini": {
+          "hypothesis_text": "Nothing at all today. I actually feel much better. I'm even doing my house chores.",
+          "latency_seconds": 10.55
+        }
+      }
+    },
+    {
+      "filename": "v167.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "None of the ones you mentioned have happened to me, thank God.",
+          "latency_seconds": 4.67
+        },
+        "deepgram": {
+          "hypothesis_text": "None of the ones you mentioned have happened on me. Thank god.",
+          "latency_seconds": 3.43
+        },
+        "gemini": {
+          "hypothesis_text": "None of the ones you mentioned have happened on me. Thank God.",
+          "latency_seconds": 3.76
+        }
+      }
+    },
+    {
+      "filename": "v168.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Neither headache nor stomachache, I just feel a bit of insomnia.",
+          "latency_seconds": 4.81
+        },
+        "deepgram": {
+          "hypothesis_text": "Neither headache nor stomach ache. I just feel a bit insomnia.",
+          "latency_seconds": 3.22
+        },
+        "gemini": {
+          "hypothesis_text": "Neither headache nor a stomachache. I just feel a bit insomnia.",
+          "latency_seconds": 3.95
+        }
+      }
+    },
+    {
+      "filename": "v169.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Everything is fine, there is no scary symptom.",
+          "latency_seconds": 5.05
+        },
+        "deepgram": {
+          "hypothesis_text": "Everything is fine. There is no scary symptom.",
+          "latency_seconds": 3.34
+        },
+        "gemini": {
+          "hypothesis_text": "Everything is fine. There is no scary symptom.",
+          "latency_seconds": 3.83
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 150,
+    "end_index": 154,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:15:29.471703+00:00"
+  },
+  "results": [
+    {
+      "filename": "v150.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My head doesn't hurt, but since the afternoon, my eyes are very blurry. I can't see things clearly.",
+          "latency_seconds": 5.17
+        },
+        "deepgram": {
+          "hypothesis_text": "My head doesn't hurt, but since the afternoon, my eyes are really blurry. I can't see things clearly.",
+          "latency_seconds": 4.06
+        },
+        "gemini": {
+          "hypothesis_text": "My head doesn't hurt bad since the afternoon. My eyes are really blurry. I can't see things clearly.",
+          "latency_seconds": 4.59
+        }
+      }
+    },
+    {
+      "filename": "v151.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, when I went to the bathroom, I saw some blood. It has really scared me.",
+          "latency_seconds": 4.3
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. When I went to the bathroom, I saw some blood. It has really scared me.",
+          "latency_seconds": 4.3
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, when I went to the bathroom, I saw some blood. It has really scared me.",
+          "latency_seconds": 3.89
+        }
+      }
+    },
+    {
+      "filename": "v152.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "It's not urine. A watery, clear fluid is leaking continuously. Oh, my clothes are soaked.",
+          "latency_seconds": 6.09
+        },
+        "deepgram": {
+          "hypothesis_text": "It's not rain. A watery, clear fluid is leaking continuously. All my clothes are soaked.",
+          "latency_seconds": 3.99
+        },
+        "gemini": {
+          "hypothesis_text": "It's not urine. A watery clear fluid is leaking continuously. All my clothes are soaked.",
+          "latency_seconds": 5.43
+        }
+      }
+    },
+    {
+      "filename": "v153.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My abdomen is cramping severely. I can neither stand nor sit.",
+          "latency_seconds": 5.07
+        },
+        "deepgram": {
+          "hypothesis_text": "My abdomen is cramping severely. I can neither stand nor sit.",
+          "latency_seconds": 3.83
+        },
+        "gemini": {
+          "hypothesis_text": "My abdomen is cramping severely. I can neither stand nor sit.",
+          "latency_seconds": 3.96
+        }
+      }
+    },
+    {
+      "filename": "v154.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My hands and face are very swollen, my ring doesn't come off, and my eyes are puffy.",
+          "latency_seconds": 5.2
+        },
+        "deepgram": {
+          "hypothesis_text": "My hands and face are very swollen. My ring won't come off and my eyes are puffy.",
+          "latency_seconds": 4.01
+        },
+        "gemini": {
+          "hypothesis_text": "My hands and face are very swollen, my ring won't come off, and my eyes are puffy.",
+          "latency_seconds": 4.03
+        }
+      }
+    }
+  ]
+}

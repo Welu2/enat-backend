@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 175,
+    "end_index": 179,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:25:03.325090+00:00"
+  },
+  "results": [
+    {
+      "filename": "v175.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Since last night, the baby's kicks have decreased a lot, and today it hasn't moved even once.",
+          "latency_seconds": 5.71
+        },
+        "deepgram": {
+          "hypothesis_text": "Since last night, the baby's hips have decreased a lot, and today, it hasn't moved even once.",
+          "latency_seconds": 3.68
+        },
+        "gemini": {
+          "hypothesis_text": "Since last night the baby's kicks have decreased a lot and today it hasn't moved even once.",
+          "latency_seconds": 4.19
+        }
+      }
+    },
+    {
+      "filename": "v176.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I can't breathe, I can't draw air in, and my heart is beating so fast.",
+          "latency_seconds": 5.21
+        },
+        "deepgram": {
+          "hypothesis_text": "I can't breathe. I can't draw air in, and my heart is beating so fast.",
+          "latency_seconds": 3.56
+        },
+        "gemini": {
+          "hypothesis_text": "I can't breathe, I can't draw air in and my heart is beating so fast.",
+          "latency_seconds": 3.28
+        }
+      }
+    },
+    {
+      "filename": "v177.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Even if I drink water, it comes back up. Today alone, I've thrown up over 10 times. I'm utterly exhausted.",
+          "latency_seconds": 5.83
+        },
+        "deepgram": {
+          "hypothesis_text": "Even if I drink water, it comes back up. Today alone, I've thrown up over 10 times. I'm utterly exhausted.",
+          "latency_seconds": 3.49
+        },
+        "gemini": {
+          "hypothesis_text": "Even if I drink water, it comes back up. Today alone, I've thrown up over 10 times. I'm utterly exhausted.",
+          "latency_seconds": 4.3
+        }
+      }
+    },
+    {
+      "filename": "v178.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My body is burning like fire. It's shaking me with chills and soaking my clothes.",
+          "latency_seconds": 5.01
+        },
+        "deepgram": {
+          "hypothesis_text": "My body is burning like fire. It's shaking me with chills and soaking my clothes.",
+          "latency_seconds": 3.4
+        },
+        "gemini": {
+          "hypothesis_text": "My body is burning like fire. It's shaking me with chills and soaking my clothes.",
+          "latency_seconds": 3.76
+        }
+      }
+    },
+    {
+      "filename": "v179.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My back feels like it's snapping deep inside the bone. I can't even turn around in bed.",
+          "latency_seconds": 4.31
+        },
+        "deepgram": {
+          "hypothesis_text": "My back feels like it's snapping deep inside the bone. I can't even turn around a bit.",
+          "latency_seconds": 2.85
+        },
+        "gemini": {
+          "hypothesis_text": "My back feels like it's napping deep inside the bone. I can't even turn around in bed.",
+          "latency_seconds": 3.5
+        }
+      }
+    }
+  ]
+}

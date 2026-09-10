@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 195,
+    "end_index": 199,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:32:23.023631+00:00"
+  },
+  "results": [
+    {
+      "filename": "v195.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "As the weight of my belly increases, my hips and lower back feel weary, but when I lie down, it gets better.",
+          "latency_seconds": 5.39
+        },
+        "deepgram": {
+          "hypothesis_text": "As the weight of my belly increases, my hips and lower back feel weary. But when I lie down, it gets better.",
+          "latency_seconds": 4.01
+        },
+        "gemini": {
+          "hypothesis_text": "As the weight of my belly increases, my hips and lower back feel weary, but when I lie down, it gets better.",
+          "latency_seconds": 3.99
+        }
+      }
+    },
+    {
+      "filename": "v196.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "At night, my cuffs cramp or stiffen, but during the day I feel no pain.",
+          "latency_seconds": 4.48
+        },
+        "deepgram": {
+          "hypothesis_text": "At night, my calves cramp or stiffen, but during the day, I feel no pain.",
+          "latency_seconds": 3.78
+        },
+        "gemini": {
+          "hypothesis_text": "At nights my calves cramp or stiffen, but during the day, I feel no pain.",
+          "latency_seconds": 3.87
+        }
+      }
+    },
+    {
+      "filename": "v197.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My hands and face are not swollen because I stood for long hours. My ankles are slightly puffy, but it goes away when I elevate my feet.",
+          "latency_seconds": 5.05
+        },
+        "deepgram": {
+          "hypothesis_text": "My hands and face are not swollen because I stood for long hours. My ankles are slightly puffy, but it goes away when I elevate my feet.",
+          "latency_seconds": 4.03
+        },
+        "gemini": {
+          "hypothesis_text": "My hands and face are not swollen, because I stood for long hours, my ankles are slightly puffy. But it goes away when I elevate my feet.",
+          "latency_seconds": 4.7
+        }
+      }
+    },
+    {
+      "filename": "v198.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I don't have a headache, I just feel heavy sleepiness and general exhaustion.",
+          "latency_seconds": 5.54
+        },
+        "deepgram": {
+          "hypothesis_text": "I don't have a headache. I just feel heavy sleepiness and general exhaustion.",
+          "latency_seconds": 3.61
+        },
+        "gemini": {
+          "hypothesis_text": "I don't have a headache. I just feel heavy sleepiness and general exhaustion.",
+          "latency_seconds": 3.7
+        }
+      }
+    },
+    {
+      "filename": "v199.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My vision isn't dim or clouded. When I got out of bed quickly, I had a slight dizziness, but after sitting for a bit, it's left.",
+          "latency_seconds": 4.52
+        },
+        "deepgram": {
+          "hypothesis_text": "My vision isn't dim or clouded. When I go out of bed quickly, I had a slight dizziness, but after sitting for a bit, it's left.",
+          "latency_seconds": 3.63
+        },
+        "gemini": {
+          "hypothesis_text": "My vision isn't dim or clouded. When I go out of bed quickly, I had a slight dizziness, but after sitting for a bit, it's left.",
+          "latency_seconds": 3.54
+        }
+      }
+    }
+  ]
+}

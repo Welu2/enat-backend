@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 215,
+    "end_index": 219,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:39:16.739354+00:00"
+  },
+  "results": [
+    {
+      "filename": "v215.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I didn't eat extra. I had tea and kita in the morning, and now for lunch I just ate a little rice.",
+          "latency_seconds": 4.49
+        },
+        "deepgram": {
+          "hypothesis_text": "I didn't eat extra. I had tea and eat, in the morning. And now for lunch, I just ate a little rice.",
+          "latency_seconds": 3.9
+        },
+        "gemini": {
+          "hypothesis_text": "I didn't eat extra. I had tea and eat uh in the morning and now for lunch, I just ate a little rice.",
+          "latency_seconds": 3.89
+        }
+      }
+    },
+    {
+      "filename": "v216.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Because there wasn't enough food at home, I only ate once. I couldn't get an extra meat.",
+          "latency_seconds": 4.98
+        },
+        "deepgram": {
+          "hypothesis_text": "Because there wasn't enough food at home, I only ate once. I couldn't get an extra meat.",
+          "latency_seconds": 3.73
+        },
+        "gemini": {
+          "hypothesis_text": "Because there wasn't enough food at home, I only ate once. I couldn't get an extra meats.",
+          "latency_seconds": 3.85
+        }
+      }
+    },
+    {
+      "filename": "v217.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I couldn't eat because the nausea wouldn't stop. All I ate was a little tea and biscuits. I couldn't take an extra meal.",
+          "latency_seconds": 5.26
+        },
+        "deepgram": {
+          "hypothesis_text": "I couldn't eat because the nausea wouldn't stop. All I ate was a little tea and biscuits. I couldn't take an extra meal.",
+          "latency_seconds": 4.0
+        },
+        "gemini": {
+          "hypothesis_text": "I couldn't eat because the nausea wouldn't stop. All I ate was a little tea and biscuits. I couldn't take an extra meal.",
+          "latency_seconds": 4.19
+        }
+      }
+    },
+    {
+      "filename": "v218.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Because heartburn was burning my chest, I didn't take any food. I couldn't even hold down water. Where would an extra meal come from?",
+          "latency_seconds": 5.06
+        },
+        "deepgram": {
+          "hypothesis_text": "Because heartburn was burning my chest, I didn't take any food. I couldn't even hold the water. Where would an extra meal come from?",
+          "latency_seconds": 3.17
+        },
+        "gemini": {
+          "hypothesis_text": "Because heartburn was burning my chest, I didn't take any food. I couldn't even hold down water. Where would an extra meal come from?",
+          "latency_seconds": 3.69
+        }
+      }
+    },
+    {
+      "filename": "v219.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My appetite is completely blocked. In the morning, I force down 1 banana, but my stomach won't accept food.",
+          "latency_seconds": 4.75
+        },
+        "deepgram": {
+          "hypothesis_text": "My appetite is completely blocked. In the morning, I forced down one banana, but my stomach won't accept food.",
+          "latency_seconds": 2.94
+        },
+        "gemini": {
+          "hypothesis_text": "My appetite is completely blocked. In the morning, I forced down one banana, but my stomach won't accept food.",
+          "latency_seconds": 4.04
+        }
+      }
+    }
+  ]
+}

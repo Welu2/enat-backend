@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 220,
+    "end_index": 224,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:41:02.188224+00:00"
+  },
+  "results": [
+    {
+      "filename": "v220.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Because the smell of food makes me vomit, I haven't eaten anything. I spent today fasting.",
+          "latency_seconds": 4.75
+        },
+        "deepgram": {
+          "hypothesis_text": "Because the smell of food makes me vomit, I haven't eaten anything. I spent today fasting.",
+          "latency_seconds": 3.71
+        },
+        "gemini": {
+          "hypothesis_text": "Because the smell food makes me vomit, I haven't eaten anything. I spent today fasting.",
+          "latency_seconds": 3.11
+        }
+      }
+    },
+    {
+      "filename": "v221.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, in the morning I drank plenty of barley admit, and for lunch, barley and wheat kita with spiced batter was served for me to give me strength.",
+          "latency_seconds": 5.3
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. In the morning, I drank plenty of barley ad meat. And for lunch, barley and wheat with spiced butter was served for me to give me strength.",
+          "latency_seconds": 5.94
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, in the morning, I drank plenty of barley oatmeal, and for lunch, barley and wheat Kicha with spiced butter was served for me to give me strength.",
+          "latency_seconds": 4.71
+        }
+      }
+    },
+    {
+      "filename": "v222.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I took Bessel and Sesame Ganfo because I was told it's good for the baby's growth. I'm taking extra food properly.",
+          "latency_seconds": 6.02
+        },
+        "deepgram": {
+          "hypothesis_text": "I took Beso and Sesame GANFOLD because I was told it's good for the baby's growth, taking extra food properly.",
+          "latency_seconds": 4.65
+        },
+        "gemini": {
+          "hypothesis_text": "I took Beso and Sasmegan 4 because I was told it's good for the baby's growth and picking extra food properly.",
+          "latency_seconds": 4.19
+        }
+      }
+    },
+    {
+      "filename": "v223.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I ate in general with Midsteel, and for snack, I drank roasted flaxseed mixed with water.",
+          "latency_seconds": 5.31
+        },
+        "deepgram": {
+          "hypothesis_text": "I ate injera with meat stew. And for snack, I drank roasted flaxseed mixed with water.",
+          "latency_seconds": 3.76
+        },
+        "gemini": {
+          "hypothesis_text": "I ate cereal with milk stew and for snack I drank roasted flaxseed mixed with water.",
+          "latency_seconds": 4.03
+        }
+      }
+    },
+    {
+      "filename": "v224.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, I took roasted chickpea snack and milk properly, and to make it balanced, I added an orange.",
+          "latency_seconds": 4.9
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. I took roasted chickpea snack and milk properly. And to make it balanced, I added an orange.",
+          "latency_seconds": 3.33
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, I took roasted chickpea snack and milk properly. And to make it balanced, I added an orange.",
+          "latency_seconds": 3.58
+        }
+      }
+    }
+  ]
+}

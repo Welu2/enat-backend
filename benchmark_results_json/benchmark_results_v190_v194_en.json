@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 190,
+    "end_index": 194,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:30:30.497166+00:00"
+  },
+  "results": [
+    {
+      "filename": "v190.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I don't understand by fluid. Do you mean urine or something else? Because today I'm urinating frequently, but I have no pain.",
+          "latency_seconds": 5.64
+        },
+        "deepgram": {
+          "hypothesis_text": "I don't understand by fluid. Do you mean, you rain or something else? Because today, I'm urinating frequently, but I have no pain.",
+          "latency_seconds": 3.77
+        },
+        "gemini": {
+          "hypothesis_text": "I don't understand by fluid. Do you mean urine or something else? Because today I'm urinating frequently, but I have no pain.",
+          "latency_seconds": 3.81
+        }
+      }
+    },
+    {
+      "filename": "v191.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "None of the pain you mentioned, but after I eat, heartburn hurts my chest. I can't even keep water down.",
+          "latency_seconds": 4.44
+        },
+        "deepgram": {
+          "hypothesis_text": "None of the pain you mentioned, but after I eat, heartburn hurts my chest. I can't even keep water down.",
+          "latency_seconds": 4.3
+        },
+        "gemini": {
+          "hypothesis_text": "None of the pain you mentioned, but after I eat, hurts burn, hurts my chest. I can't even keep water down.",
+          "latency_seconds": 4.1
+        }
+      }
+    },
+    {
+      "filename": "v192.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "It's not severe pain because I have constipation and bloating. My belly just feels a bit heavy.",
+          "latency_seconds": 4.85
+        },
+        "deepgram": {
+          "hypothesis_text": "It's not severe pain because I have constipation and bloating. My belly just feels a bit heavy.",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "It's not severe pain because I have constipation and bloating. My belly just feels a bit heavy.",
+          "latency_seconds": 4.3
+        }
+      }
+    },
+    {
+      "filename": "v193.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Because the skin of my abdomen is stretching, it started itching, but there are no cramps or sharp abdominal pain.",
+          "latency_seconds": 4.43
+        },
+        "deepgram": {
+          "hypothesis_text": "Because the skin on my abdomen is stretching, it started itching, but there are no crumbs or sharp abdominal pain.",
+          "latency_seconds": 4.11
+        },
+        "gemini": {
+          "hypothesis_text": "Because this kind of my abdomen is stretching it started itching, but there are no crumbs or sharp abdominal pain.",
+          "latency_seconds": 4.15
+        }
+      }
+    },
+    {
+      "filename": "v194.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "When I stand up, suddenly my side pulls slightly, but it stops right away. It's not severe pain.",
+          "latency_seconds": 6.24
+        },
+        "deepgram": {
+          "hypothesis_text": "When I stand up, suddenly my side pulls slightly, but it stops right away. It's not severe pain.",
+          "latency_seconds": 4.32
+        },
+        "gemini": {
+          "hypothesis_text": "When I stand up suddenly my side pulls slightly, but it stops right away. It's not severe pain.",
+          "latency_seconds": 6.03
+        }
+      }
+    }
+  ]
+}

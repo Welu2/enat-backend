@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 76,
+    "end_index": 80,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:49:51.526424+00:00"
+  },
+  "results": [
+    {
+      "filename": "v76.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes በጣም servious headache አለብኝ parastamol ወስጄ relief ሊሰጠኝ አልቻለም",
+          "latency_seconds": 3.52
+        },
+        "addis_ai": {
+          "hypothesis_text": "የስ በጣም ሰፊው ሄዴክ አለብኝ ፓራስታሞል ወስጄ ሪሊፍ ሊሰጠኝ አልቻለም",
+          "latency_seconds": 4.0
+        },
+        "gemini": {
+          "hypothesis_text": "Yes በጣም severe headache አለብኝ Paracetamol ወስጄ relief ሊሰጠኝ አልቻለም",
+          "latency_seconds": 2.86
+        }
+      }
+    },
+    {
+      "filename": "v77.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ራሴን አያመኝም but my vision is blury screen ወይም ሰው በደንብ focus ማድረግ አልቻልኩም",
+          "latency_seconds": 3.58
+        },
+        "addis_ai": {
+          "hypothesis_text": "ራሴን አያመኝም በት ማይ ቪዥን ኢዝ ብለሪ ስክሪን ወይም ሰው በደንብ ፎከስ ማድረግ አልቻልኩም",
+          "latency_seconds": 3.95
+        },
+        "gemini": {
+          "hypothesis_text": "ዳዴና እመኝም በቲስ ማይ ቪዥን ኢዝ ስፕሪ ስክሪን ዌይ ሰብ በደንብ ፎከስ ማድረግ አልቻልኩም።",
+          "latency_seconds": 3.89
+        }
+      }
+    },
+    {
+      "filename": "v78.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ኦይሊንግ ጋር አይቻለው I'm really worried",
+          "latency_seconds": 3.43
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ቶይሌት ስሄድ ፈጃይናል ብሊዲንግ ጋር አይቻለሁ አም ሪሊ ወሪድ",
+          "latency_seconds": 4.1
+        },
+        "gemini": {
+          "hypothesis_text": "Oh toilet sight vaginal bleeding I'm really worried",
+          "latency_seconds": 3.69
+        }
+      }
+    },
+    {
+      "filename": "v79.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሽንቴ ሳይሆን continuous የሆነ fluid አለ። my water brok መሰለኝ",
+          "latency_seconds": 3.41
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሽንቴ ሳይሆን ኮንቲኒየስ የሆነ ፍሉድ አለ ማይ ዋተር ብሩክ መሰለኝ",
+          "latency_seconds": 3.51
+        },
+        "gemini": {
+          "hypothesis_text": "ጤንጤ ሳይሆን ኮንቲኒየስ የሆነ ፍሉይ እንዳለ ማይዋተር ብሮክ መሰለኝ",
+          "latency_seconds": 3.28
+        }
+      }
+    },
+    {
+      "filename": "v80.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ህመም የለምበት fatal movement ሙሉ በሙሉ ቆሟል። sincer ምንም ኪል ተሰማኝ",
+          "latency_seconds": 3.23
+        },
+        "addis_ai": {
+          "hypothesis_text": "ህመም የለም በት ፌታል ሙቭመንት ሙሉ በሙሉ ቆሟል ሲንስ ያስደርደይ ምንም ኪክ አልተሰማኝም",
+          "latency_seconds": 3.68
+        },
+        "gemini": {
+          "hypothesis_text": "ሃማም የለም በትፌታል ሙቭመንት ሙሉ በሙሉ ቆሟል ሲንስ ያስጀመረኝ ምንም ኪክ አልተሰማኝም",
+          "latency_seconds": 3.59
+        }
+      }
+    }
+  ]
+}

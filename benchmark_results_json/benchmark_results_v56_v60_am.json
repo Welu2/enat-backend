@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 56,
+    "end_index": 60,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:41:24.890415+00:00"
+  },
+  "results": [
+    {
+      "filename": "v56.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሌሊት ባቴ ይዘኛል ወይም ይሻማቀዋል። ቀን ግን ምንም ህመም አይሰማኝም",
+          "latency_seconds": 3.14
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሌሊት ሌሊት ባቴን ይዘኛል ወይም ይሸማቀቃል ቀን ግን ምንም ህመም አይሰማኝም",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "ሌሊት ሌሊት ባቴ ይይዘኛል ወይም ይሸማቀቃል ቀን ቀን ምንም ህመም አይሰማኝም",
+          "latency_seconds": 6.76
+        }
+      }
+    },
+    {
+      "filename": "v57.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እግሮቼ ወይም ፊቴ አልተነፋፉም ረጅም ሰዓት ስለቆምኩ ግን ቁርጭም ጭኝቴ አካባቢ አብጧዋል",
+          "latency_seconds": 3.42
+        },
+        "addis_ai": {
+          "hypothesis_text": "እግሮቼ ወይም ፊቴ አልተነፋፉም። ረጅም ሰዓት ስለቆምኩ ግን ቁርጭምጭኝቴ አካባቢ አብጧል።",
+          "latency_seconds": 3.48
+        },
+        "gemini": {
+          "hypothesis_text": "እግሮቼ ወይም ፊቴ አልተነፋፉም። ረጅም ሰዓት ስለቆምኩ ግን ቁርጭምጭሚቴ አካባቢ አብጧል።",
+          "latency_seconds": 7.17
+        }
+      }
+    },
+    {
+      "filename": "v58.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ራስ ምታት የለብኝም የሚከብድ እንቅልፍ ማለት እና በአጠቃላይ ድካም ብቻ ነው የተሰማኝ",
+          "latency_seconds": 5.68
+        },
+        "addis_ai": {
+          "hypothesis_text": "ራስ ምታት የለብኝም በጣም የሚከብድ እንቅልፍ እንቅልፍ ማለት እና በአጠቃላይ ድካም ብቻ ነው የተሰማኝ",
+          "latency_seconds": 4.0
+        },
+        "gemini": {
+          "hypothesis_text": "ራስ ምታት የለብኝም በጣም የሚከብድ እንቅልፍ እንቅልፍ ማለት እና በአጠቃላይ ድካም ብቻ ነው የተሰማኝ",
+          "latency_seconds": 4.81
+        }
+      }
+    },
+    {
+      "filename": "v59.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አይኔ አልፈፀም ወይም አልተጋረደም ካልጋራዬ በድንገት ግን ትንሽ የማዞር ስሜት ነበረኝ ተቀምጬ ስቆይ ለቀቀኝ",
+          "latency_seconds": 3.03
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይኔ አልፈዝዝም ወይም አልተጋረደም ከአልጋ ላይ በድንገት ስነሳ ግን ትንሽ የማዞር ስሜት ነበረኝ ተቀም<0xE1><0x8C><0xAC> ስቆይ ለቀቀኝ",
+          "latency_seconds": 4.1
+        },
+        "gemini": {
+          "hypothesis_text": "አይኔ አልፈዘዘም ወይም አልተጋረደ። ከአልጋዬ በድንገት ስነሳ ግን ትንሽ የማዞር ስሜት ነበረኝ። ተቀምጬ ስቆይ ለቀቀኝ።",
+          "latency_seconds": 7.68
+        }
+      }
+    },
+    {
+      "filename": "v60.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ልጁ ወደ ላይ ገፍቶ ስለያዘኝ ደረጃ ስወጣ ትንሽ ያስተነፍሰኛል እንጂ የመታፈን አይነት ምልክት አይደለም",
+          "latency_seconds": 4.55
+        },
+        "addis_ai": {
+          "hypothesis_text": "ልጁ ወደ ላይ ጋፍቶ ስለያዘኝ ደረጃው ሲወጣ ትንሽ ያስነፍሰኛል እንጂ የመታፈን አይነት ምልክት አይደለም",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "ልጁ ወደ ላይ ጋፍቶ ስለአዘኝ ደረጃ ሶስት ትንሽ ያስነፍሰኛል እንጂ የመታፈን አይነት ምልክት አይደለም",
+          "latency_seconds": 11.0
+        }
+      }
+    }
+  ]
+}

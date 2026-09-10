@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 46,
+    "end_index": 50,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:37:53.262203+00:00"
+  },
+  "results": [
+    {
+      "filename": "v46.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እንዴት ልንገረም ግን ሮዝ የመሰለ ፈሳሽ ዛሬ ጠዋት አይቻለሁ ያ ችግር አለው",
+          "latency_seconds": 2.96
+        },
+        "addis_ai": {
+          "hypothesis_text": "እንዴት ልንገርህ ደግሞ አይደለም ግን ሮዝ የመሰለ ፈሳሽ ዛሬ ጠዋት አይቻለሁ ያ ችግር አለው",
+          "latency_seconds": 3.73
+        },
+        "gemini": {
+          "hypothesis_text": "እንዴት ልንገርህ? ደው አይደለም ግን ሮዝ የመሰለ ፈሳሽ ዛሬ ጠዋት አይቻለሁ። ያ ችግር አለው?",
+          "latency_seconds": 8.9
+        }
+      }
+    },
+    {
+      "filename": "v47.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ራሴን ያመኛል ግን ደም መፍሰስ ምናምን የሚባል ነገር የለም ሻይ ጠጣው ይተውኛል ብዬ አስባለሁ።",
+          "latency_seconds": 2.79
+        },
+        "addis_ai": {
+          "hypothesis_text": "ራሴን ያመኛል ግን ደም መብሰስ ምናምን የሚባል ነገር የለም ሻይ ብጠጣው ይተውኛል ብዬ አስባለሁ",
+          "latency_seconds": 4.22
+        },
+        "gemini": {
+          "hypothesis_text": "ራሴን ያመኛል ግን ደም መብሰስ ምናምን የሚባል ነገር የለም ሻይ ብጠጣ ይተወኛል ብዬ አስባለሁ።",
+          "latency_seconds": 8.87
+        }
+      }
+    },
+    {
+      "filename": "v48.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አይኔ የሚዥጎራው በመድሀኒቱም ምክንያት ይሁን ወይስ በህመሙ አላወቅ ግን ራሴን ያመኛል",
+          "latency_seconds": 3.19
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይኔ የሚሽጎረጎረው በመድሃኒቱ ምክንያት ይሆን ወይስ በህመሙ አላወቅኩም ግን ራሴን ያመኛል",
+          "latency_seconds": 3.29
+        },
+        "gemini": {
+          "hypothesis_text": "አይኔ የሚዥጎረጎረው በመድሃኒቱ ምክንያት ይሁን ወይስ በህመሙ አላወኩም ግን ራሴን ያመኛል",
+          "latency_seconds": 11.56
+        }
+      }
+    },
+    {
+      "filename": "v49.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሁዴን ይነፋኛል ቁርጠት አለው ቆይ ግን እንደዚህ አይነት ህመም መደበኛ ነው ወይስ clinically",
+          "latency_seconds": 2.86
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሆዴን ይነፋኛል ቁርጠታለው ቆይ ግን እንደዚህ አይነት ህመም መደበኛ ነው ወይስ ክሊኒክ ሊሂድ",
+          "latency_seconds": 3.05
+        },
+        "gemini": {
+          "hypothesis_text": "ሆዴን ይነፋኛል ቁርጠት አለው ቆይ ግን እንደዚህ አይነት ህመም መደበኛ ነው ወይስ ክሊኒክ ልሂድ",
+          "latency_seconds": 4.44
+        }
+      }
+    },
+    {
+      "filename": "v50.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አልገባኝም ፈሳሽ ማለት ሽንት ነው ወይስ ሌላ ምክንያቱም ዛሬ ቶሎ ቶሎ ስሻራ ነበር ህመም ግን የለኝም",
+          "latency_seconds": 5.66
+        },
+        "addis_ai": {
+          "hypothesis_text": "አልገባኝም ፈሳሽ ማለት ሽንት ነው ወይስ ሌላ ምክንያቱም ዛሬ ቶሎ ቶሎ ስሸና ነበር ህመም ግን የለኝም",
+          "latency_seconds": 5.4
+        },
+        "gemini": {
+          "hypothesis_text": "አልገባኝም ፈሳሽ ማለት ሽንት ነው ወይስ ሌላ ምክንያቱም ዛሬ ቶሎ ቶሎ እሸና ነበር ህመም ግን የለኝም",
+          "latency_seconds": 5.4
+        }
+      }
+    }
+  ]
+}

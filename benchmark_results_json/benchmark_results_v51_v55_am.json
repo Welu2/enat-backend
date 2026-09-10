@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 51,
+    "end_index": 55,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:39:33.336660+00:00"
+  },
+  "results": [
+    {
+      "filename": "v51.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "የጠቀስከው ህመም የለም ግን ምግብ ከበላሁ በኋላ ቃል ደራሴን ያቃጥለኛል ውሃም ማሳረግ አልቻልኩም",
+          "latency_seconds": 4.11
+        },
+        "addis_ai": {
+          "hypothesis_text": "የጠቀስከው ህመም የለም ግን ምግብ ከበላሁ በኋላ ደረቴን ያቃጥለኛል ውሃም ማሳረግ አልቻልኩም",
+          "latency_seconds": 3.48
+        },
+        "gemini": {
+          "hypothesis_text": "የተቀሰቀሰ ህመም የለም ግን ምግብ ከበላሁ በኋላ ቃር ደረቴን ያቃጥለኛል ውሃም ማሳረግ አልቻልኩም",
+          "latency_seconds": 4.81
+        }
+      }
+    },
+    {
+      "filename": "v52.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ድርቀት ስላለብኝ እና ሆዴ ስለተነፋ ትንሽ መክድ ተሰምቶኛል።",
+          "latency_seconds": 4.25
+        },
+        "addis_ai": {
+          "hypothesis_text": "ጽኑ ህመም አይደለም የሆድ ድርቀት ስላለብኝና ሆዴ ስለተነፋ ትንሽ መክፈድ ተሰምቶኛል",
+          "latency_seconds": 4.3
+        },
+        "gemini": {
+          "hypothesis_text": "ጽኑ ህመም አይደለም የሆድ ድርቀት ስላለብኝና ሆዴ ስለተነፋ ትንሽ መክበድ ተሰምቶኛል",
+          "latency_seconds": 6.97
+        }
+      }
+    },
+    {
+      "filename": "v53.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሆዴ ስለተወጣጠረ ትንሽ ያሳክከኛል እንጂ ቁርጠት ወይም የሚወጋ የሆድ ህመም የለም",
+          "latency_seconds": 3.23
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሆዴ ስለተወጣጠረ ትንሽ ያሳክከኛል እንጂ ቁርጠት ወይም የሚወጋ የሆድ ህመም የለም",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "ሆዴ ስለተወጣጠረ ትንሽ ያሳክከኛል እንጂ ቁርጠት ወይም የሚወጋ የሆድ ህመም የለም",
+          "latency_seconds": 6.76
+        }
+      }
+    },
+    {
+      "filename": "v54.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ድንገት ስንነሳ ትንሽ ጎኒን ቆንጠጥ ያደርገኛል ግን ወዲያው ይቶኛል ጽኑ ህመም አይደለም",
+          "latency_seconds": 3.75
+        },
+        "addis_ai": {
+          "hypothesis_text": "ድንገት ስነሳ ትንሽ ጎኔን ቆንጠጥ ያደርገኛል ግን ወዲያው ይተወኛል ጽኑ ህመም አይደለም",
+          "latency_seconds": 3.98
+        },
+        "gemini": {
+          "hypothesis_text": "ድንገት ስነሳ ትንሽ ጎኔን ቆንጠጥ ያደርገኛል ግን ወዲያው ይተውኛል ፅኑ ህመም አይደለም",
+          "latency_seconds": 5.33
+        }
+      }
+    },
+    {
+      "filename": "v55.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሆዴ ክብደት ሲጨምር ዳሌ እና የታችኛው ወገቢ ዛሌ ያደረገ ጋደም ስር ግን ይሻለኛል።",
+          "latency_seconds": 3.63
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ሆዴ ክብደት ሲጨምር ዳሌ እና የታችኛው ወገቤ ዛል ያደርገኛል፣ ጋደም ስር ግን ይሻለኛል።",
+          "latency_seconds": 4.3
+        },
+        "gemini": {
+          "hypothesis_text": "ሆዴ ክብደት ሲጨምር ዳሌዬ እና የታችኛው ወገቤ ዛል ያደረገኛል ጋደም ስል ግን ይሻለኛል",
+          "latency_seconds": 5.94
+        }
+      }
+    }
+  ]
+}

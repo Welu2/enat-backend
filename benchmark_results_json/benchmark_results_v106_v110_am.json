@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 106,
+    "end_index": 110,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:59:19.949325+00:00"
+  },
+  "results": [
+    {
+      "filename": "v106.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "facial peffyiness አለብኝ my eyelid እና my fingers በጣም swill አርገዋል ቀለብቴ ራሱ በጣም እየወጠረ ነው።",
+          "latency_seconds": 3.65
+        },
+        "addis_ai": {
+          "hypothesis_text": "ፌሻል ተፊነስ አለብኝ ማይ አይሌድስ እና ማይ ፊንገርስ በጣም ስዌል አድርገዋል ቀለበቴ ራሱ በጣም እየወጠረኝ ነው",
+          "latency_seconds": 4.14
+        },
+        "gemini": {
+          "hypothesis_text": "facial pain አለብኝ ማይ አይለድስና ማይ ፊንገርስ በጣም swollen ይላልቀዋል ቀለበቴ ራሱ በጣም እየወጠረኝ ነው።",
+          "latency_seconds": 3.17
+        }
+      }
+    },
+    {
+      "filename": "v107.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I can't keep fluid down even areas ብጠጣ ራሱ vomit ነው የማደርገው",
+          "latency_seconds": 3.95
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይ ካንት ኪፕ ፍሉድ ዳውን ኢቭን ኦርስ ብጠጣ ራሱ <0xE1><0x89><0xAE>ሚት ነው ማረገው",
+          "latency_seconds": 4.46
+        },
+        "gemini": {
+          "hypothesis_text": "I can't keep food down. Even water isse bhedhatarasu vomiting namare ga.",
+          "latency_seconds": 5.07
+        }
+      }
+    },
+    {
+      "filename": "v108.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "high grade favor አለኝ thermo 39 አሳይተዋል። shaking chill",
+          "latency_seconds": 3.74
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሃይ ግሬድ ፌቨር አለኝ ቴርሞሜትሩ 39 አሳይቷል <0xE1><0x88><0xBC>ኪንግ ቺልስ ይሰማኛል",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "High-grade fever አሊኝ። ቴርሞሜትሩ 39 አሳይቶኛል። Shaking chill ሲሰማኛል።",
+          "latency_seconds": 4.1
+        }
+      }
+    },
+    {
+      "filename": "v109.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My headache በጣም unbarable now vision cloudy honwol my hand and face are completely swollen",
+          "latency_seconds": 4.24
+        },
+        "addis_ai": {
+          "hypothesis_text": "ማይ ሂዲክ በጣም አንበርብል ነው። ቪዥኒ ክላውዲ ሆንል ፕላስ ማይ ሃንድስ ኤንድ ፋስ አር ኮምፕሊትሊ ስዋርል።",
+          "latency_seconds": 4.51
+        },
+        "gemini": {
+          "hypothesis_text": "ማይ ሄዴክ በጣም አሜርብል ነው። ቪዥኔ ክላውዲ ሆኗል። my hands and face are completely swollen.",
+          "latency_seconds": 4.1
+        }
+      }
+    },
+    {
+      "filename": "v110.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Severe abdominal pain አለኝ sharp cromto with heavy bleeding I think I need an emergency trigh",
+          "latency_seconds": 5.89
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሰቪር አብዶሚናል ፔን አለኝ በጣም ሻርፕ ክራምፕ ነው ዊዝ ሄቪ ብሊዲንግ አይ ቲንክ አይ ኒድ ኤን ኢመርጀንሲ ትራይጅ",
+          "latency_seconds": 4.51
+        },
+        "gemini": {
+          "hypothesis_text": "severe abdominal pain አለኝ በጣም sharp cramp ነው with heavy bleeding I think I need an emergency triage",
+          "latency_seconds": 3.69
+        }
+      }
+    }
+  ]
+}

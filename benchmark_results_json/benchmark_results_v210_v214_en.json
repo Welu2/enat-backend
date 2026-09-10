@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 210,
+    "end_index": 214,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:37:31.583366+00:00"
+  },
+  "results": [
+    {
+      "filename": "v210.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "In the morning, I drank oat with milk. For lunch, I had doroid, and in the afternoon I took roasted kolo and peanuts with extra milk.",
+          "latency_seconds": 5.63
+        },
+        "deepgram": {
+          "hypothesis_text": "In the morning, I drank oats with milk for lunch. I had and in the afternoon, I took roasted colo and peanuts with extra milk.",
+          "latency_seconds": 4.17
+        },
+        "gemini": {
+          "hypothesis_text": "In the morning, I drank oats with milk. For lunch, I had Doro Wat, and in the afternoon, I took roasted colo and peanuts with extra milk.",
+          "latency_seconds": 4.12
+        }
+      }
+    },
+    {
+      "filename": "v211.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, I ate 4 times in general with shito and greens, and in between I added fruit juice and yogurt.",
+          "latency_seconds": 5.06
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. I ate four times injera with chorizo and greens. And in between, I added fruit juice and yogurt.",
+          "latency_seconds": 3.67
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, I ate four times and Jaro with shiitake and greens, and in between, I added fruit juice and yogurt.",
+          "latency_seconds": 4.12
+        }
+      }
+    },
+    {
+      "filename": "v212.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I didn't take an extra meal for morning and lunch. I just ate the usual in general, with sure, nothing different.",
+          "latency_seconds": 4.86
+        },
+        "deepgram": {
+          "hypothesis_text": "I didn't take an extra meal for morning and lunch. I just ate the usual injera with shawl. Nothing different.",
+          "latency_seconds": 3.76
+        },
+        "gemini": {
+          "hypothesis_text": "I didn't take an extra meal for morning and lunch. I just ate the usual in general which sure, nothing different.",
+          "latency_seconds": 3.41
+        }
+      }
+    },
+    {
+      "filename": "v213.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No, nothing extra. Today I only had bread with tea for breakfast, and I haven't eaten lunch yet.",
+          "latency_seconds": 5.27
+        },
+        "deepgram": {
+          "hypothesis_text": "No. Nothing extra. Today, I only had bread with tea for breakfast, and I haven't eaten lunch yet.",
+          "latency_seconds": 3.52
+        },
+        "gemini": {
+          "hypothesis_text": "No nothing extra. Today I only had bread with tea for breakfast and I hasn't eaten lunch yet.",
+          "latency_seconds": 3.96
+        }
+      }
+    },
+    {
+      "filename": "v214.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I didn't get anything nutritious. I only ate whatever split pea stew was in the house with Njar. There was no fruit or meat.",
+          "latency_seconds": 6.55
+        },
+        "deepgram": {
+          "hypothesis_text": "I didn't get anything nutritious. I only ate whatever split pea stew was in the house with injera. There was no fruit or meats.",
+          "latency_seconds": 4.04
+        },
+        "gemini": {
+          "hypothesis_text": "I didn't get anything nutritious. I only ate whatever split-pea stew was in the house with ginger. There was no fruit or meat.",
+          "latency_seconds": 4.12
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 185,
+    "end_index": 189,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:28:51.092444+00:00"
+  },
+  "results": [
+    {
+      "filename": "v185.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My breath is cattle. I can't breathe while sitting. My face and neck are also swollen.",
+          "latency_seconds": 6.07
+        },
+        "deepgram": {
+          "hypothesis_text": "My breath is scattered. I can't breathe while sitting. My face and neck are also swollen.",
+          "latency_seconds": 5.25
+        },
+        "gemini": {
+          "hypothesis_text": "My breath is cut short. I can't breathe while sitting. My face and neck are also swollen.",
+          "latency_seconds": 4.1
+        }
+      }
+    },
+    {
+      "filename": "v186.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "How do I tell you? It's not blood, but I saw a pinkish fluid this morning. Is that a problem?",
+          "latency_seconds": 5.18
+        },
+        "deepgram": {
+          "hypothesis_text": "How do I tell you? It's not blood, but I saw a pinkish fluid this morning. Is that a problem?",
+          "latency_seconds": 3.37
+        },
+        "gemini": {
+          "hypothesis_text": "Um, how do I tell you? It's not blood, but I saw a pinkish fluid this morning. Is that a problem?",
+          "latency_seconds": 4.29
+        }
+      }
+    },
+    {
+      "filename": "v187.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Oh, please, my head hurts, but there's no bleeding or anything like that. I was thinking maybe if I drink tea, it will pass.",
+          "latency_seconds": 5.13
+        },
+        "deepgram": {
+          "hypothesis_text": "Oh, please. My head hurts, but there is no breathing or anything like that. I was thinking maybe if I drink tea, it will pass.",
+          "latency_seconds": 3.82
+        },
+        "gemini": {
+          "hypothesis_text": "Oh, please. My head hurts, but there's no bleeding or anything like that. I was thinking maybe if I drink tea, it will pass.",
+          "latency_seconds": 4.17
+        }
+      }
+    },
+    {
+      "filename": "v188.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I don't know if my eyes are blurry because of the medication or the illness, but my head hurts.",
+          "latency_seconds": 4.64
+        },
+        "deepgram": {
+          "hypothesis_text": "I don't know if my eyes are blurry because of the medication or the illness, but my head hurts.",
+          "latency_seconds": 3.64
+        },
+        "gemini": {
+          "hypothesis_text": "I don't know if my eyes are blurry because of the medication or the illness, but my head hurts.",
+          "latency_seconds": 3.76
+        }
+      }
+    },
+    {
+      "filename": "v189.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My stomach is gassy, it has cramps, but wait, is this kind of pain normal, or should I go to the clinic?",
+          "latency_seconds": 5.2
+        },
+        "deepgram": {
+          "hypothesis_text": "My stomach is gassy. It has cramps. But wait. It's is this kind of pain normal, or should I go to the clinic?",
+          "latency_seconds": 3.7
+        },
+        "gemini": {
+          "hypothesis_text": "My stomach is gassy. It has cramps. But wait, it's is this kind of pain normal, or should I go to the clinic?",
+          "latency_seconds": 3.5
+        }
+      }
+    }
+  ]
+}

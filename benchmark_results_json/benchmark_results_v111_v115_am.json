@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 111,
+    "end_index": 115,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:01:09.310034+00:00"
+  },
+  "results": [
+    {
+      "filename": "v111.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ጥሩ ሽታ የሌለው fluid እየፈሰሰ ነው። high temperature no severe abdominal tenderness ovral",
+          "latency_seconds": 3.78
+        },
+        "addis_ai": {
+          "hypothesis_text": "ጥሩ ሽታ የሌለው ፍሉድ እየፈሰሰኝ ነው። ሃይ ቴምፕሬቸር እና ሰቪር አብዶሚናል ቴንደርነስ አብሯል።",
+          "latency_seconds": 5.14
+        },
+        "gemini": {
+          "hypothesis_text": "ጥሩ shutil ያለው ፍሉድ እየፈሰሰኝ ነው። High temperature no severe abdominal tenderness አብሯል።",
+          "latency_seconds": 3.6
+        }
+      }
+    },
+    {
+      "filename": "v112.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I'm confused discharge pinkish ነው this qualify as bleeding way normal mucus ነው",
+          "latency_seconds": 3.84
+        },
+        "addis_ai": {
+          "hypothesis_text": "አም ኮንፊውዝድ ዲስቻርጁ ፒንኪሽ ነው ደስ ዲስ ኳሊፋይስ ብሊዲንግ ወይስ ኖርማል ሚውከስ ነው",
+          "latency_seconds": 3.52
+        },
+        "gemini": {
+          "hypothesis_text": "I'm confused discharge pinkish no that's this qualifies bleeding with normal mucus no",
+          "latency_seconds": 2.85
+        }
+      }
+    },
+    {
+      "filename": "v113.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Dizziness አለኝ በ headache የለም suggere droper's a sign of hypertension",
+          "latency_seconds": 3.88
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዲዚነስ አለኝ በት ሄዴክ የለም ሹገሬ ዶፕ አድርጎ ይሆን ወይስ ኢትስ ኤ ሳይን ኦፍ ሃይፐርቴንሽን",
+          "latency_seconds": 3.57
+        },
+        "gemini": {
+          "hypothesis_text": "ድካም ስሜት አለኝ ብት ሄድኬ የለም ሡገር ይድሮፕ አርጎ ይሆን ወይስ ዘ ሳይን ኦፍ ሃይፐርቴንሽን",
+          "latency_seconds": 3.83
+        }
+      }
+    },
+    {
+      "filename": "v114.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "watery ፈሳሽ አለ። ግን control ማድረግ እችላለሁ። urine leakage ይሆን ወይስ Aminotic fluid እርግጠኛ አይደለሁም",
+          "latency_seconds": 4.72
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዋተሪ ፈሳሽ አለ ግን ኮንትሮል ማድረግ እችላለሁ ዩሪን ሊኬጅ ይሆን ወይስ አሚኖቲክ ፍሉድ እርግጠኛ አይደለሁም",
+          "latency_seconds": 4.31
+        },
+        "gemini": {
+          "hypothesis_text": "ውሃ ተረፍ ይሰማሻል? ግን ኮንትሮል ማድረግ ትችላለህ? ዩሪን ሊኬጅ ይሆን ወይስ አሚኖቲክ ፍሉድ እርግጠኛ አይደለሁም።",
+          "latency_seconds": 4.0
+        }
+      }
+    },
+    {
+      "filename": "v115.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "a little bet low back አለኝ nothing severe ግን irregular contractions ይመስላል should I wary",
+          "latency_seconds": 3.31
+        },
+        "addis_ai": {
+          "hypothesis_text": "አሊትል ቤት ሎር ባክ ኤክ አለኝ ነቲንግ ሳይቪር ግን ኢሬጉላር ኮንትራክሽንስ ይመስላል ሹድ አይ ወሪ",
+          "latency_seconds": 4.72
+        },
+        "gemini": {
+          "hypothesis_text": "a little bit lower back pain አለኝ nothing severe ግን irregular contractions ይመስላል Should I worry?",
+          "latency_seconds": 4.08
+        }
+      }
+    }
+  ]
+}

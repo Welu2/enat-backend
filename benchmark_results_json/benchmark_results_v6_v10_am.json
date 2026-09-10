@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 6,
+    "end_index": 10,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T01:35:50Z"
+  },
+  "results": [
+    {
+      "filename": "v6.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ጽኑ ህመም አይደለም ግን ትንሾ ገቢን ሸክም ስለበዛበት ይቆረጥመኛል ሌላው ደህና ነው።",
+          "latency_seconds": 4.86
+        },
+        "addis_ai": {
+          "hypothesis_text": "ጽኑ ህመም አይደለም ግን ትንሹ ገቢን ሸክም ስለበዛበት ይቆረጥመኛል። ሌላው ደህና ነው።",
+          "latency_seconds": 3.68
+        },
+        "gemini": {
+          "hypothesis_text": "ጽኑ ህመም አይደለም ግን ትንሽ ወገبیን ሸክም ስለበዛበት ይቆረጥመኛል ሌላው ደህና ነው",
+          "latency_seconds": 8.39
+        }
+      }
+    },
+    {
+      "filename": "v7.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ጠዋት ላይ ትንሽ ማቅለስ ልጅ ነበረኝ ግን ራሴን አላመመኝም ደምም አልፈሰኝም",
+          "latency_seconds": 2.94
+        },
+        "addis_ai": {
+          "hypothesis_text": "እንትን ጠዋት ላይ ትንሽ ማቅለስ ስለሽ ነበረኝ ግን ራሴን አላምመኝም ደምም አልፈሰሰኝም",
+          "latency_seconds": 3.43
+        },
+        "gemini": {
+          "hypothesis_text": "እንትን ጠዋት ላይ ትንሽ ማቅለሽለሽ ነበረኝ ግን ራሴን አላመመኝም ደምም አልፈሰሰኝም",
+          "latency_seconds": 8.27
+        }
+      }
+    },
+    {
+      "filename": "v8.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሆዴ ትንሽ ይከብደኛል እንጂ ከፍተኛ ህመም ወይም ፈሳሽ መፍሰስ",
+          "latency_seconds": 3.02
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሆዴ ትንሽ ይከብደኛል እንጂ ከፍተኛ ህመም ወይም ፈሳሽ መፍሰስ የለም።",
+          "latency_seconds": 3.36
+        },
+        "gemini": {
+          "hypothesis_text": "ሆድህ ትንሽ ይከብደኛል እንጂ ከፍተኛ ህመም ወይም ፈሳሽ መፍሰስ የለም።",
+          "latency_seconds": 8.69
+        }
+      }
+    },
+    {
+      "filename": "v9.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ድካም ድካም ይለኛል እንጂ አይኔም አይጎረጉረኝም ራሴም አያዞረኝም።",
+          "latency_seconds": 2.87
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ድካም ድካም ይለኛል እንጂ - አይኔም አያሽጎረጉረኝም ፤ ራሴም አያዞረኝም።",
+          "latency_seconds": 3.38
+        },
+        "gemini": {
+          "hypothesis_text": "ደከመኝ ደከመኝ ይለኛል እንጂ አይኔም አይርገረገረኝም ራሴም አያዞረኝም",
+          "latency_seconds": 9.01
+        }
+      }
+    },
+    {
+      "filename": "v10.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ከጠዋት ጀምሮ በጣም የሚከብድ ጽኑ ራስ መታት አለብኝ parastamulo ስጄም አልለቀቀኝም",
+          "latency_seconds": 3.39
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"አዎ፣ ከጠዋት ጀምሮ በጣም የሚከብድ ጽኑ ራስ መታት አለብኝ፤ ፓራስታሚሎ ወስጄም አልለቀቀኝም።",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "ኦው ከጠዋት ጀምሮ በጣም የሚከብድ ጽኑ ራስ ምታት አለብኝ ፓራስታሞልም ወስጄም አልለቀቀኝም",
+          "latency_seconds": 9.42
+        }
+      }
+    }
+  ]
+}

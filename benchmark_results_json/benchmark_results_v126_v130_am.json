@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 126,
+    "end_index": 130,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:06:17.536154+00:00"
+  },
+  "results": [
+    {
+      "filename": "v126.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ምግብ ራሱ ቤት ውስጥ ስላልነበረ አንድ ጊዜ ብቻ ነው የተመገብኩት ተጨማሪ ምግብ አላገኘውም",
+          "latency_seconds": 7.42
+        },
+        "addis_ai": {
+          "hypothesis_text": "ምግብ ራሱ ቤት ውስጥ ስላልነበረ አንድ ጊዜ ብቻ ነው የተመገብኩት ተጨማሪ ምግብ አላገኘሁም",
+          "latency_seconds": 5.63
+        },
+        "gemini": {
+          "hypothesis_text": "ምግብ አሰዎ ቤቱ ውስጥ ስላለነበረ አንድ ጊዜ ብቻ ነው የተመገብኩት። ተጫማሪ ምግብ አላገኘም።",
+          "latency_seconds": 5.73
+        }
+      }
+    },
+    {
+      "filename": "v127.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ልበላ አልቻልኩም ማቅለሽለሹ ስራ ላቆመ የበላሁት ትንሽ ሳይና ብስኩት ብቻ ነው። ተጨማሪ ምግብ መውሰድ አልቻልኩም",
+          "latency_seconds": 5.88
+        },
+        "addis_ai": {
+          "hypothesis_text": "ልበላ አልቻልኩም ማቅለሽለሹ ስላላቆመ እየበላሁት ትንሽ ሳይና ብስኩት ብቻ ነው ተጨማሪ ምግብ መውሰድ አልቻልኩም",
+          "latency_seconds": 6.8
+        },
+        "gemini": {
+          "hypothesis_text": "ልበላ አልቻልኩም ማቅለሽለሹ ስላላቆመኝ የበላሁት ትንሽ ሳይና አርዱ ስኪች ብቻ ነው። ተጨማሪ ምግብ መውሰድ አልቻልኩም።",
+          "latency_seconds": 4.67
+        }
+      }
+    },
+    {
+      "filename": "v128.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ቃር ደረቴን ስላቃጠለኝ ምንም ምግብ አልወሰድኩም ውሃ እንኳን መያዝ አልቻልኩም ተጨማሪ ምግብ ከየት ይመጣል።",
+          "latency_seconds": 2.86
+        },
+        "addis_ai": {
+          "hypothesis_text": "ቃር ደረቴን ስላቃጠለኝ ምንም ምግብ አልወሰድኩም ውሃ እንኳን መያዝ አልቻልኩም ተጨማሪ ምግብ ከየት ይመጣል",
+          "latency_seconds": 3.84
+        },
+        "gemini": {
+          "hypothesis_text": "ቀር ደረቴን ስለጋጠለኝ ምንም የምገመው አሰርኩም። ውሃን እንኳን መያዝ አልቻልኩም። ተጨማሪ ምግብ ኬዝ ይመጣል።",
+          "latency_seconds": 3.69
+        }
+      }
+    },
+    {
+      "filename": "v129.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "የምግብ ፍላጎቴ ሙሉ በሙሉ ተዘግቷል። ጠዋት አንድ ሙዝ በግድ በላው እንጂ ሆዴ ምግብ አይቀበልም",
+          "latency_seconds": 3.84
+        },
+        "addis_ai": {
+          "hypothesis_text": "የምግብ ፍላጎቴ ሙሉ በሙሉ ተዘግቷል፡፡ ጣት አንድ ሙዝ በግድ በላሁ እንጂ ሆዴ ምግብ አይቀበልም፡፡",
+          "latency_seconds": 4.25
+        },
+        "gemini": {
+          "hypothesis_text": "የምግብ ፍላጎቴ ሙሉ በሙሉ ተዘጋቷል። ጠዋት አንድ ሙዝ በግድ የበላሁ እንጂ ሆዴ ምግብ አይቀበልም።",
+          "latency_seconds": 3.81
+        }
+      }
+    },
+    {
+      "filename": "v130.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "የምግብ ሽታ ሲመጣብኝ ስለሚያስመልሰኝ ምንም አልበላውም ዛሬ ጾሜን ነው ያልኩት",
+          "latency_seconds": 3.57
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"የምግብ ሽታ ሲመጣብኝ ስለሚያስመልሰኝ ምንም አልበላሁም። ዛሬ <0xE1><0x8D><0x86>ሜን ነው ያልኩት።",
+          "latency_seconds": 4.79
+        },
+        "gemini": {
+          "hypothesis_text": "የምግብ ሽታ ሲመጣብኝ ስለሚያስመልሰኝ ምንም አልበላሁም ዛሬ ጾሜን ነው አልኩት",
+          "latency_seconds": 3.61
+        }
+      }
+    }
+  ]
+}

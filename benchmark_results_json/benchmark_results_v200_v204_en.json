@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 200,
+    "end_index": 204,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:34:04.197876+00:00"
+  },
+  "results": [
+    {
+      "filename": "v200.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Because the baby is pushing upward, I get a bit winded when climbing stairs, but it's no choking or severe breathlessness.",
+          "latency_seconds": 4.73
+        },
+        "deepgram": {
+          "hypothesis_text": "Because the baby is pushing upward, I get a bit winded when climbing stairs, but it's not choking or severe breathlessness.",
+          "latency_seconds": 4.4
+        },
+        "gemini": {
+          "hypothesis_text": "Because the baby is pushing upward, I get a bit winded when climbing stairs, but it's not choking or severe breathlessness.",
+          "latency_seconds": 3.9
+        }
+      }
+    },
+    {
+      "filename": "v201.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No vomiting, but in the mornings when food smells hit me, I feel nauseous. Then later, it goes away.",
+          "latency_seconds": 4.85
+        },
+        "deepgram": {
+          "hypothesis_text": "Novel meeting, but in the mornings when food smells hits me, I feel nauseous, then later it goes away.",
+          "latency_seconds": 4.51
+        },
+        "gemini": {
+          "hypothesis_text": "No vomiting. But in the mornings when food smells hits me, I feel nauseous. Then later it goes away.",
+          "latency_seconds": 4.5
+        }
+      }
+    },
+    {
+      "filename": "v202.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "There is no leaking fluid because the baby pushes down. I'm just frequenting the bathroom often, but I have no pain.",
+          "latency_seconds": 4.66
+        },
+        "deepgram": {
+          "hypothesis_text": "There is no leaking fluid because the baby pushes down. I'm just frequenting the bathroom often, but I have no pain.",
+          "latency_seconds": 3.5
+        },
+        "gemini": {
+          "hypothesis_text": "There is no leaking fluid because the baby pushes down and just frequently the bathroom often, but I have no pain.",
+          "latency_seconds": 3.88
+        }
+      }
+    },
+    {
+      "filename": "v203.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Occasionally, my belly tightens, but it doesn't cramp and it lets go quickly. It's not continuous pain.",
+          "latency_seconds": 5.88
+        },
+        "deepgram": {
+          "hypothesis_text": "Occasionally, my belly tightens, but it doesn't cramp, and it lets go quickly. It's not continuous pain.",
+          "latency_seconds": 3.95
+        },
+        "gemini": {
+          "hypothesis_text": "Occasionally, my belly tightens, but it doesn't cramp, and it lets go quickly. It's not continuous pain.",
+          "latency_seconds": 3.67
+        }
+      }
+    },
+    {
+      "filename": "v204.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Oh, there's nothing severe like that, just the usual heavy bailing and backache.",
+          "latency_seconds": 5.36
+        },
+        "deepgram": {
+          "hypothesis_text": "Oh, there's nothing severe like that. Just the usual heavy belly and backache.",
+          "latency_seconds": 3.78
+        },
+        "gemini": {
+          "hypothesis_text": "Oh there's nothing severe like that. Just the usual heavy beily and backache.",
+          "latency_seconds": 3.89
+        }
+      }
+    }
+  ]
+}

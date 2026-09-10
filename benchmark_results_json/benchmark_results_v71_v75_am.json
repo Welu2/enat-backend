@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 71,
+    "end_index": 75,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:48:24.792547+00:00"
+  },
+  "results": [
+    {
+      "filename": "v71.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "severe pain የለም just ትንሽ hertburn እና acid ነው የሚያስቸግረኝ",
+          "latency_seconds": 3.31
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሰቪር ፔን የለም ጀስት ትንሽ ሀርት በርን እና አሲዲቲ ነው የሚያስቸግረኝ",
+          "latency_seconds": 3.82
+        },
+        "gemini": {
+          "hypothesis_text": "severe pain የለም just ትንሽ heart burn ነው acidity ነው የሚያስቸግረኝ",
+          "latency_seconds": 4.75
+        }
+      }
+    },
+    {
+      "filename": "v72.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Morning sickness ትንሽ ነበረኝ በ vomiting የለም አሁን ቤት ነኝ",
+          "latency_seconds": 4.04
+        },
+        "addis_ai": {
+          "hypothesis_text": "እንትን ሞርኒንግ ሲክነስ ትንሽ ነበረኝ በት <0xE1><0x89><0xAE>ሚቲንግ የለም አሁን ቤተር ነኝ",
+          "latency_seconds": 4.09
+        },
+        "gemini": {
+          "hypothesis_text": "እኔን morning sickness ትንሽ ነበረኝ፣ but vomiting የለም፣ አሁን better ነኝ።",
+          "latency_seconds": 3.93
+        }
+      }
+    },
+    {
+      "filename": "v73.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እግሬ ላይ mild swelling አለ። mosly long time ስቆም ነው። face እና hand normal ናቸው",
+          "latency_seconds": 3.53
+        },
+        "addis_ai": {
+          "hypothesis_text": "እግሬ ላይ ማይልድ ስዌሊንግ አለ በት ሞስሊ ሎንግ ታይም ስቆም ነው ፊስ እና ሃንድ ግን ኖርማል ናቸው",
+          "latency_seconds": 4.1
+        },
+        "gemini": {
+          "hypothesis_text": "እግሬ ላይ ማይልድ ስዌሊንግ አለ። በ ሞስሊ ሎንግ ታይም ስቆም ነው። ፌስ እና አንድ ግን ኖርማል ናቸው።",
+          "latency_seconds": 3.76
+        }
+      }
+    },
+    {
+      "filename": "v74.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "severe abdominal crump አይደለም Broxton hicks መሰለኝ ሆዴ just tie ሆኖ ይለቀኛል።",
+          "latency_seconds": 4.04
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሰቪር አብዶሚናል ክራምፕ አይደለም ብሮክስተን ሂክስ መሰለኝ ሆዴ ጀስት ታይት ሆኖ ይለቀኛል",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "ሰቭዩር አብዶሚናል ክራምፕ አይደለህም? ብሮክስትን ሂክስ መሰራሊንግ ሁዴጅስቲ ታይት ሆኖ ይለቀኛል።",
+          "latency_seconds": 6.92
+        }
+      }
+    },
+    {
+      "filename": "v75.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ትንሽ low back pain ይሰማኛል because of the weight alarming የሆነ ሳይን የለም",
+          "latency_seconds": 3.74
+        },
+        "addis_ai": {
+          "hypothesis_text": "ትንሽ ሎወር ባክ ፔን ይሰማኛል ቢኮዝ ኦፍ ዘ ዌይት በት አላርሚንግ የሆነ ሳይን የለም",
+          "latency_seconds": 4.71
+        },
+        "gemini": {
+          "hypothesis_text": "ትንሽ lower back pain ይሰማኛል because of the weight but alarm ሆነ ሳይን የለም",
+          "latency_seconds": 5.08
+        }
+      }
+    }
+  ]
+}

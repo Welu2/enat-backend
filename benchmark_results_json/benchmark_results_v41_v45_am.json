@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 41,
+    "end_index": 45,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T01:49:48Z"
+  },
+  "results": [
+    {
+      "filename": "v41.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ደም እየፈሰሰኝ ነው። ልክ እንደ የወር አበባ ቀይ ሆኖ መፍሰስ ጀምሯል።",
+          "latency_seconds": 2.74
+        },
+        "addis_ai": {
+          "hypothesis_text": "ደም እየፈሰሰኝ ነው ልክ እንደ የወር አበባ ቀይ ሆኖ መፍሰስ ጀምሯል",
+          "latency_seconds": 2.81
+        },
+        "gemini": {
+          "hypothesis_text": "ደም እየፈሰሰኝ ነው ልክ እንደ የ ወራ አበባ ቀይ ሆኖ መፍሰስ ጀምሯል",
+          "latency_seconds": 8.16
+        }
+      }
+    },
+    {
+      "filename": "v42.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ራሴን በጣም አሞኛል ራስ ምታት አለብኝ በዛ ላይ አይኔ ብዥ ብሎብኛል እጆቼ እና እግሮቼም በጣም ተበጣጥረው አብጠዋል",
+          "latency_seconds": 5.06
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ራሴን በጣም አሞኛል ራስ ምታት አለብኝ በዛ ላይ አይኔ ብዥ ብሎብኛል እጆቼና እግሮቼም በጣም ተወጣጥረው አውጠዋል",
+          "latency_seconds": 3.59
+        },
+        "gemini": {
+          "hypothesis_text": "ራሴን በጣም አሞኛል ራስ ምታት አለብኝ። በዛ ላይ አይኔ ብዥ ብሎብኛል። እጆቼና እግሮቼም በጣም ተወጣጥረው አብጠዋል።",
+          "latency_seconds": 7.47
+        }
+      }
+    },
+    {
+      "filename": "v43.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሆዴን በድንገት በጣም እየቆረጠኝ ነው። ከዛም ደም የቀላቀለ ፈሳሽ እየወረደኝ ነው።",
+          "latency_seconds": 3.18
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ሆዴን በድንገት በጣም እየቆረጠኝ ነው፣ ከዛም ደም የቀለ ፈሳሽ እየወረደኝ ነው።",
+          "latency_seconds": 2.97
+        },
+        "gemini": {
+          "hypothesis_text": "ሆዴን በድንገት በጣም እየቆረጠኝ ነው። ከዛም ደም የቀላቀለ ፈሳሽ እየወረደኝ ነው።",
+          "latency_seconds": 7.23
+        }
+      }
+    },
+    {
+      "filename": "v44.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሰውነቴ በጣም ግሏል በዛ ላይ ደግሞ ሆዴን ይቆርጠኛ",
+          "latency_seconds": 2.81
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሰውነቴ በጣም ግሏል በዛ ላይ ደሞ ሆዴን ይቆርጠኛል",
+          "latency_seconds": 2.95
+        },
+        "gemini": {
+          "hypothesis_text": "ሰውነቴ በጣም ግሏል በዛ ላይ ደግሞ ሆዴን ይቆርጠኛል",
+          "latency_seconds": 7.47
+        }
+      }
+    },
+    {
+      "filename": "v45.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ትንፋሼ ተቆራርጧል። ቁጭ ብዬ እንኳን መተንፈስ አልቻልኩም ፊቴና አንገቴም አወጣውብኛል",
+          "latency_seconds": 3.17
+        },
+        "addis_ai": {
+          "hypothesis_text": "ትንፋ<0xE1><0x88><0xBC> ተቆራርጧል ቁጭ ብዬ እንኳን መተንፈስ አልቻልኩም ፊቴና አንገቴም አወጣሁብኛል",
+          "latency_seconds": 3.6
+        },
+        "gemini": {
+          "hypothesis_text": "ትንፋሼ ተቆራርጧል ቁጭ ብዬ እንኳን መተንፈስ አልቻልኩም ፊቴና አንገቴም አወጣሁብኝአል",
+          "latency_seconds": 10.06
+        }
+      }
+    }
+  ]
+}

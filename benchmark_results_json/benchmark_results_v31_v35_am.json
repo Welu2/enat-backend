@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 31,
+    "end_index": 35,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T01:45:21Z"
+  },
+  "results": [
+    {
+      "filename": "v31.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ጽኑ ህመም አይደለም ህፃኑ ወደ ታች ሲገፋ የሚሰማኝ መደበኛ ግፊት ብቻ ነው ያለው",
+          "latency_seconds": 2.72
+        },
+        "addis_ai": {
+          "hypothesis_text": "ጽኑ ህመም አይደለም ህጻኑ ወደታች ሲገፋ የሚሰማኝ መደበኛ ግፊት ብቻ ነው ያለው።",
+          "latency_seconds": 3.59
+        },
+        "gemini": {
+          "hypothesis_text": "ጽኑ ህመም አይደለም ህፃኑ ወደታች ሲገፋ የሚሰማኝ መደበኛ ግፊት ብቻ ነው ያለው።",
+          "latency_seconds": 8.36
+        }
+      }
+    },
+    {
+      "filename": "v32.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ጠዋት ስንነሳ ትንሿይ ነበር አሁን ግን በልቼ ተሽሎኛል ማስመለስም የለም:",
+          "latency_seconds": 2.82
+        },
+        "addis_ai": {
+          "hypothesis_text": "ጠዋት ስነሳ ትንሽ አቅለሽሾኝ ነበር አሁን ግን በልቼ ተሽሎኛል ማስመለስም የለም",
+          "latency_seconds": 3.27
+        },
+        "gemini": {
+          "hypothesis_text": "ጠዋት ስነሳ ትንሽ አቅለሽልሸኝ ነበር። አሁን ግን በልቼ ተሽሎኛል። ማስመለስም የለም።",
+          "latency_seconds": 8.9
+        }
+      }
+    },
+    {
+      "filename": "v33.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እግሬ ትንሽ አብጧል ግን ቀኑን ሙሉ ቆሜ ስለኩ መሰለኝ እጄ ግን ደህና ነው።",
+          "latency_seconds": 2.46
+        },
+        "addis_ai": {
+          "hypothesis_text": "እግሬ ትንሽ አብጧል ግን ቀኑን ሙሉ ቆሜ ስለዋልኩ መሰለኝ እጄና ፊቴ ግን ደህና ነው",
+          "latency_seconds": 2.92
+        },
+        "gemini": {
+          "hypothesis_text": "እግሬ ትንሽ አብጧል ግን ቀኑን ሙሉ ቆሜ ስላዋልኩ መሰለኝ እጄና ፊቴ ግን ደህና ነው",
+          "latency_seconds": 8.75
+        }
+      }
+    },
+    {
+      "filename": "v34.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ጀርባዬን አልፎ አልፎ ይመኛል ግን የጽኑ ህመም ደረጃ አይደለም",
+          "latency_seconds": 2.54
+        },
+        "addis_ai": {
+          "hypothesis_text": "ጀርባዬን አልፎ አልፈህ ይመኛል ግን የጽኑ ህመም ደረጃው አይደለም።",
+          "latency_seconds": 4.17
+        },
+        "gemini": {
+          "hypothesis_text": "ጆሮዬን አልፎ አልፎም ነኛል ግን የጽኑ ህመም ደረጃ አይደለም።",
+          "latency_seconds": 7.38
+        }
+      }
+    },
+    {
+      "filename": "v35.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ከትናንት ማታ ጀምሮ የልጁ ምርት በጣም ቀንሷል ዛሬ ደግሞ አንድም አልተንቀሳቀስም በጣም ጨንቆኛል።",
+          "latency_seconds": 3.09
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ከትናንት ማታ ጀምሮ የልጁ ምት በጣም ቀንሷል ዛሬ ደግሞ አንዴም አልተንቀሳቀሰም በጣም ጨንቆኛል።",
+          "latency_seconds": 3.33
+        },
+        "gemini": {
+          "hypothesis_text": "ከ ትናንት ማታ ጀምሮ የልጁ ምት በጣም ቀንሷል ዛሬ ደግሞ አንዴም አልተንቀሳቀሰም በጣም ጨንቆኛል",
+          "latency_seconds": 9.21
+        }
+      }
+    }
+  ]
+}

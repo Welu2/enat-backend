@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 16,
+    "end_index": 20,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T01:39:52Z"
+  },
+  "results": [
+    {
+      "filename": "v16.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ህመሙ የለም ግን የልጁ መንቀሳቀስ ከትናንት ወዲህ ሙሉ በሙሉ ምንም አይሰማኝም",
+          "latency_seconds": 2.62
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ህማሙ የለም ግን የልጁ መንቀሳቀስ ከትናንት ወዲህ ሙሉ በሙሉ ቆሟል፣ ምንም አይሰማኝም።",
+          "latency_seconds": 3.56
+        },
+        "gemini": {
+          "hypothesis_text": "ህማሙ የለም ግን የልጁ መንቀሳቀስ ከትናንት ወዲያ ሙሉ በሙሉ ቆሟል ምንም አይሰማኝም",
+          "latency_seconds": 8.67
+        }
+      }
+    },
+    {
+      "filename": "v17.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ከፍተኛ ትኩሳት አለብኝ ሰውነቴን በሙሉ ይንቀጠቀጣል በጣም በር",
+          "latency_seconds": 2.7
+        },
+        "addis_ai": {
+          "hypothesis_text": "ከፍተኛ ትኩሳት አለብኝ። ሰውነቴን በሙሉ ይንቀጠቀጣል። በጣም በርዶኛል።",
+          "latency_seconds": 3.34
+        },
+        "gemini": {
+          "hypothesis_text": "ከፍተኛ ትኩሳት አለብኝ ሰውነቴን በሙሉ ይንቀጠቀጣል በጣም በርዶኛል",
+          "latency_seconds": 8.28
+        }
+      }
+    },
+    {
+      "filename": "v18.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ትንፋሽ እያጠረኝ ነው። ጋደም ምስል ደረቴን ይጫነኛል መተንፈስ ገብቶኛል።",
+          "latency_seconds": 2.45
+        },
+        "addis_ai": {
+          "hypothesis_text": "ትንፋሽ እያጠረኝ ነው ጋደም ስል ደረቴን ይጫነኛል መተንፈስ ገብዶኛል",
+          "latency_seconds": 3.22
+        },
+        "gemini": {
+          "hypothesis_text": "ትንፋሽ እያጥረኝ ነው ጋደም ስል ደረቴን ይጫነኛል መተንፈስ ገብዶኛል",
+          "latency_seconds": 8.03
+        }
+      }
+    },
+    {
+      "filename": "v19.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ከትናንት ጀምሮ ራሴን በጣም እያመ ነው አይኔ ሁሉ ጥቁር ነገር ያለ ፊቴም ማብጠዋል።",
+          "latency_seconds": 2.78
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"አዎ፣ ከትላንት ጀምሮ ራሴን በጣም እያመመኝ ነው። አይኔ ሁሉ ጥቁር ጥቁር ነገር ያለው ፊቴም አብጧል።",
+          "latency_seconds": 2.99
+        },
+        "gemini": {
+          "hypothesis_text": "አው ከትናንት ጀምሮ ራሴን በጣም እያመመኝ ነው አይኔ ሁሉ ጥቁር ጥቁር ነገር ይላል ፊቴም አብጧል",
+          "latency_seconds": 8.0
+        }
+      }
+    },
+    {
+      "filename": "v20.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሆዴን በጣም እያመነው ከዛም ጋር ቀይ ደም እየፈሰሰኝ ነው። ቶሎ ኦርኝ",
+          "latency_seconds": 2.69
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ሆዴን በጣም እያመመኝ ነው ከዛም ጋር ቀይ ደም እየፈሰሰኝ ነው፤ ቶሎ እወርድሁኝ።",
+          "latency_seconds": 2.84
+        },
+        "gemini": {
+          "hypothesis_text": "ሆዴን በጣም እያመመኝ ነው ከዛም ጋር ቀይ ደም እየፈሰሰኝ ነው ቶሎ እርዱኝ!",
+          "latency_seconds": 7.92
+        }
+      }
+    }
+  ]
+}

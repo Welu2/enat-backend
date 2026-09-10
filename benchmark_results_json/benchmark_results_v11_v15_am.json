@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 11,
+    "end_index": 15,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T01:37:38Z"
+  },
+  "results": [
+    {
+      "filename": "v11.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ራሴን አያመኝም ግን ከሰዓት ጀምሮ አይኔ በጣም ይጅጎራል ነገሮችን በደንብ",
+          "latency_seconds": 3.09
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"እራሴን አያመኝም፣ ግን ከሰዓት ጀምሮ አይኔ በጣም ይዥጎረጎራል ነገሮችን በደንብ ማየት አልቻልኩም።",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "ራሴን አየመኝም ግን ከሰአት ጀምሮ አይኔ በጣም ይሽርጎጎራል ነገሮችን በደንብ ማየት አልቻልኩም",
+          "latency_seconds": 9.05
+        }
+      }
+    },
+    {
+      "filename": "v12.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ሽንት ፊት ስገባ ትንሽ ደም ነገር አይቻለሁ በጣም አስፈርቶኛል።",
+          "latency_seconds": 2.64
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ሽንት ቤት ስገባ ትንሽ ደም ነገር አይቻለሁ በጣም አስፈርቶኛል።",
+          "latency_seconds": 3.0
+        },
+        "gemini": {
+          "hypothesis_text": "አዎ ሽንት ቤት ስገባ ትንሽ ደም ነገር አይቻለሁ በጣም አስፈርቶኛል",
+          "latency_seconds": 8.03
+        }
+      }
+    },
+    {
+      "filename": "v13.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሽንቴ ሳይሆን እንደ ውሃ ያለ ንፁህ ፈቶ ያለማቋረጥ እየፈሰሰኝ ነው። ልብሴ ሁሉ እርሷል።",
+          "latency_seconds": 2.37
+        },
+        "addis_ai": {
+          "hypothesis_text": "ሽንቴ ሳይሆን እንደ ውሃ ያለ ንጹህ ፈሳሽ ያለማቋረጥ እየፈሰሰኝ ነው፤ ልብሴ ሁሉ ርሷል።",
+          "latency_seconds": 2.94
+        },
+        "gemini": {
+          "hypothesis_text": "ሽንጤ ሳይሆን እንደ ውሃ ያለ ንጹህ ፈሳሽ ያለማቋረጥ እየፈሰሰኝ ነው ልብሴ ሁሉ ረሷል",
+          "latency_seconds": 7.75
+        }
+      }
+    },
+    {
+      "filename": "v14.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ሆዴን በጣም አጥብቆ እየወጠረኝ ነው። መቆምም ሆነ መቀመጥ አልቻልኩም።",
+          "latency_seconds": 3.11
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ሆዴን በጣም አጥብቆ እየወጠረኝ ነው፣ መቆምም ሆነ መቀመጥ አልቻልኩም።",
+          "latency_seconds": 2.88
+        },
+        "gemini": {
+          "hypothesis_text": "ሆዴን በጣም አጥብቆ እየወጣራኝ ነው መቆምም ሆነ መቀመጥ አልቻልኩም",
+          "latency_seconds": 8.32
+        }
+      }
+    },
+    {
+      "filename": "v15.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እጆቼ እና ፊቴ በጣም አብጠዋል የጣት ቀለበቴ ሊልቅ አልቻለም አይኖቼም ተነፋፍተዋል።",
+          "latency_seconds": 3.38
+        },
+        "addis_ai": {
+          "hypothesis_text": "እጆቼና ፊቴ በጣም አብጠዋል። የጣት ቀለበቴ ሊወልቅ አልቻለም። አይኖቼም ተነፋፍተዋል።",
+          "latency_seconds": 2.76
+        },
+        "gemini": {
+          "hypothesis_text": "እጆቼና ፊቴ በጣሙን አብጥተዋል የጣት ቀለበቴ ሊወልቅ አልቻለም አይኖቼም ተነፋፍተዋል",
+          "latency_seconds": 9.0
+        }
+      }
+    }
+  ]
+}

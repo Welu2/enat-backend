@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 160,
+    "end_index": 164,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:19:12.090020+00:00"
+  },
+  "results": [
+    {
+      "filename": "v160.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I'm throwing up everything I eat. I can't keep water down. I feel a weakness where I can't even stand up.",
+          "latency_seconds": 5.62
+        },
+        "deepgram": {
+          "hypothesis_text": "I'm throwing up everything I eat. I can't keep water down. I feel a weakness where I can't even stand up.",
+          "latency_seconds": 4.79
+        },
+        "gemini": {
+          "hypothesis_text": "I'm throwing up everything I eat. I can't keep water down. I feel a weakness where I can't even stand up.",
+          "latency_seconds": 4.57
+        }
+      }
+    },
+    {
+      "filename": "v161.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Oh, I don't know. My stomach hurts a bit, but I can't tell if it's the usual fetal pressure or something else.",
+          "latency_seconds": 5.02
+        },
+        "deepgram": {
+          "hypothesis_text": "Oh, I don't know. My stomach hurts a bit, but I can't tell if it's the usual fatal pressure or something else.",
+          "latency_seconds": 8.09
+        },
+        "gemini": {
+          "hypothesis_text": "Oh, I don't know. My stomach hurts a bit, but I can't tell if it's the usual fetal pressure or something else.",
+          "latency_seconds": 4.2
+        }
+      }
+    },
+    {
+      "filename": "v162.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "There is fluid, but I don't know if I leaked urine or my water broke. What should I do?",
+          "latency_seconds": 4.79
+        },
+        "deepgram": {
+          "hypothesis_text": "There is fluid, but I don't know if I leaked the rain or my water broke. What should I do?",
+          "latency_seconds": 3.34
+        },
+        "gemini": {
+          "hypothesis_text": "There is fluid, but I don't know if I leaked urine or my water broke? What should I do?",
+          "latency_seconds": 5.19
+        }
+      }
+    },
+    {
+      "filename": "v163.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "It's not blood, but I see a bit of brownish discharge. Does that count as a danger sign?",
+          "latency_seconds": 4.79
+        },
+        "deepgram": {
+          "hypothesis_text": "It's not blood, but I see a bit of brownish discharge. Does that count as a danger sign?",
+          "latency_seconds": 5.84
+        },
+        "gemini": {
+          "hypothesis_text": "It's not blood, but I see a bit of brownish discharge. Does that count as a danger sign?",
+          "latency_seconds": 4.2
+        }
+      }
+    },
+    {
+      "filename": "v164.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "The headache is there. My vision is also slightly dim, but there's no bleeding.",
+          "latency_seconds": 4.86
+        },
+        "deepgram": {
+          "hypothesis_text": "The headache is there. My vision is also slightly dim, but there's no bleeding.",
+          "latency_seconds": 3.99
+        },
+        "gemini": {
+          "hypothesis_text": "Um, the headache is there. My vision is also slightly dim. But, there's no bleeding.",
+          "latency_seconds": 3.99
+        }
+      }
+    }
+  ]
+}

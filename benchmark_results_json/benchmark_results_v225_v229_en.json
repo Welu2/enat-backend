@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 225,
+    "end_index": 229,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T10:09:08.480203+00:00"
+  },
+  "results": [
+    {
+      "filename": "v225.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, I took a perfectly balanced meal. For lunch, I ate sinjara with lentils and spinach. Then in the afternoon, I had a boiled egg and fluid fruit and snack.",
+          "latency_seconds": 6.22
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. I took a perfectly balanced meal. For lunch, I ate injera with lentils and spinach. Then in the afternoon, I had boiled egg and food fruit as snack.",
+          "latency_seconds": 3.97
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, I took a perfectly balanced meal for lunch. I ate some jar with lentils and spinach. Then in the afternoon, I had boiled egg and fruit as snack.",
+          "latency_seconds": 7.29
+        }
+      }
+    },
+    {
+      "filename": "v226.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No, actually, I don't have an appetite. In the morning, I just tasted toast and tea. I didn't take any extra meal.",
+          "latency_seconds": 6.93
+        },
+        "deepgram": {
+          "hypothesis_text": "No. Actually, I don't have an appetite. In the morning, I just tasted toast and tea. I didn't take any extra meal.",
+          "latency_seconds": 4.71
+        },
+        "gemini": {
+          "hypothesis_text": "No, actually, I don't have an appetite. In the morning, I just tasted toast and tea. I didn't take any extra meal.",
+          "latency_seconds": 4.3
+        }
+      }
+    },
+    {
+      "filename": "v227.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, I took an extra snack, I drank an avocado smoothie with milk, and for lunch I ate chicken stew.",
+          "latency_seconds": 6.3
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. I took an extra snack. I drank an avocado smoothie with milk. And for lunch, I ate chicken stew.",
+          "latency_seconds": 4.3
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, I took an extra snack. I drank an avocado smoothie with milk and for lunch I ate chicken stew.",
+          "latency_seconds": 4.19
+        }
+      }
+    },
+    {
+      "filename": "v228.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I only ate heavy carbs, rice and pasta. I didn't get fruits or vegetables, so it's not balanced.",
+          "latency_seconds": 9.08
+        },
+        "deepgram": {
+          "hypothesis_text": "I only ate heavy carbs, rice, and pasta. I didn't eat fruits or vegetables, so it's not balanced.",
+          "latency_seconds": 4.31
+        },
+        "gemini": {
+          "hypothesis_text": "I only eat heavy carbs, rice, and pasta. I didn't eat fruits or vegetables. So it's not balanced.",
+          "latency_seconds": 4.7
+        }
+      }
+    },
+    {
+      "filename": "v229.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Thinking of getting iron and vitamins, I drank orange juice, but because I have severe nausea, I couldn't eat a heavy extra meal.",
+          "latency_seconds": 6.62
+        },
+        "deepgram": {
+          "hypothesis_text": "Thinking of getting iron and vitamins, I drank oranges. But because I have severe nausea, I couldn't eat a heavy extra meal.",
+          "latency_seconds": 3.53
+        },
+        "gemini": {
+          "hypothesis_text": "Thinking of getting iron and vitamins, I drank orange juice, but because I have severe nausea, I couldn't eat a heavy extra meal.",
+          "latency_seconds": 4.85
+        }
+      }
+    }
+  ]
+}

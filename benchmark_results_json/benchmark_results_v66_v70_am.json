@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 66,
+    "end_index": 70,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:45:02.042908+00:00"
+  },
+  "results": [
+    {
+      "filename": "v66.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ከጠቀስካቸው ምልክቶች አንዱም የለም ትንሽ ድካም እና የምግብ ፍላጎት መቀነስ ብቻ ነው ዛሬ ያለው",
+          "latency_seconds": 3.36
+        },
+        "addis_ai": {
+          "hypothesis_text": "ከጠቀስካቸው ምልክቶች አንዱም የለም፣ ትንሽ ድካምና የምግብ ፍላጎት መቀነስ ብቻ ነው ዛሬ ያለው።",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "ከጠቀስካቸው ምልክቶች አንድም የለም። ትንሽ ድካምና የምግብ ፍላጎት መቀነስ ብቻ ነው ዛሬ ያለው።",
+          "latency_seconds": 5.02
+        }
+      }
+    },
+    {
+      "filename": "v67.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አይ ምንም symptom የለኝም ዛሬ completely normal ነኝ",
+          "latency_seconds": 3.53
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይ ምንም ሲምፕተም የለኝም ዛሬ ኮምፕሊትሊ ኖርማል ነኝ",
+          "latency_seconds": 3.38
+        },
+        "gemini": {
+          "hypothesis_text": "አይ ምንም symptom የለኝም። ዛሬ completely normal ነኝ።",
+          "latency_seconds": 9.73
+        }
+      }
+    },
+    {
+      "filename": "v68.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እረትም bleeding ምናምን የሚባል ነገር የለም I feel totaly fine",
+          "latency_seconds": 3.22
+        },
+        "addis_ai": {
+          "hypothesis_text": "አረ ነኖህ ዘም ራስ መታትም ብሊዲንግ ምናምን የሚባል ነገር የለም አይ ፊል ቶታሊ ፋይን",
+          "latency_seconds": 3.48
+        },
+        "gemini": {
+          "hypothesis_text": "ኧረ መደንዘዝም ራስ ምታትም bleeding ምናምን የሚባል ነገር የለም I feel totally fine",
+          "latency_seconds": 5.94
+        }
+      }
+    },
+    {
+      "filename": "v69.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No no severe complications ምንም አይታይም ሰላም ነኝ",
+          "latency_seconds": 3.42
+        },
+        "addis_ai": {
+          "hypothesis_text": "ኖ ኖ ኖ ኖ የጠቀስካቸው ሰቪር ኮምፕሊኬሽንስ ምንም አይታዩብኝም ሰላም ነኝ",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "ኖ ኖ ኖ ኖ የተጠቀሳቸው severe complications ምንም አይታዩብኝም ሰላም ነኝ",
+          "latency_seconds": 4.92
+        }
+      }
+    },
+    {
+      "filename": "v70.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ምንም የተለየ ነገር የለም everything ok ትንሽ tired መሆን ብቻ ነው ያለው",
+          "latency_seconds": 3.44
+        },
+        "addis_ai": {
+          "hypothesis_text": "ምንም የተለየ ነገር የለም ኤቭሪቲንግ ኢዝ ኦኬ ትንሽ ታየርድ መሆን ብቻ ነው ያለው",
+          "latency_seconds": 3.18
+        },
+        "gemini": {
+          "hypothesis_text": "ምንም የተለየ ነገር የለም everything is okay ትንሽ tired መሆን ብቻ ነው ያለው።",
+          "latency_seconds": 5.84
+        }
+      }
+    }
+  ]
+}

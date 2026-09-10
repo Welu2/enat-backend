@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 205,
+    "end_index": 209,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:35:52.738587+00:00"
+  },
+  "results": [
+    {
+      "filename": "v205.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I don't feel anything alarming, other than the pressure when the baby kicks now and then. I'm fine.",
+          "latency_seconds": 4.57
+        },
+        "deepgram": {
+          "hypothesis_text": "I don't feel anything alarming other than the pressure when the baby kicks now and then. I'm fine.",
+          "latency_seconds": 5.13
+        },
+        "gemini": {
+          "hypothesis_text": "I don't feel anything alarming other than the pressure when the baby kicks now and then. I'm fine.",
+          "latency_seconds": 3.78
+        }
+      }
+    },
+    {
+      "filename": "v206.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "None of the symptoms you mentioned are there, just a bit of tiredness and reduced appetite today.",
+          "latency_seconds": 5.47
+        },
+        "deepgram": {
+          "hypothesis_text": "None of the symptoms you mentioned are there. Just a bit of tiredness and reduced the appetite today.",
+          "latency_seconds": 8.2
+        },
+        "gemini": {
+          "hypothesis_text": "None of the symptoms you mentioned are there, just a bit of tiredness and reduced appetite today.",
+          "latency_seconds": 3.66
+        }
+      }
+    },
+    {
+      "filename": "v207.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, in the morning I had scrambled eggs with bread. For lunch, I ate injera with misti and collard greens. Tonight, outside the regular meals, I had an extra glass of milk and a banana.",
+          "latency_seconds": 5.66
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. In the morning, I had scrambled eggs with bread. For lunch, I ate injera with meat stew and color greens. Tonight, outside the regular meals, I had an extra glass of milk and a banana.",
+          "latency_seconds": 3.93
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, in the morning I had scrambled eggs with bread. For lunch I ate injera with meat stew and colored greens. Tonight outside the regular meals, I had an extra glass of milk and a banana.",
+          "latency_seconds": 4.73
+        }
+      }
+    },
+    {
+      "filename": "v208.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I ate well. During the day, I had split lentil wet and salad, and for a snack, I took an extra boiled egg and avocado salad.",
+          "latency_seconds": 5.44
+        },
+        "deepgram": {
+          "hypothesis_text": "I ate well. During the day, I had split lentil with and salad. And for snack, I took an extra boiled egg and avocado salad.",
+          "latency_seconds": 3.54
+        },
+        "gemini": {
+          "hypothesis_text": "I ate well. During the day, I had split lentil wade and salad. And for snack, I took an extra boiled egg and avocado salad.",
+          "latency_seconds": 4.45
+        }
+      }
+    },
+    {
+      "filename": "v209.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, I took an extra meal after lunch in the afternoon. Gamfo with spiced butter was prepared for me, and for fruit I ate orange and mango.",
+          "latency_seconds": 5.16
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. I took an extra meal. After lunch in the afternoon, ganfou with spiced butter was prepared for me. And for fruits, I ate orange and mango.",
+          "latency_seconds": 4.4
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, I took an extra meal after lunch in the afternoon, gimbap with spicy butter was prepared for me, and for fruits, I ate orange and mango.",
+          "latency_seconds": 4.92
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 121,
+    "end_index": 125,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:04:27.762432+00:00"
+  },
+  "results": [
+    {
+      "filename": "v121.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ዛሬ 4 ጊዜ ነው የበላት እንጀራ በሽሮና በጎመን መሃል ላይ ደግሞ የፍርፋሪ ጨማቂ እና እርጎ ጨምር ያለው",
+          "latency_seconds": 3.2
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ። ዛሬ አራት ጊዜ ነው የበላሁት። እንጀራ በሽሮ እና በጎመን መሃል ላይ ደግሞ የፍርፋሬ ጭማቂ እና እርጎ ጨምሬአለሁ።",
+          "latency_seconds": 3.94
+        },
+        "gemini": {
+          "hypothesis_text": "ኦው ዛሬ አራት ጊዜ ነው የበላሁት እንጀራ በሽሮ እና በጎመን መሃል ላይ ደሞ የፍርፍር ተጨማሪ እና እርጎ ጨምርያለው",
+          "latency_seconds": 4.4
+        }
+      }
+    },
+    {
+      "filename": "v122.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ተጨማሪ ምግብ አልወሰድኩም ጠአትም እሳም ያው የተለመደው እንጀራ በሽሮን የበላሁት ሌላ የተለየ ነገር የለም",
+          "latency_seconds": 3.22
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ተጨማሪ ምግብ አልወሰድኩም፣ ጠዋትም ምሳም ያው የተለመደው እንጀራ በሽሮን የበላሁት፣ ሌላ የተለየ ነገር የለም።",
+          "latency_seconds": 4.79
+        },
+        "gemini": {
+          "hypothesis_text": "ተጨማሪ ምግብ አልወስድኩም ጠዋትም ምሳም ያው የተለመደው እንጀራ በሽሮን የበላሁት ሌላ የተለየ ነገር የለም",
+          "latency_seconds": 4.42
+        }
+      }
+    },
+    {
+      "filename": "v123.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አይ ምንም ተጨማሪ ነገር የለም ዛሬ ዳቦ በሻይ ብቻ ነው ቆርሴ ነው የበላሁት ምሰማ አልበላውም ገና ነኝ",
+          "latency_seconds": 3.22
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይ ምንም ተጨማሪ ነገር የለም ዛሬ ዳቦ በሻይ ብቻ ነው ቁርሴን የበላሁት ምሳም አልበላሁም ገና ነኝ",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "አይ, ሚንብ ተጫማሪ ነገር የለም. ዛሬ ዳቦ በሻይ ብቻ ነው. ቆርሰዬ ነው የበላሁት. ምሳ አልበላሁም. ገና ነኝ.",
+          "latency_seconds": 3.69
+        }
+      }
+    },
+    {
+      "filename": "v124.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "የተበጣጠነ ምግብ የሚባል ነገር አልገባኝም ቤት ውስጥ ያለውን ክኮት ብቻ ነው ከእንጀራ ጋር የበሉት ፍራፍሬ ወይም ስጋ አልነበረም",
+          "latency_seconds": 3.62
+        },
+        "addis_ai": {
+          "hypothesis_text": "የተመጣጠነ ምግብ የሚባል ነገር አልገባኝም። ቤት ውስጥ ያለውን ክኮት ብቻ ነው ከእንጀራ ጋር የበላሁት። ፍራፍሬ ወይም ስጋ አልነበረም።",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "የተበላሸ አጠነ ምግብ የሚባል ነገር አልገባኝም። ቤት ውስጥ ያለውን ክክ ብቻ ነው ከእንጀራ ጋር የበላሁት። ፍራፍሬ ወይም ስጋ አልነበረም።",
+          "latency_seconds": 3.63
+        }
+      }
+    },
+    {
+      "filename": "v125.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ተጨማሪ አልበላውም ያው ሻይ እና ቂጣ ጠዋት በልቼ አሁን ምሳ ላይ ትንሽ ሩዝ ነው የበለውት",
+          "latency_seconds": 3.28
+        },
+        "addis_ai": {
+          "hypothesis_text": "ተጨማሪ አልበላሁም ያው ሻይና ቂጣ ጠዋት በልቼ አሁን ምሳ ላይ ትንሽ ሩዝ ነው የበላሁት",
+          "latency_seconds": 3.28
+        },
+        "gemini": {
+          "hypothesis_text": "ተጨማሪ አልበላሁም፣ ያው ሻይና ቂጣ ጧት በልቼ አሁን ምሳ ላይ ትንሽ ሩዝ ነው የበላሁት።",
+          "latency_seconds": 3.89
+        }
+      }
+    }
+  ]
+}

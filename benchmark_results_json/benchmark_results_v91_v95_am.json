@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 91,
+    "end_index": 95,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:54:21.350478+00:00"
+  },
+  "results": [
+    {
+      "filename": "v91.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No actually everything is supprsmos ምንም የሚያሰጋ pain አልተሰማኝም",
+          "latency_seconds": 4.11
+        },
+        "addis_ai": {
+          "hypothesis_text": "ኖ አክችዋሊ ኤቭሪቲንግ ኢዝ ሱፐር ስሞዝ ምንም የሚያሰጋ ፔይን አልተሰማኝም",
+          "latency_seconds": 4.3
+        },
+        "gemini": {
+          "hypothesis_text": "ኖ አክቹዋሊ ኤቭሪቲንግ ኢዝ super smooth ምንም የሚያሰጋ pain አልተሰማኝም።",
+          "latency_seconds": 3.69
+        }
+      }
+    },
+    {
+      "filename": "v92.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I checked my BP thought like perfectly normal headache wemb dizziness የለኝም",
+          "latency_seconds": 3.53
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይ ቼክድ ማይ ቢፒ ጠዋት ላይ ፐርፌክትሊ ኖርማል ነው ሄዲክ ወይም ዲዚነስ የለኝም",
+          "latency_seconds": 3.58
+        },
+        "gemini": {
+          "hypothesis_text": "I checked my BP start line. Perfectly normal ነው። Headache ወይም Dizziness የለኝም።",
+          "latency_seconds": 3.69
+        }
+      }
+    },
+    {
+      "filename": "v93.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "None of that bleeding የለም fluid leakaging የለም today I feel energy",
+          "latency_seconds": 3.22
+        },
+        "addis_ai": {
+          "hypothesis_text": "አረ ነን ኦፍ ዛት ብሊዲንግ የለም ፍሎድ ሊኬጅም የለም ቱዴይ አይ ፊል ኢነርጂቲክ",
+          "latency_seconds": 3.69
+        },
+        "gemini": {
+          "hypothesis_text": "እነነፍሳት ብሊዲንግ የለም ፍሉድ ሌኬጅ የለም ቱደይ አይ ፊል ኢነርጀቲክ",
+          "latency_seconds": 3.48
+        }
+      }
+    },
+    {
+      "filename": "v94.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Not really የጠቀስካቸው redux ምንም አልታዩብኝም completely safe ነኝ",
+          "latency_seconds": 3.63
+        },
+        "addis_ai": {
+          "hypothesis_text": "ኖት ሪሊ የጠቀስካቸው ሬድ ፍላክስ ምንም አልታዩብኝም ኮምፕሊትሊ ሴፍ ነኝ",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "ኖት ቱ ሪሊ የጠቀስካቸው ሬድ ፍላግስ ምንም አልታዩብኝም completely safe ነኝ።",
+          "latency_seconds": 3.69
+        }
+      }
+    },
+    {
+      "filename": "v95.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "So baby is active kick ሲያደርግ በደንብ ይሰማኛል so no voice ምንም sign የለኝም",
+          "latency_seconds": 3.53
+        },
+        "addis_ai": {
+          "hypothesis_text": "በቤቢ አክቲቭ ኪክ ሲያደርግ በደንብ ይሰማኛል ሶ ኖ ወሪስ ምንም ሳይን የለኝም",
+          "latency_seconds": 3.79
+        },
+        "gemini": {
+          "hypothesis_text": "So baby's active kick سی አርግ በደንብ ይሰማኛል so no worries ምንም sign የለኝም",
+          "latency_seconds": 3.69
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 101,
+    "end_index": 105,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T02:57:34.366894+00:00"
+  },
+  "results": [
+    {
+      "filename": "v101.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I have massive headache drobbing pain ነው darkness ውስጥ ካልተኘሁ አይለቅኝም",
+          "latency_seconds": 3.92
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይ ሃቭ ማሲቭ ሄደክ ትራቪንግ ፔን ነው ዳርክነስ ውስጥ ካልተኛሁ አይለቀኝም",
+          "latency_seconds": 3.42
+        },
+        "gemini": {
+          "hypothesis_text": "I have massive headache, throbbing pain, darkness ኝ ካልተኛሁ አይለቀኝም",
+          "latency_seconds": 4.36
+        }
+      }
+    },
+    {
+      "filename": "v102.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I necetly barry ሆኗል spots and flushing lights ይታይኛል I can't read anything",
+          "latency_seconds": 3.84
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይኔ ኮምፕሊትሊ ብረሪ ሆኗል ስፖትስ ኤንድ ፍላሽንግ ላይትስ ይታየኛል አይ ካንት ሪድ ኤኒቲንግ",
+          "latency_seconds": 4.59
+        },
+        "gemini": {
+          "hypothesis_text": "አይንዬ completely blurry ሆኗል። spots and flashing lights ይታየኛል። አይ कांट read anything።",
+          "latency_seconds": 4.22
+        }
+      }
+    },
+    {
+      "filename": "v103.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ቶሎ ቶሎ የሚወጣ አለኝ like watering discharge ነው። padding fully so ካርጎታል።",
+          "latency_seconds": 3.03
+        },
+        "addis_ai": {
+          "hypothesis_text": "ቶሎ ቶሎ የሚወጣ ፍሉድ አለኝ ላይክ ዋተሪን ዲስቻርጅ ነው ፓዴን ፉሊ ሶክ አድርጎታል",
+          "latency_seconds": 3.88
+        },
+        "gemini": {
+          "hypothesis_text": "ቶሎ ቶሎ የሚመጣ ﬂuid አልነኝ like watery discharge ነው padding fully so ሰካጎታል",
+          "latency_seconds": 3.49
+        }
+      }
+    },
+    {
+      "filename": "v104.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "sputting ሳይሆን actually fresh red bleeding አለም አይቻለሁ it's bet's gay",
+          "latency_seconds": 3.82
+        },
+        "addis_ai": {
+          "hypothesis_text": "ስፖቲንግ ሳይሆን አክቹዋል ፍሬሽ ሬድ ብሊዲንግ አለ ክሎት ነገርም ወይቻለሁ ኢትስ በጣም ስኬሪ",
+          "latency_seconds": 3.48
+        },
+        "gemini": {
+          "hypothesis_text": "spotting ሳይሆን actual fresh red bleeding አለ clot ነገርም ሆይቻለሁ  እሱ በጣም scary",
+          "latency_seconds": 3.46
+        }
+      }
+    },
+    {
+      "filename": "v105.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "The baby is barely moving countade since morning two kicks ብቻ ነው usually very active ነበር",
+          "latency_seconds": 3.06
+        },
+        "addis_ai": {
+          "hypothesis_text": "the baby is barely moving count ሳረግ since morning two kicks ብቻ ነው usually very active ነበር",
+          "latency_seconds": 3.46
+        },
+        "gemini": {
+          "hypothesis_text": "the baby is barely moving, ቀንሳለች since morning, 2 kicks with channel. usually you very active number.",
+          "latency_seconds": 3.79
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 1,
+    "end_index": 5,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T01:25:49Z"
+  },
+  "results": [
+    {
+      "filename": "v1.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አይ ምንም አልተሰማኝም ዛሬ በጣም ደህና ነኝ አመሰግናለሁ።",
+          "latency_seconds": 19.2
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይ ምንም አልተሰማኝም ዛሬ በጣም ደህና ነኝ አመሰግናለሁ።",
+          "latency_seconds": 8.17
+        },
+        "gemini": {
+          "hypothesis_text": "አይ ምንም አልተሰማኝም ዛሬ በጣም ደህና ነኝ አመሰግናለሁ።",
+          "latency_seconds": 11.88
+        }
+      }
+    },
+    {
+      "filename": "v2.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እረ ምንም የለም ራስ ምታትም ሆነ የኡርድ ቁርጠት አልተሰማኝም ሰላም ነኝ",
+          "latency_seconds": 6.13
+        },
+        "addis_ai": {
+          "hypothesis_text": "ኧረ ምንም የለም ራስ ምታትም ሆነ የውድቅ ውርቀት አልተሰማኝም ሰላም ነኝ።",
+          "latency_seconds": 5.94
+        },
+        "gemini": {
+          "hypothesis_text": "እረ ምንም የለም ራስ ምታትም ሆነ የወር አበባ ቁርጠት አልተሰማኝም ሰላም ነኝ።",
+          "latency_seconds": 11.08
+        }
+      }
+    },
+    {
+      "filename": "v3.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አልተሰማኝም እንደውም ዛሬ ቀላል ብሎኛል",
+          "latency_seconds": 4.85
+        },
+        "addis_ai": {
+          "hypothesis_text": "አልተሰማኝም እንደውም ዛሬ ቀለል ብሎኛል።",
+          "latency_seconds": 3.71
+        },
+        "gemini": {
+          "hypothesis_text": "አልሰማኝም እንደውም ዛሬ ቀለል ብሎኛል",
+          "latency_seconds": 9.83
+        }
+      }
+    },
+    {
+      "filename": "v4.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ምንም የተለየ ነገር የለም ሁሉም ነገር ደናው ነው።",
+          "latency_seconds": 4.38
+        },
+        "addis_ai": {
+          "hypothesis_text": "ምንም የተለየ ነገር የለም፤ ሁሉም ነገር ደህና ነው።",
+          "latency_seconds": 4.4
+        },
+        "gemini": {
+          "hypothesis_text": "ምንም የተለየ ነገር የለም ሁሉም ነገር ደህና ነው።",
+          "latency_seconds": 8.91
+        }
+      }
+    },
+    {
+      "filename": "v5.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አይ የጠቀስካቸው ነገሮች ምንም አልታዩብኝም",
+          "latency_seconds": 4.08
+        },
+        "addis_ai": {
+          "hypothesis_text": "አይ የጠቀስካቸው ነገሮች ምንም አልታዩብኝም።",
+          "latency_seconds": 3.89
+        },
+        "gemini": {
+          "hypothesis_text": "አይ የጠቀسካቸው ነገሮች ምንም አልታዩብኝም",
+          "latency_seconds": 8.42
+        }
+      }
+    }
+  ]
+}

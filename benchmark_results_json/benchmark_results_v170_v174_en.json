@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 170,
+    "end_index": 174,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:23:10.274747+00:00"
+  },
+  "results": [
+    {
+      "filename": "v170.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "It's not severe pain, it's just the normal pressure I feel when the baby pushes downward.",
+          "latency_seconds": 5.08
+        },
+        "deepgram": {
+          "hypothesis_text": "It's not severe pain. It's just the normal pressure I feel when the baby pushes downward.",
+          "latency_seconds": 9.57
+        },
+        "gemini": {
+          "hypothesis_text": "It's not severe pain, it's just the normal pressure I feel when the baby pushes downward.",
+          "latency_seconds": 4.67
+        }
+      }
+    },
+    {
+      "filename": "v171.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My stomach isn't cramping, but because I'm bloated with gas, it feels a bit heavy.",
+          "latency_seconds": 4.75
+        },
+        "deepgram": {
+          "hypothesis_text": "My stomach isn't cramping, but because I'm bloated with gas, it feels a bit heavy.",
+          "latency_seconds": 3.43
+        },
+        "gemini": {
+          "hypothesis_text": "My stomach is encramping, perhaps because I'm bloated with gas. It feels a bit heavy.",
+          "latency_seconds": 3.94
+        }
+      }
+    },
+    {
+      "filename": "v172.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "When I woke up, I was slightly nauseous, but now I ate and I feel better, no more vomiting.",
+          "latency_seconds": 5.27
+        },
+        "deepgram": {
+          "hypothesis_text": "When I woke up, I was slightly nauseous, but now I ate and I feel better. No more vomiting.",
+          "latency_seconds": 4.2
+        },
+        "gemini": {
+          "hypothesis_text": "When I woke up, I was slightly nauseous, but now I ate and I feel better. No more vomiting.",
+          "latency_seconds": 3.99
+        }
+      }
+    },
+    {
+      "filename": "v173.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My feet are slightly swollen, but I think it's because I've been standing all day. My hands and face are fine.",
+          "latency_seconds": 4.45
+        },
+        "deepgram": {
+          "hypothesis_text": "My feet are slightly swollen, but I think it's because I've been standing all day. My hands and face are fine.",
+          "latency_seconds": 3.78
+        },
+        "gemini": {
+          "hypothesis_text": "My feet are slightly swollen, but I think it's because I've been standing all day. My hands and face are fine.",
+          "latency_seconds": 4.41
+        }
+      }
+    },
+    {
+      "filename": "v174.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "My back hurts occasionally, but it's not at the level of severe pain.",
+          "latency_seconds": 4.81
+        },
+        "deepgram": {
+          "hypothesis_text": "My back hurts occasionally, but it's not at the level of severe pain.",
+          "latency_seconds": 3.25
+        },
+        "gemini": {
+          "hypothesis_text": "My back hurts occasionally, but it's not at the level of severe pain.",
+          "latency_seconds": 3.75
+        }
+      }
+    }
+  ]
+}

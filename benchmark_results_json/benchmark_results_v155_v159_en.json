@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "language_code": "en",
+    "stage_label": "symptoms",
+    "start_index": 155,
+    "end_index": 159,
+    "total_requested": 5,
+    "completed_count": 5,
+    "last_updated": "2026-09-08T03:17:27.640685+00:00"
+  },
+  "results": [
+    {
+      "filename": "v155.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "No pain, but the baby's movements have completely stopped since yesterday. I feel nothing.",
+          "latency_seconds": 5.08
+        },
+        "deepgram": {
+          "hypothesis_text": "No pain, but the baby's movements have completely stopped since yesterday. I feel nothing.",
+          "latency_seconds": 4.4
+        },
+        "gemini": {
+          "hypothesis_text": "No pain, but the baby's movements have completely stopped since yesterday. I feel nothing.",
+          "latency_seconds": 5.02
+        }
+      }
+    },
+    {
+      "filename": "v156.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I have a high fever. My entire body is shivering. I feel very cold.",
+          "latency_seconds": 3.99
+        },
+        "deepgram": {
+          "hypothesis_text": "I have a high fever. My entire body is shivering. I feel very cold.",
+          "latency_seconds": 4.24
+        },
+        "gemini": {
+          "hypothesis_text": "I have a high fever. My entire body is shivering. I feel very cold.",
+          "latency_seconds": 4.0
+        }
+      }
+    },
+    {
+      "filename": "v157.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I'm short of breath. When I lie down, my chest feels tight. Breathing is so difficult.",
+          "latency_seconds": 5.06
+        },
+        "deepgram": {
+          "hypothesis_text": "I'm short of breath when I lie down. My chest feels tight. Breathing is so difficult.",
+          "latency_seconds": 4.61
+        },
+        "gemini": {
+          "hypothesis_text": "I'm short of breath when I lie down. My chest feels tight. Breathing is so difficult.",
+          "latency_seconds": 4.73
+        }
+      }
+    },
+    {
+      "filename": "v158.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Yes, since yesterday, my head is pounding like a hammer, my vision has black spots, and my face is swollen.",
+          "latency_seconds": 4.76
+        },
+        "deepgram": {
+          "hypothesis_text": "Yes. Since yesterday, my head is pounding like a hammer. My vision has black spots, and my face is swollen.",
+          "latency_seconds": 3.79
+        },
+        "gemini": {
+          "hypothesis_text": "Yes, since yesterday, my head is pounding like a hammer. My vision has black spots, and my face is swollen.",
+          "latency_seconds": 3.69
+        }
+      }
+    },
+    {
+      "filename": "v159.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "I'm feeling sharp cramps on my lower abdomen, and red blood is leaking with it. Help me quickly.",
+          "latency_seconds": 5.16
+        },
+        "deepgram": {
+          "hypothesis_text": "I'm feeling sharp cramps on my lower abdomen, and red blood is leaking with it. Help me quickly.",
+          "latency_seconds": 3.47
+        },
+        "gemini": {
+          "hypothesis_text": "I'm feeling sharp cramps on my lower abdomen, and red blood is leaking with it. Help me quickly.",
+          "latency_seconds": 3.7
+        }
+      }
+    }
+  ]
+}
