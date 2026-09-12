@@ -1,0 +1,463 @@
+{
+  "metadata": {
+    "language_code": "am",
+    "stage_label": "symptoms",
+    "start_index": 26,
+    "end_index": 50,
+    "total_requested": 25,
+    "completed_count": 21,
+    "last_updated": "2026-09-09T08:52:24.682953+00:00"
+  },
+  "results": [
+    {
+      "filename": "v26.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እግሬ በጣም እያበጠ ነው። today ቦታ ላይ severe swelling አለ። ጫማዬም አልገባ ብሎኛል ከዚህም በተጨማሪ mild headache አለኝ BP clinic ሄጄ blood pressure check ማድረግ አለብኝ ወይስ tomorrow morning መምጣት ይሻላል።",
+          "latency_seconds": 4.8
+        },
+        "addis_ai": {
+          "hypothesis_text": "እግሬ በጣም እያበጠ ነው ቱዴይ ቦት ፊት ላይ ሲቪር ስዌሊንግ አለ ጫማዬም አልገባ ብሎኛል ከዚህም በተጨማሪ ማይል ሄዴክ አለኝ ቢፒዬ ሃይ ሆኖ እንዳይሆን ፈርቻለሁ ኒርባይ ክሊኒክ ሄጄ ብላት ፕረሽር ቼክ ማድረግ አለብኝ ወይስ ሞሮ ሞኒንግ መምጣት ይሻላል።",
+          "latency_seconds": 5.68
+        },
+        "gemini": {
+          "hypothesis_text": "እግሬ በጣም እያበጠ ነው Today both feet ላይ severe swelling አለ ጫማዬም አልገባ ብሎኛል ከዚህም በተጨማሪ mild headache አለኝ BPዬ high ሆኖ እንዳይሆን ፈርቻለሁ nearby clinic ሄጄ blood pressure check ማድረግ አለብኝ ወይስ tomorrow morning መምጣት ይሻላል",
+          "latency_seconds": 9.11
+        }
+      }
+    },
+    {
+      "filename": "v27.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እኔ የ Folic acid እና iron supplement correctly ወስጃለሁ። ምንም side effect የለብኝም ግን the calcium ታብለስ አልቀውብኛል ባለፈው clinic ስሄድ ፋይ ውስጥ out of stock ነበር ያሉት ዛሬ private pharmcy ፈልጌ መግዛት አለብኝ ወይስ next appointment ድረስ",
+          "latency_seconds": 5.55
+        },
+        "addis_ai": {
+          "hypothesis_text": "እኔ የፎሊክ አሲድ እና አይሮን ሳፕሊመንቱን ከሬክ እወስጃለሁ ምንም ሳይድ ኢፌክት የለብኝም ግን ዘ ካልሲየም ታብለስ አልቀውብኛል ባለፈው ክሊኒክ ስሄድ ፋርማሲ ውስጥ አውት ኦፍ ስቶክ ነበር ያሉት ዛሬ ፕራይቬት ፋርማሲ ፈልጌ መግዛት አለብኝ ወይስ ኔክስት አፖይትመንት ድረስ መጠበቅ እችላለሁ።",
+          "latency_seconds": 5.43
+        },
+        "gemini": {
+          "hypothesis_text": "እኔ የ folic acid እና iron supplementኡን correctly ወስጃለሁ። ምንም side effect የለብኝም። ግን የ calcium tablets አልቀውብኛል። ባለፈው clinic ስሄድ pharmacy ውስጥ out of stock ነበሩ ያሉት። ዛሬ private pharmacy ፈልጌ መግዛት አለብኝ ወይስ next appointment ድረስ መጠበቅ እችላለሁ?",
+          "latency_seconds": 15.05
+        }
+      }
+    },
+    {
+      "filename": "v28.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬ afternoon ላይ lower abdomen tight እያደረገ frequent cramps ይሰማኛል like period pain intervalu ግን regular አይደለም these are just bruxton hicks, contractions or early labor science መሆናቸውን distinguish ማድረግ አልቻልኩም what at warning sciences should I monitor",
+          "latency_seconds": 4.14
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬ አፍትኑን ላይ ሎወር አብዶሚኔ ታይት እያደረገ ፍሪኩዌንት ክራምፕስ ይሰማኛል ላይክ ፒርድ ፔይን ኢንተርቫሉ ግን ሬጉላር አይደለም ዚዝ አር ጀስት ብራክስ ኤንድ ሂክስ ኮንትራክሽንስ ኦር ኤርሊ ሌበር ሳይንስ መሆናቸውን ዲስቲንጉሽ ማድረግ አልቻልኩም ዋት አዘር ዋንንግ ሳይንስ ሹድ አይ ሞኒተር",
+          "latency_seconds": 5.94
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬ afternoon ላይ lower abdomen ኤን tight የሚያደርግ frequent cramps ይሰማኛል። like period pain. interval ኡ ግን regular አይደለም። These are just Braxton Hicks contractions or early labor signs መሆናቸውን distinguish ማድረግ አልቻልኩም። What other warning signs should I monitor?",
+          "latency_seconds": 10.09
+        }
+      }
+    },
+    {
+      "filename": "v29.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ወስጃለው Daily አይፋ ኪኒኑን ጠዋት ላይ with fresh squezed orrang just ነው የወሰድኩት አይራብስንውን ይጨምራል ብለውኝ ካልሲያሙን ግን የ sturday ማታ ወስጄዋለሁ ዛሬም after diner ወስደዋለሁ እስካሁን ምንም stomach pain አልተሰማኝም",
+          "latency_seconds": 5.6
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ወስጃለሁ ዴሊ አይፋ ኪኒኑን ጠዋት ላይ ዊዝ ፍሬሽ ስኩዝ ኦረንጅ ጁስ ነው የወሰድኩት አይራብዞብሰንኑን ይጨምራል ብለውኝ ካልሲያሙን ግን የስተርዴይ ማታ ወስጄዋለሁ ዛሬም አፍተ ዲነር ወስደዋለሁ እስካሁን ምንም ስቶማክ በእነርሱ አማኝ በእነርሱ አማኝ",
+          "latency_seconds": 6.2
+        },
+        "gemini": {
+          "hypothesis_text": "አዎ ወስጃለሁ daily IFA ኪኒኑን ጧት ላይ with fresh squeezed orange juice ነው የወሰድኩት iron absorptionኡን ይጨምራል ብለውኝ ካልሲየም ግን yesterday ማታ ወስጃለሁ ዛሬም after dinner እወስደዋለሁ እስካ",
+          "latency_seconds": 45.97
+        }
+      }
+    },
+    {
+      "filename": "v30.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ምንም serious pain የለብኝም ግን the heart burn እና acid reflux በጣም severe ሆኗል። nighttime ላይ sleep መተኛት አልቻልኩም twos አድርጌ እንኳን burning sensation ይኖረዋል safe የሆነ Anteracid syrop medication ከመድሃኒት መግዛት እችላለሁ ወይስ prescription",
+          "latency_seconds": 21.35
+        },
+        "addis_ai": {
+          "hypothesis_text": "ምንም ሲሪየስ ፔን የለብኝም ግን ዘሃርት በርን እና አሲድ ሪፍሉክስ በጣም ሲቪር ሆኗል ናይት ታይም ላይ ስሊፕ መተኛት አልቻልኩም ቱፕሎዝ አድርጌ እንኳን በርኒንግ ሰንሴሽን ይኖረዋል ሴፍ የሆነ አንታሲድ ሲሮፕ ወይም ሜዲኬሽን ከመድሃኒት ቤት መግዛት እችላለው ወይስ እስኪ እስኪ እስኪ እስኪ",
+          "latency_seconds": 5.22
+        },
+        "gemini": {
+          "hypothesis_text": "ምንም serious pain የለብኝም። ግን heartburn እና acid reflux በጣም severe ሆኗል። night time ላይ sleep መተኛት አልቻልኩም። two pillows አድርጌ እንኳን burning sensation ይኖረዋል። safe የሆነ antacid syrup ወይም medication ከመድኃኒት ቤት መግዛት እችላለሁ ወይስ prescription ያስፈልጋል?",
+          "latency_seconds": 11.1
+        }
+      }
+    },
+    {
+      "filename": "v31.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ዛሬ morning ላይ ከ breakfal folic acid tablet ወስጃለሁ። ግን Calcium tableቱን ማታ ከመተኛቴ በፊት ነው የምወስደው። ምክንያቱም ሲመልቴ ከወሰድኳቸው severe naze እና mild constipation ይፈጥርብኛል doctor supprite አድርጌ እንዲወስድ ነግሮኛል ሶፋር strictly እስከ ዱዋሩን",
+          "latency_seconds": 6.44
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ዛሬ ሞኒንግ ላይ ከብሬክፈስት በኋላ ዲ አይረን ፎሊክ አሲድ ታብሌት ወስጃለሁ ግን ካልሲየም ታብሌቱን ማታ ከመተኛቴ በፊት ነው የምወስደው ምክንያቱም ሲማልቴኒሲ ከወሰድኳቸው ስቪየር ናዚያ እና ማይልድ ኮንስቲፔሽን ይፈጥርብኛል ዶክተሩ ሰፕራይዝ አድርጌ እንድወስድ ነግሮኛል። ሶ ፋር ስትሪክትሊ እስከ ድዋሩም እየተከተልኩ ነው።",
+          "latency_seconds": 5.89
+        },
+        "gemini": {
+          "hypothesis_text": "አዎ ዛሬ morning ላይ ከ breakfast በኋላ የ iron folic acid tablet ወስጃለሁ። ግን calcium tabletቱን ማታ ከመተኛቴ በፊት ነው የምወስደው። ምክንያቱም simultaneously ከወስድኳቸው severe nausea እና mild constipation ይፈጥርብኛል። ዶክተሩም separately አድርጌ እንድወስድ ነግሮኛል። So far strictly scheduleኡን እየተከተልኩ ነው።",
+          "latency_seconds": 9.78
+        }
+      }
+    },
+    {
+      "filename": "v32.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬ morning ጀምሮ defitel chick በጣም decrease አድርጓል። normally after breakft very active ነበር የሚሆነው ዛሬ ግን hardly any movement ተሰማኝ coal juice ጠጥቼ ቆይቻለሁ ግን still quaet ነው please hospital emergency treage መሄድ አለብኝ ወይስ ትንሽ ል",
+          "latency_seconds": 3.78
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬ ሞኒንግ ጀምሮ ደፊተል ቺክ በጣም ዲክሪስ አድርጓል። ኖርማሊ አፍተር ብሬክፈስት ቬሪ አክቲቭ ነበር የሚሆነው። ዛሬ ግን ሃድሊ ኤኒ ሙቭመንት ተሰማኝ። ኮል ጁስ ጠጥቼ ቆይቻለሁ ግን ስቲል ኳየት ነው። ፕሊዝ ሆስፒታል ኢመርጀንሲ ትሪያጅ መሄድ አለብኝ ወይስ ትንሽ ልጠብቅ በብቁ",
+          "latency_seconds": 5.02
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬ morning ጀምሮ fetal kick በጣም decrease አድርጓል። normally after breakfast very active ነበር የሚሆነው። ዛሬ ግን hardly any movement ተሰማኝ። cold juice ጠጥቼ ቆይቻለሁ ግን still quiet ነው። please hospital emergency triage መሄድ አለብኝ ወይስ ትንሽ ልጠበቅ?",
+          "latency_seconds": 7.73
+        }
+      }
+    },
+    {
+      "filename": "v33.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬ lower back pain እና pelvic pressure በጣም ይሰማኛል especially ስራ ላይ standing for a long time ሲሆን አምበረቦ ይሆናል። fetal movement ግን active ነው፣ baby normal cick እያደረገ ነው። ይሄ normaltrimestyment ነው ወይስ የ doctor emergency ማናገር",
+          "latency_seconds": 3.88
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬ ሎወር ባክ ፔይን እና ፐርቪክ ፕሬሸር በጣም ይሰማኛል ስፔሻሊ ስራ ላይ ስታንዲንግ ፎር ሎንግ ታይም ሲሆን አንበረቦ ይሆናል ፊትል ሙቭመንት ግን አክቲቭ ነው ቤቢ ኖርማል ኪክ እያደረገ ነው ይሄ ኖርማል ትራይምስተር ስንተም ነው ወይስ የዶክተሩን ኢመርጀንሲ ማናገር አንድ ነጥብ",
+          "latency_seconds": 5.63
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬ lower back pain እና pelvic pressure በጣም ይሰማኛል። especially ሥራ ላይ standing for a long time ሲሆን አምበልቦ ይሆናል። fetal movement ግን active ነው baby normal kick እያደረገ ነው። ይህ normal third trimester symptom ነው? ወይስ ዶክተሬን emergency ማናገር አለብኝ?",
+          "latency_seconds": 40.98
+        }
+      }
+    },
+    {
+      "filename": "v34.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬ taken አድርጌያለሁ ሙሉ ቀን ስራ ስለነበርኩ the Calcium supplement መውሰድ ፈጌት አድርጌ ነበር። ዛሬ double dose መውሰድ አለብኝ ወይስ just continue with one tablet አይፋውን ግን ትዴ as usual ጠዋት ወስጃለሁ no complications",
+          "latency_seconds": 2.33
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬ ቴክን አድርጌያለሁ በት ጀስት ዴይ ሙሉ ቀን ስራ ስለነበርኩ ደካል ሲያም ሳፕልመንቱን መውሰድ ፈጌጥ አድርጌ ነበር ዛሬ ደብል ዶስ መውሰድ አለብኝ ወይስ ጀስት ኮንቲኒው ዊዝ ዋን ታብሌት አይፋውን ግን ትዴይ አዝ ዩዙዋል ጠዋት ወስጃለሁ ኖ ካምፕሊኬሽንስ",
+          "latency_seconds": 5.53
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬ taken አድርጌያለሁ፤ but yesterday ሙሉ ቀን ስራ ስለነበርኩ የ calcium supplementቱን መውሰድ forget አድርጌ ነበር። ዛሬ double dose መውሰድ አለብኝ ወይስ just continue with one tablet? I fine ግን today as usual ጠዋት ወስጄያለሁ። no complications።",
+          "latency_seconds": 10.03
+        }
+      }
+    },
+    {
+      "filename": "v35.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬማ ገና አልወሰድኩም እኮ ጠዋት Morning ሲነሱ በጣም አስቸግሮኝ vommit ሳደርግ ነው የረፈደው emtistac መውሰድ አልቻልኩም አሁን after lench ትንሽ አል ሲለኝ the daily If supplement ከብዙ ዋጋ እወስደዋለሁ ካልሲየም ደግሞ አብሬን ውሰደው ወይስ",
+          "latency_seconds": 3.73
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬማ ገና አልወሰድኩም እኮ ጠዋት ሞኒንግ ሲክንሱ በጣም አስቸግሮኝ <0xE1><0x89><0xAE>ሚት ሳደርግ ነው የረፈደው እምቲስተማክ መውሰድ አልቻልኩም አሁን አፍተር ለንች ትንሽ ሻል ሲለኝ ዘዴሊ አይፍ ሳፕልማንቱን ከብዙ ዋታ ጋር ወስደዋለሁ ካልሲየም ደግሞ አብሬል ውስጥ ያለው ይስቃል እስካሁን",
+          "latency_seconds": 4.86
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬማ ገና አልወሰድኩም እኮ። ጠዋት morning sicknessኡ በጣም አስቸግሮኝ vomit ሳደርግ ነው የረፈደው። empty stomach መውሰድ አልቻልኩም። አሁን after lunch ትንሽ ሻል ሲለኝ የdaily IF supplementኡን ከብዙ water ጋር ወስደዋለሁ። calcium ደግሞ አብሬ ልውሰደው ወይስ gap ልስጠው?",
+          "latency_seconds": 12.49
+        }
+      }
+    },
+    {
+      "filename": "v36.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እግሬ በጣም እያበጠ ነው። today ቦት ፊት ላይ severe swelling አለ። ጫማዬም አልገባ ብሎኛል። ከዚህም በተጨማሪ mild headache አለኝ BP clinic hegad pressure check ማድረግ አለብኝ ወይስሞሮ morning መምጣት",
+          "latency_seconds": 4.14
+        },
+        "addis_ai": {
+          "hypothesis_text": "እግሬ በጣም እያበጠ ነው። ቱደይ ቦት ፊት ላይ ሲቪር ስወሊንግ አለ። ጫማዬም አልገባ ብሎኛል። ከዚህም በተጨማሪ ማይልድ ሄዴክ አለኝ። ዲፒኤ ሃይ ሆኖ እንዳይሆን ፈርቻለሁ። ኒርባይ ክሊኒክ ሄጅ ብላድ ፕሬሽር ቼክ ማድረግ አለብኝ ወይስ ትሞሮ ሞኒንግ መምጣት እንሻላ",
+          "latency_seconds": 7.01
+        },
+        "gemini": {
+        "hypothesis_text": "እግሬ በጣም እያበጠ ነው:: Today both feet ላይ severe swelling አለ:: ጫማዬም አልገባ ብሎኛል:: ከዚያም በተጨማሪ mild headache አለኝ:: BPዬ high ሆኖ እንዳይሆን ፈርቻለሁ:: nearby clinic ሄጄ blood pressure check ማድረግ አለብኝ ወይስ tomorrow morning መምጣት ይሻላል?",
+        "latency_seconds": 37.18
+      }
+      }
+    },
+    {
+      "filename": "v37.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እኔ የ Folic acid እና iron supplimant correctly ወስጃለሁ። ምንም side effect የለብኝም ግን Calcium tablets አልቀውብኛል ባለፈው clinic ስሄድ phamacy ውስጥ out of stock ነበር ያሉት ዛሬ private phamacy ፈልጌ መግዛት አለብኝ ወይስ next appointment ድረስ መጠበቅ ይችላል።",
+          "latency_seconds": 4.83
+        },
+        "addis_ai": {
+          "hypothesis_text": "እኔ የፎሊክ አሲድ እና አይሮን ስፕሪማንቱን ካሬክትሊ ወስጃለሁ። ምንም ሳይድ ኢፌክት የለብኝም። ግን ዘ ካልሲየም ታብሌት አልቀውብኛል። ባለፈው ክሊኒክ ስሄድ ፋርማሲ ውስጥ አውት ኦፍ ስቶክ ነበር ያሉት። ዛሬ ፕራይቬት ፋርማሲ ፈልጌ መግዛት አለብኝ ወይ መጠበቅ እችላለሁ",
+          "latency_seconds": 6.34
+        },
+        "gemini": {
+          "hypothesis_text": "እኔ የ folic acid እና iron supplement ቱን correctly ወስጃለሁ። ምንም side effect የለብኝም። ግን የ calcium tablets አልቆብኛል። ባለፈው clinic ስሄድ pharmacy ውስጥ out of stock ነበር ያሉት። ዛሬ private pharmacy ፈልጌ መግዛት አለብኝ ወይስ next appointment ድረስ መጠበቅ እችላለሁ?",
+          "latency_seconds": 33.08
+        }
+      }
+    },
+    {
+      "filename": "v38.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬ afternoon ላይ low abdomination እያደረገ frequent cramps ይሰማኛል። like period pain intervalu ግን regular አይደለም these are just bruxton hex contractions or early labor science መሆናቸውን distinguish ማድረግ አልቻልኩም what ather warning science should I monitor?",
+          "latency_seconds": 5.58
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬ አፍትኑን ላይ ሎወር አብዶሚኔ ታይት እያደረገ ፍሪኮንት ክራምፕስ ይሰማኛል። ላይክ ፒሪዮድ ፔይን። ኢንተርቫሉ ግን ሬጉላር አይደለም። ዚዝ አር ጀስት ብራክስተን ሄክስ ኮንትራክሽንስ ኦር ኤርሊ ሌበር ሳይንስ መሆናቸውን ዲስቲንጉሽ ማድረግ አልቻልኩም። ዋት አዘር ዋርኒንግ ሳይንስ ሹድ አይ ሞኒተር?",
+          "latency_seconds": 5.68
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬ አፍተርኑን ላይ lower abdomen ታይት እያደረገ frequent cramps ይሰማኛል። like period pain። ኢንተርቫሉ ግን regular አይደለም። These are just Braxton Hicks contractions or early labor signs መሆናቸውን distinguish ማድረግ አልቻልኩም። What other warning signs should I monitor?",
+          "latency_seconds": 21.4
+        }
+      }
+    },
+    {
+      "filename": "v39.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ወስጃለው Daily አይፋ ኪኒኑን ጠዋት ላይ with freshly squeezed orrang just ነው የወሰድኩት iron absorbeኑን ይጨምራል ብለውኝ ካልሲያሙን ግን የስቴ ማታ ወስጄዋለሁ ዛሬም after diner ወስደዋለሁ እስካሁን ምንም stomach pain አልተሰማኝም perfectly fine ነኝ:",
+          "latency_seconds": 3.94
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ወስጃለሁ ዴሊ አይፋ ኪኒኑን ጠዋት ላይ ዊት ፍሬሽሊ ስኩዊዝድ ኦረንጅ ጁስ ነው የወሰድኩት አይሮን አብዞብሰኑን ይጨምራል ብለውኝ ካልሲያሙን ግን የስተዴ ማታ ወስጄዋለሁ ዛሬም አፍተ ዲነር ወስደዋለሁ እስካሁን ምንም ስተማክፔን አልተሰማኝም ፐርፌክሊ ፋይን ነኝ",
+          "latency_seconds": 5.28
+        },
+        "gemini": {
+          "hypothesis_text": "ወስጃለሁ Daily IFA ኪኒኑን ጠዋት ላይ with freshly squeezed orange juice ነው የወሰድኩት iron absorptionኑን ይጨምራል ብለውኝ። ካልሲየሙን ግን yesterday ማታ ወስጄዋለሁ። ዛሬ after dinner እወስደዋለሁ። እስካሁን ምንም stomach pain አልተሰማኝም። perfectly fine ነኝ።",
+          "latency_seconds": 21.1
+        }
+      }
+    },
+    {
+      "filename": "v40.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ምንም serious spain የለብኝም ግን ድሀድበን እና acid reflux በጣም severe ሆኗል። night time ላይ sleep መተኛት አልቻልኩም two pilows አድርጌ እንኳን burning sensation ይኖረዋል safe የሆነ antacid syropecation ከመድሀኒት መግዛት እችላለሁ ወይስ prescription ያስፈልገናል",
+          "latency_seconds": 5.42
+        },
+        "addis_ai": {
+          "hypothesis_text": "ምንም ሲሪየስ ፔን የለብኝም ግን ድሃድበን እና አሲድ ሪፍሉክስ በጣም ሲቪር ሆኗል። ናይት ታይም ላይ ስሊፕ መተኛት አልቻልኩም ቱ ፒሎዝ አድርጌ እንኳን ቨርሚንግ ሴንሴሽን ይኖረዋል። ሴፍ የሆነ አንታሲድ ሲሮፕ ወይም ሜዲኬሽን ከመድሃኒት ቤት መግዛት እችላለሁ። ውይስ ፕሮስክሪፕሽን ያስፈልጋል?",
+          "latency_seconds": 12.9
+        },
+        "gemini": {
+          "hypothesis_text": "ምንም serious pain ባይኖርብኝም ግን heartburn እና acid reflux በጣም severe ሆኗል። nighttime ላይ sleep መተኛት አልቻልኩም። two pillows አድርጌ እንኳን burning sensation ይኖረዋል። safe የሆነ antacid syrup ወይም medication ከመድኃኒት ቤት መግዛት እችላለሁ ወይስ prescription ያስፈልጋል?",
+          "latency_seconds": 32.21
+        }
+      }
+    },
+    {
+      "filename": "v41.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ዛሬ morning ላይ ከ breakft በኋላ diron and folic stablet ወስጃለሁ። ግን ካልሲም tablet ትቱን ማታ ከመተኛቴ በፊት ነው የምወስደው ምክንያቱም simultaneously ከወሰድኳቸው severe nozia እና mid conspation ይፈጥርብኛል doctor ሰፕራ አድርጌ እንዲወስድ ነግሮኛል። so far strictly scadon እየተከተልኩ ነው።",
+          "latency_seconds": 4.74
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ዛሬ ሞኒንግ ላይ ከብሬክፋስት በኋላ ዲ አይሮን አንድ ፎሊክስ ታብሌት ወስጃለሁ ግን ካልሲም ታብሌትቱን ማታ ከመተኛቴ በፊት ነው የምወስደው ምክንያቱም ሲሞልቴኒየስሊ ከወሰድኳቸው ስቪርኖዚያ እና ማይድ ኮንስፔሽን ይፈጥርብኛል ዶክተሩም ሰፕራይ አድርጌ እንዲወስድ ነግሮኛል። ሶ ፋር ስትሪክሊ ኤስኬዱሩን እየተከተልኩ ነው።",
+          "latency_seconds": 6.66
+        },
+        "gemini": {
+          "hypothesis_text": "አዎ ዛሬ morning ላይ ከbreakfast በኋላ የiron እና folic tablet ወስጃለሁ። ግን calcium tabletቱን ማታ ከመተኛቴ በፊት ነው የምወስደው። ምክንያቱም simultaneously ከወሰድኳቸው severe nausea እና mild constipation ይፈጥርብኛል። ዶክተሩም separate አድርጌ እንድወስድ ነግሮኛል። So far strictly scheduleሉን እየተከተልኩ ነው።",
+          "latency_seconds": 10.49
+        }
+      }
+    },
+    {
+      "filename": "v42.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬ morning ጀምሮ the feetly kick በጣም decrease አድርጓል። normally after breakfast very active ነበር የሚሆነው ዛሬ ግን hardly any movement ተሰማኝ coljust ጠጥቼ ቆይቻለሁ ግን still coየት ነው። please hospital emergency መሄድ አለብኝ ወይስ",
+          "latency_seconds": 4.24
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬ ሞርኒንግ ጀምሮ ዘ ፊትል ኪክ በጣም ዲክሪስ አድርጓል። ኖርማሊ አፍተር ብሬክፋስት ቬሪ አክቲቭ ነበር የሚሆነው። ዛሬ ግን ሃርድሊ ኤኒ ሙቭመንት ተሰማኝ። ኮል ጁስ ጠጥቼ ቆይቻለሁ ግን ስቲል ኳየት ነው። ፕሊስ ሆስፒታል ኢመርጀንሲ ትራያዥ መሄድ አለብኝ ወይስ ትንሽ ልጠብቅ?",
+          "latency_seconds": 5.28
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬ morning ጀምሮ fetal kick በጣም decrease አድርጓል። normally after breakfast very active ነበረ የሚሆነው። ዛሬ ግን hardly any movement ተሰማኝ። cold juice ጠጥቼ ቆይቻለሁ ግን still quiet ነው። please hospital emergency triage መሄድ አለብኝ ወይስ ትንሽ ልጠበቅ?",
+          "latency_seconds": 18.17
+        }
+      }
+    },
+    {
+      "filename": "v43.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬ lower back pain እና pelvic pressure በጣም ይሰማኛል especially ስራ ላይ standing for a long time ስሆን umbarible fetal movement ግን active ነው፣ baby no mokik እያደረገ ነው። ይሄ normal temestemt ነው ወይስ doctor emergency ማናገር አለብኝ",
+          "latency_seconds": 4.61
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬ ሎዋር ባክ ፔን እና ፔልቪክ ፕረሸር በጣም ይሰማኛል። እስፔሻሊ ስራ ላይ ስታንዲንግ ፎር ኤ ሎንግ ታይም ስሆን አምቤርቦ ይሆናል። ፊትል ሙቭመንት ግን አክቲቭ ነው። ቤቢ ኖሞል ኪክ እያደረገ ነው። ይሄ ኖሞል ተርትራይምስት ሲምፕተም ነው? ወይስ ዶክተሩን ኢመርጀንሲ ማናገር አለብኝ?",
+          "latency_seconds": 5.37
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬ lower back pain እና pelvic pressure በጣም ይሰማኛል። especially ሥራ ላይ standing for a long time ስሆን unbearable ይሆናል። fetal movement ግን active ነው። baby'ውም kick እያደረገ ነው። ይህ normal third trimester symptom ነው? ወይስ ዶክተሩን emergency ማናገር አለብኝ?",
+          "latency_seconds": 10.75
+        }
+      }
+    },
+    {
+      "filename": "v44.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬ taken አድርጌያለሁ በ ሙሉ ቀን ስራ ስለነበርኩ the Calcium supplement መውሰድ ፈጌት አድርጌ ነበር። ዛሬ double dose መውሰድ አለብኝ ወይስ just continue with one tablet ይፋውን ግን ትዴ as usual ጠዋት ወስጃለሁ no complications",
+          "latency_seconds": 4.09
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬ ቴክን አድርጌያለሁ በት የስተዴይ ሙሉ ቀን ስራ ስለነበርኩ ዘካልሲየም ሳፕሊመንቱን መውሰድ ፈጌት አድርጌ ነበር ዛሬ ዳብል ዶስ መውሰድ አለብኝ ወይስ ጀስት ኮንቲኒው ዊዝ ዋን ታብሌት ኢት አይሆን ግን ቱዴይ አዝ ዩዝዋል ጠዋት ወስጃለሁ ኖ ኮምፕኬሽንስ",
+          "latency_seconds": 5.68
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬ take-ን አድርጌአለሁ:: But yesterday ሙሉ ቀን ሥራ ስለነበርኩ the calcium supplement-ን መውሰድ forget አድርጌ ነበር:: ዛሬ double dose መውሰድ አለብኝ ወይስ just continue with one tablet? Thyron-ን ግን today as usual ጧት ወስጃለሁ:: No complications.",
+          "latency_seconds": 40.96
+        }
+      }
+    },
+    {
+      "filename": "v45.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬማ ገና አልወሰድኩም እኮ ጠዋት Morning ሲክነሱ በጣም አስቸግሮኝ Wommit ሳደርግ ነው የረፈ Emtystamac መውሰድ አልቻልኩም አሁን አፍ ላንቺ ትንሽ ትንሽ አልኝ the daily if supplement ከብዙ ጋር እወስደዋለሁ ካልሲም ደግሞ አብሬን ውሰደው ወይስ ጋፕ ልስጠው?",
+          "latency_seconds": 21.55
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬማ ገና አልወሰድኩም እኮ ጠዋት ሞኒንግ ሲክነሱ በጣም አስቸግሮኝ ወሚት ሳደርግ ነው የረፈደው እምቲስ ተማክ መውሰድ አልቻልኩም አሁን አፍተር ላንች ትንሽ ሻል ሲለኝ ዘ ዴይሊ አይፍ ሳፕልማንቱን ከብዙ ዋተር ጋር እወስደዋለሁ ካልሲየም ደግሞ አብሬ ልውሰደው ወይስ ከአብ ልስጥ አው?",
+          "latency_seconds": 5.42
+        },
+        "gemini": {
+          "hypothesis_text": "ዛሬ ገና አልወሰድኩም እኮ። ጧት morning sickness ኡ በጣም አስቸግሮኝ vomit ሳደርግ ነው የረፈደው። empty stomach መውሰድ አልቻልኩም። አሁን after lunch ትንሽ ይሻል ሲለኝ The Daily IF supplement ኡን ከብዙ water ጋር ወስደዋለሁ። calcium ደግሞ አብሬ ልውሰደው ወይስ gap ልስጠው?",
+          "latency_seconds": 32.42
+        }
+      }
+    },
+    {
+      "filename": "v46.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "Today በወጥፊት ላይ severe swelling አለ። ጫማዬን አልገባ ብሎኛል። ከዚህም በተጨማሪ Mill headache አለኝ Deep high ሆኖ እንዳይሆን ፈርጫለሁ። Nibiclinic ሄጄ Blood pressure check ማድረግ አለብኝ ወይስ tomorrow morning መምጣት ይሻላል:",
+          "latency_seconds": 5.17
+        },
+        "addis_ai": {
+          "hypothesis_text": "ትዴይ ቦት ፊት ላይ ስቪየርስ ወልኝ አለ ጫማዬን አልገባ ብሎኛል ከዚህም በተጨማሪ ማይል ሄዴክ አለኝ ቢፕ ሃይ ሆኖ እንዳይሆን ፈርቻለሁ ኒባይ ክሊኒክ ሄጄ ብላክ ፕርሸር ቼክ ማድረግ አለብኝ ወይስ ትሞሮ ሞኒንግ መምጣት ይሻላል",
+          "latency_seconds": 5.57
+        },
+        "gemini": {
+        "hypothesis_text": "ሁለቱም እግሬ ላይ severe swelling አለ። ጫማዬም አልገባ ብሎኛል። ከዚህም በተጨማሪ mild headache አለኝ። BP high ሆኖ እንዳይሆን ፈርቻለሁ። እኔ ወደ clinic ሄጄ blood pressure check ማድረግ አለብኝ ወይስ tomorrow morning መምጣት ይሻላል?",
+        "latency_seconds": 41.8
+      }
+      }
+    },
+    {
+      "filename": "v47.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "እኔ የ Folic acid እና iron supplimant correctly ወስጃለሁ ምንም side effect የለብኝም ግን tablet ያልቀውብኛል ባለፈው clinic ሲሄድ pharmacy ውስጥ out of stock ነበር ያሉት ዛሬ private pharmacy ፈልጌ መግዛት አለብኝ ወይስ ነክ appointment መጠበቅ እችላለሁ",
+          "latency_seconds": 7.06
+        },
+        "addis_ai": {
+          "hypothesis_text": "እኔ የፎሊክ አሲድ እና አይሮን ሳፕልማንቱን ኮሬክትሊ ወስጃለሁ። ምንም ሳይድ ኢፌክት የለብኝም። ግን ዘ ካልሲየም ታብሌትስ አልቆብኛል። ባለፈው ክሊኒክ ስሄድ ፋርማሲ ውስጥ አውት ኦፍ ስቶክ ነበር ያሉት። ዛሬ ፕራይቬት ፋርማሲ ፈልጌ መግዛት አለብኝ ወደ እስ ነክስት አፕዋይንት መንድረስ መጠበቅ ችላለሁ",
+          "latency_seconds": 5.53
+        },
+        "gemini": {
+        "hypothesis_text": "እኔ የ folic acid እና iron supplementኡን correctly ወስጃለሁ። ምንም side effect የለብኝም። ግን የ calcium tablets አልቆብኛል። ባለፈው clinic ስሄድ pharmacy ውስጥ out of stock ነበር ያሉት። ዛሬ private pharmacy ፈልጌ መግዛት አለብኝ ወይስ next appointment ድረስ መጠበቅ እችላለሁ?",
+        "latency_seconds": 13.6
+      }
+      }
+    },
+    {
+      "filename": "v48.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ዛሬ afternonon ላይ ለወር abdoment tight እያደረገ frequent cramps ይሰማኛል like period pain intervalu ግን regular አይደለም these are just bruxton hicks contractions or early labor science መሆናቸውን distinguish ማድረግ አልቻልኩም what at there warning science shudy",
+          "latency_seconds": 3.38
+        },
+        "addis_ai": {
+          "hypothesis_text": "ዛሬ አፍትኑን ላይ ሎወር አብዶሜንቴ ታይት እያደረገ ፍሪኩዌንት ክራምስ ይሰማኛል ላይክ ፒሪያድ ፔይን ኢንተርቫሉ ግን ሬጉላር አይደለም ዚስ አር ጀስት ብራክስትን ሂክስ ኮንትራክሽንስ ኦር ኤርሊ ሌበር ሳይንስ መሆናቸውን ዲስቲንጉሽ ማድረግ አልቻልኩም ዋት አዘር ዎርኒንግ ሳይንስ ሹድ አይ ሞኒተር",
+          "latency_seconds": 4.86
+        },
+        "gemini": {
+        "hypothesis_text": "ዛሬ afternoon ላይ lower abdomen ኔን tight እያደረገ frequent cramps ይሰማኛል። like period pain. interval ሉ ግን regular አይደለም። These are just Braxton Hicks contractions or early labor signs መሆናቸውን distinguish ማድረግ አልቻልኩም። What other warning signs should I monitor?",
+        "latency_seconds": 12.77
+      }
+      }
+    },
+    {
+      "filename": "v49.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "አዎ ወስጃለሁ። ዴቪ አይፋ tininu ጠዋት ላይ with fresh squezed orrengus ነው የወሰድኩት irons ይጨምራል ብለውኝ calcium ግን የስቴዴ ማታ ወስደዋለሁ ዛሬም After dineral እስካሁን ምንም stomach pain አልተሰማኝም ተፈቅቢ ፋይን",
+          "latency_seconds": 6.75
+        },
+        "addis_ai": {
+          "hypothesis_text": "አዎ ወስጃለሁ ዴሊ አይፋ ኪኒኑን ጠዋት ላይ ዊት ፍሬሽ ስኩዝድ ኦረንጅ ጁስ ነው የወሰድኩት አይሮን እንደዚህም ይጨምራል ብለውኝ ከያልዚያሙን ግን የተያየ ስትዴይ ማታ ወስጄዋለሁ ዛሬም አፍት ዲነር እወስደዋለሁ እስካሁን ምንም ስተማክቴ አስተሳሰብ ማን ነው? አክቲቪስት ነኝ ነኝ።",
+          "latency_seconds": 4.03
+        },
+        "gemini": {
+          "hypothesis_text": "አዎ ወስጃለሁ daily iron pill ኡን ጧት ላይ with freshly squeezed orange juice ነው የወሰድኩት iron ደረጃዬን ይጨምራል ብለውኝ calcium ኡን ግን yesterday ማታ ወስጃለሁ ዛሬም after dinner እወስደዋለሁ እስካሁን ምንም stomach pain አልተሰማኝም perfectly fine ነኝ",
+          "latency_seconds": 20.26
+        }
+      }
+    },
+    {
+      "filename": "v50.wav",
+      "stage_label": "symptoms",
+      "models": {
+        "sahara": {
+          "hypothesis_text": "ምንም serious pain የለብኝም ግን ደሃት በንና acid reflux በጣም severe ሆኗል። night time ላይ sleep መተኛት አልቻልኩም two pilos አድርጌ እንኳን burning sensation ይኖረዋል safe የሆነ Antacid syrop ወይም medication ከመድሃኒት ቤት መግዛት እችላለሁ ወይስ prescription ያስፈልጋል",
+          "latency_seconds": 2.57
+        },
+        "addis_ai": {
+          "hypothesis_text": "\"ምንም ሲሪየስ ፔይን የለብኝም ግን ዳትበርን እና አሲድ ሪፍልክስ በጣም ሰቪየር ሆኗል። ናይት ታይም ላይ ስሊፕ መተኛት አልቻልኩም፣ ቱ ፒሎውዝ አድርጌ እንኳን በርኒንግ ሴንሴሽን ይኖረዋል። ሴፍ የሆነ አንታሲድ ሲሮፕ ወይም ሜዲኬሽን ከመድሃኒት ቤት መግዛት እችላለሁ። ወይስ ፕሮስክሪፕሽን ያስፈልጋል?",
+          "latency_seconds": 9.11
+        },
+        "gemini": {
+          "hypothesis_text": "ምንም serious pain የለብኝም:: ግን heartburn እና acid reflux በጣም severe ሆኗል:: night time ላይ sleep መተኛት አልቻልኩም:: two pillows አድርጌ እንኳን burning sensation ይኖረዋል:: safe የሆነ antacid syrup ወይም medication ከመድኃኒት ቤት መግዛት እችላለሁ ወይስ prescription ያስፈልጋል?",
+          "latency_seconds": 8.81
+        }
+      }
+    }
+  ]
+}
