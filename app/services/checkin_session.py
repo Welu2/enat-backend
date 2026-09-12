@@ -80,7 +80,7 @@ class CheckInSessionService:
         audio_bytes: bytes,
         filename: str,
         content_type: str,
-        model: str = "addisai",
+        model: str = "sahara",
         language: str | None = None,
     ) -> dict[str, Any]:
         session = self._get_active_session(user_id, session_id)
@@ -218,7 +218,7 @@ class CheckInSessionService:
         audio_bytes: bytes,
         filename: str,
         content_type: str,
-        model: str = "addisai",
+        model: str = "sahara",
         language: str | None = None,
     ) -> dict[str, Any]:
         """Record voice again specifically to correct a single pending item."""
