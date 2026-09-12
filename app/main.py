@@ -83,10 +83,10 @@ if settings.enable_dev_routes:
     @app.post("/dev/asr-test")
     async def dev_asr_test(
         audio: UploadFile = File(...),
-        model: str = Form("addisai"),
+        model: str = Form("sahara"),
         model_query: str | None = Query(None, alias="model"),
     ) -> dict[str, str]:
-        selected_model = model_query or model or "addisai"
+        selected_model = model_query or model or "sahara"
         audio_bytes = await audio.read()
         client = get_asr_client(selected_model)
         transcript = await client.transcribe(
