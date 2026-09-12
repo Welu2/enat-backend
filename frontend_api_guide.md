@@ -11,6 +11,7 @@
 1. [Authentication Flow](#1-authentication-flow)
 2. [User Settings & Profile Management](#2-user-settings--profile-management)
 3. [Voice Check-in Intake Workflow](#3-voice-check-in-intake-workflow)
+   - [Voice Models & Language Architecture](#voice-models--language-architecture)
    - [Stage 1: Symptoms](#stage-1-symptoms)
    - [Stage 2: Food Log](#stage-2-food-log)
    - [Stage 3: Supplement Tracking](#stage-3-supplement-tracking)
@@ -23,6 +24,7 @@
 6. [Clinician Summaries & QR Sharing](#6-clinician-summaries--qr-sharing)
 7. [Notifications & Reminders System](#7-notifications--reminders-system)
 8. [Error Handling & Best Practices](#8-error-handling--best-practices)
+9. [Text-to-Speech (TTS) Voice Synthesis](#9-text-to-speech-tts-voice-synthesis)
 
 ---
 
@@ -322,8 +324,8 @@ Allows the patient to manually confirm supplement intake (e.g. from home screen 
 }
 ```
 
-### Manual 4-Food-Group Logging (Skip Stage 2 in Voice Check-in)
-Allows the patient to select the food groups she ate today directly via a 4-group checkbox UI (`grains`, `proteins`, `dairy`, `fruits_and_vegetables`). Logging food for today automatically **skips Stage 2 (Food)** during the voice check-in session!
+### Manual 4-Food-Group Logging
+Allows the patient to select the food groups she ate today directly via a 4-group checkbox UI (`grains`, `proteins`, `dairy`, `fruits_and_vegetables`). Note: Unlike Stage 3 (Supplement), Stage 2 (Food) is always presented during daily voice check-ins so mothers can log meals across different times of day.
 - **Endpoint**: `POST /users/me/food/verify` or `POST /users/me/food-log`
 - **Request Body**:
 ```json
@@ -497,27 +499,49 @@ graph TD
     Stage4 --> Finish[Intake Complete status: completed]
 ```
 
+### Voice Models & Language Architecture
+
+The backend supports multiple speech-to-text (ASR) providers with intelligent language routing and clinical tool-calling extraction:
+
+| Model ID | Provider | Supported Languages | Description & Fallback Behavior |
+|---|---|---|---|
+| **`sahara`** | **Intron Voice** | **Amharic (`am`) & English (`en`)** | **Default Model**. Fast, high-accuracy clinical voice recognition for both Amharic and English. |
+| `addisai` | Addis AI | Amharic (`am`) | Specialized speech models tuned specifically for Amharic. |
+| `gemini` | Google Gemini | Amharic (`am`) & English (`en`) | Multimodal LLM transcription. |
+| `elevenlabs` | ElevenLabs | English (`en`) | High-accuracy English transcription. *(If Amharic is requested, backend automatically safeguards and routes to an Amharic-capable engine)*. |
+| `deepgram` | Deepgram | English (`en`) | Ultra-low latency English transcription. *(If Amharic is requested, backend automatically safeguards and routes to an Amharic-capable engine)*. |
+
+> [!TIP]
+> **Default Model Behavior**: If the frontend omits the `model` parameter, the backend defaults to **`"sahara"`**!  
+> **Tool Calling & Extraction Routing**:
+> - **Amharic Sessions (`language="am"`)**: Tool calling & entity extraction powered by **Addis AI**.
+> - **English Sessions (`language="en"`)**: Tool calling & entity extraction powered by **Google Gemini**.
+
 ### Step 0: Check-in Stage Prompts & Stored Voice Audio
-Frontend can query all 4 standard check-in prompts or play the stored Amharic voice for each stage directly (zero dynamic TTS latency!):
+Frontend can query all 4 standard check-in prompts or play pre-recorded voice for each stage directly in Amharic or English (zero dynamic TTS latency!):
 - **Get All Stage Prompts**: `GET /checkin/prompts`
-- **Stream Stored Audio for Stage**: `GET /checkin/prompts/{stage}/audio` (e.g. `/checkin/prompts/symptoms/audio`)
+- **Stream Stored Audio for Stage**: `GET /checkin/prompts/{stage}/audio?language=am` (or `?language=en`)
 
 ### Step 1: Start Session
-- **Endpoint**: `POST /checkin/start`
+- **Endpoint**: `POST /checkin/start?language=am` (or `?language=en`, default: `"am"`)
 - **Response** `(200 OK)`:
 ```json
 {
   "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
   "stage": "symptoms",
   "question_prompt": "ዛሬ ጽኑ ራስ ምታት፣ የዓይን ብዥታ፣ ደም መፍሰስ፣ ፈሳሽ መፍሰስ ወይም ከፍተኛ የሆድ ህመም ተሰምቶዎታል?",
-  "question_audio_url": "/checkin/prompts/symptoms/audio"
+  "question_audio_url": "/checkin/prompts/symptoms/audio?language=am"
 }
 ```
 
 ### Step 2: Send Voice Response (Audio Upload)
-- **Endpoint**: `POST /checkin/{session_id}/respond`
+- **Endpoint**: `POST /checkin/{session_id}/respond`  
+  *(Supports query parameters as well: `POST /checkin/{session_id}/respond?model=sahara&language=am`)*
 - **Content-Type**: `multipart/form-data`
-- **Form Field**: `audio` (file upload: `.webm`, `.wav`, `.m4a`, `.mp3`)
+- **Parameters** (Form Data or Query Parameters):
+  - `audio` (Required, File): Upload audio file (`.webm`, `.wav`, `.m4a`, `.mp3`).
+  - `model` (Optional, String, **Default: `"sahara"`**): ASR voice model to use (`"sahara"`, `"addisai"`, `"gemini"`, `"elevenlabs"`, or `"deepgram"`).
+  - `language` (Optional, String, Default: Session language, typically `"am"` or `"en"`).
 - **Response** `(200 OK)`:
 ```json
 {
@@ -529,11 +553,16 @@ Frontend can query all 4 standard check-in prompts or play the stored Amharic vo
       "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
       "raw_text": "ቀላል የድካም ስሜት አለኝ",
       "category": null,
+      "category_display": "ምልክት",
+      "category_display_en": "symptom",
       "duration": {"value": null, "unit": "unspecified"},
       "severity": "mild",
       "danger_sign": false,
       "confirmed": false,
-      "verification_phrase": "ቀላል የድካም ስሜት አለኝ — ትክክል ነው?"
+      "verification_phrase": "ቀላል የድካም ስሜት አለኝ — ትክክል ነው?",
+      "verification_phrase_am": "ቀላል የድካም ስሜት አለኝ — ትክክል ነው?",
+      "verification_phrase_en": "ቀላል የድካም ስሜት አለኝ — is that correct?",
+      "verification_audio_url": "/tts?text=ቀላል+የድካም+ስሜት+አለኝ+—+ትክክል+ነው%3F"
     }
   ]
 }
@@ -598,9 +627,13 @@ When the patient confirms or manually edits an item:
 ### B. Single-Item Voice Correction
 If the patient taps "Re-record voice for this item":
 
-- **Endpoint**: `POST /checkin/{session_id}/items/{item_id}/voice-correct`
+- **Endpoint**: `POST /checkin/{session_id}/items/{item_id}/voice-correct`  
+  *(Supports query parameters: `POST /checkin/{session_id}/items/{item_id}/voice-correct?model=sahara&language=am`)*
 - **Content-Type**: `multipart/form-data`
-- **Form Field**: `audio` (file upload)
+- **Parameters** (Form Data or Query Parameters):
+  - `audio` (Required, File): Audio recording for the corrected item.
+  - `model` (Optional, String, **Default: `"sahara"`**): Voice model to use (`"sahara"`, `"addisai"`, `"gemini"`, `"elevenlabs"`, or `"deepgram"`).
+  - `language` (Optional, String, Default: Session language, typically `"am"` or `"en"`).
 - **Response** `(200 OK)`:
 ```json
 {
@@ -613,11 +646,16 @@ If the patient taps "Re-record voice for this item":
       "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
       "raw_text": "ከባድ ራስ ምታት ለሁለት ቀን",
       "category": "severe_headache",
+      "category_display": "ከባድ ራስ ምታት",
+      "category_display_en": "severe headache",
       "duration": {"value": 2, "unit": "day"},
       "severity": "severe",
       "danger_sign": true,
       "confirmed": false,
-      "verification_phrase": "ከባድ ራስ ምታት፣ 2 ቀን — ትክክል ነው?"
+      "verification_phrase": "ከባድ ራስ ምታት፣ 2 ቀን — ትክክል ነው?",
+      "verification_phrase_am": "ከባድ ራስ ምታት፣ 2 ቀን — ትክክል ነው?",
+      "verification_phrase_en": "severe headache, 2 day — is that correct?",
+      "verification_audio_url": "/tts?text=%E1%8A%A8%E1%89%A3%E1%8B%9D+..."
     }
   ]
 }
@@ -847,14 +885,14 @@ Register device token for lockscreen push notifications when the app or browser 
 
 ### Frontend UI Checklist
 1. **Always display `verification_phrase`** returned by backend directly on screen.
-2. **Audio File Formats**: Send `.webm` or `.wav` recorded at 16kHz for Addis AI ASR accuracy.
+2. **Audio File Formats**: Send `.webm` or `.wav` recorded at 16kHz for optimal STT accuracy across Sahara, Addis AI, Gemini, ElevenLabs, and Deepgram.
 3. **Empty Stage Handling**: When user says "No / nothing", `pending_items` is `[]`. Directly call `/complete` to move forward.
 
 ---
 
 ## 9. Text-to-Speech (TTS) Voice Synthesis
 
-The backend includes native **Text-to-Speech (TTS)** via Addis AI so the AI can speak stage prompts and read-back verification phrases in Amharic voice.
+The backend includes native **Text-to-Speech (TTS)** via Sahara (Intron Voice) and Addis AI so the AI can speak stage prompts and read-back verification phrases in natural Amharic or English voice.
 
 ### 1. Automatic Audio URLs in Check-in Responses
 All check-in endpoints automatically attach `question_audio_url` and `verification_audio_url`:
@@ -865,7 +903,7 @@ All check-in endpoints automatically attach `question_audio_url` and `verificati
   "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
   "stage": "symptoms",
   "question_prompt": "ዛሬ ወይም በቅርቡ ምንም አይነት ያልተለመደ የጤና እክል ወይም ህመም ተሰምቶዎታል?",
-  "question_audio_url": "/tts?text=%E1%8B%AE%E1%88%A5..."
+  "question_audio_url": "/tts?text=%E1%8B%AE%E1%88%A5...&model=sahara"
 }
 ```
 
@@ -875,13 +913,22 @@ All check-in endpoints automatically attach `question_audio_url` and `verificati
   "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
   "raw_text": "ቀላል የድካም ስሜት",
   "verification_phrase": "ቀላል የድካም ስሜት — ትክክል ነው?",
-  "verification_audio_url": "/tts?text=%E1%88%A8%E1%8B%AE..."
+  "verification_phrase_am": "ቀላል የድካም ስሜት — ትክክል ነው?",
+  "verification_phrase_en": "mild fatigue — is that correct?",
+  "verification_audio_url": "/tts?text=%E1%88%A8%E1%8B%AE...&model=sahara"
 }
 ```
 
 ### 2. Direct TTS Endpoints
 - **Stream Audio via GET (HTML `<audio src="...">` / Mobile Audio Player)**:  
-  `GET /tts?text=ከፍተኛ+ትኩሳት+—+ትክክል+ነው%3F` -> Returns `audio/mpeg` MP3 stream.
+  `GET /tts?text=ከፍተኛ+ትኩሳት+—+ትክክል+ነው%3F&model=sahara` -> Returns `audio/mpeg` MP3 stream.  
+  *(Parameters: `text` [required], `model` [optional, `"sahara"` (default) or `"addisai"`])*.
 - **Synthesize Audio via POST**:  
   `POST /tts`  
-  `{"text": "ከፍተኛ ትኩሳት — ትክክል ነው?"}` -> Returns `audio/mpeg` MP3 stream.
+  ```json
+  {
+    "text": "ከፍተኛ ትኩሳት — ትክክል ነው?",
+    "model": "sahara"
+  }
+  ```  
+  -> Returns `audio/mpeg` MP3 stream.
