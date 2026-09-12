@@ -8,10 +8,10 @@ from app.services.sahara import SaharaVoiceClient
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_VOICE_MODEL = "addisai"
+DEFAULT_VOICE_MODEL = "sahara"
 SUPPORTED_VOICE_MODELS = (
-    "addisai",
     "sahara",
+    "addisai",
     "intron",
     "gemini",
     "google",
@@ -35,19 +35,21 @@ def normalize_language(language: str | None) -> str:
 
 
 def normalize_voice_model(model: str | None) -> str:
-    """Normalize model string to standard canonical name ('addisai', 'sahara', 'gemini', 'elevenlabs', or 'deepgram')."""
+    """Normalize model string to standard canonical name ('sahara', 'addisai', 'gemini', 'elevenlabs', or 'deepgram')."""
     if not model or not str(model).strip():
         return DEFAULT_VOICE_MODEL
     cleaned = str(model).strip().lower()
     if cleaned in ("sahara", "intron", "sahara_voice", "saharavoice"):
         return "sahara"
+    if cleaned in ("addisai", "addis", "addis_ai", "addis-ai"):
+        return "addisai"
     if cleaned in ("gemini", "google", "gemini-3.5-transcribe", "gemini_transcribe", "gemini-transcribe"):
         return "gemini"
     if cleaned in ("elevenlabs", "eleven_labs", "eleven", "11labs"):
         return "elevenlabs"
     if cleaned in ("deepgram", "deep_gram", "deepgram_voice"):
         return "deepgram"
-    return "addisai"
+    return DEFAULT_VOICE_MODEL
 
 
 def get_asr_client(model: str = DEFAULT_VOICE_MODEL) -> Any:
