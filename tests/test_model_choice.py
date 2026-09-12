@@ -23,7 +23,7 @@ def mock_user_id() -> str:
 
 
 @pytest.mark.asyncio
-async def test_checkin_service_respond_defaults_to_addisai() -> None:
+async def test_checkin_service_respond_defaults_to_sahara() -> None:
     service = CheckInSessionService()
     session = {
         "id": uuid4(),
@@ -41,6 +41,30 @@ async def test_checkin_service_respond_defaults_to_addisai() -> None:
          patch.object(service.extraction, "extract", new=AsyncMock(return_value=[])), \
          patch.object(service.sessions, "update"):
         res = await service.respond(session["id"], session["id"], b"audio", "file.wav", "audio/wav")
+        assert not mock_addis.called
+        assert mock_sahara.called
+        assert res["transcript"] == "sahara transcript"
+
+
+@pytest.mark.asyncio
+async def test_checkin_service_respond_routes_to_addisai_when_specified() -> None:
+    service = CheckInSessionService()
+    session = {
+        "id": uuid4(),
+        "current_stage": "symptoms",
+        "stage_order": ["symptoms", "food", "closing"],
+        "draft_data": {"symptoms": []},
+        "pending_items": [],
+        "status": "in_progress",
+        "expires_at": "2099-01-01T00:00:00",
+    }
+
+    with patch.object(service, "_get_active_session", return_value=session), \
+         patch.object(AddisAIClient, "transcribe", new=AsyncMock(return_value="addisai transcript")) as mock_addis, \
+         patch.object(SaharaVoiceClient, "transcribe", new=AsyncMock(return_value="sahara transcript")) as mock_sahara, \
+         patch.object(service.extraction, "extract", new=AsyncMock(return_value=[])), \
+         patch.object(service.sessions, "update"):
+        res = await service.respond(session["id"], session["id"], b"audio", "file.wav", "audio/wav", model="addisai")
         assert mock_addis.called
         assert not mock_sahara.called
         assert res["transcript"] == "addisai transcript"
