@@ -14,8 +14,8 @@ from app.services.speech import (
 def test_normalize_voice_model() -> None:
     assert normalize_voice_model("addisai") == "addisai"
     assert normalize_voice_model("ADDISAI") == "addisai"
-    assert normalize_voice_model(None) == "addisai"
-    assert normalize_voice_model("") == "addisai"
+    assert normalize_voice_model(None) == "sahara"
+    assert normalize_voice_model("") == "sahara"
     assert normalize_voice_model("sahara") == "sahara"
     assert normalize_voice_model("intron") == "sahara"
     assert normalize_voice_model("SAHARA_VOICE") == "sahara"
