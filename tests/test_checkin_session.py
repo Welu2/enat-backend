@@ -1,9 +1,10 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
 
 from app.services.checkin_session import CheckInSessionService
+from app.services.sahara import SaharaVoiceClient
 
 
 @pytest.fixture
@@ -122,11 +123,11 @@ async def test_voice_correct_item_updates_pending_item(service: CheckInSessionSe
     }
 
     with patch.object(service, "_get_active_session", return_value=session):
-        with patch.object(service.asr, "transcribe", new=pytest.importorskip("unittest.mock").AsyncMock(return_value="ሶስት ቀን ነው")):
+        with patch.object(SaharaVoiceClient, "transcribe", new=AsyncMock(return_value="ሶስት ቀን ነው")):
             with patch.object(
                 service.extraction,
                 "extract",
-                new=pytest.importorskip("unittest.mock").AsyncMock(
+                new=AsyncMock(
                     return_value=[{"category": "severe_headache", "duration": {"value": 3, "unit": "day"}}]
                 ),
             ):
