@@ -61,13 +61,13 @@ def start_checkin(
 async def respond_to_checkin(
     session_id: UUID,
     audio: UploadFile = File(...),
-    model: str = Form("addisai"),
+    model: str = Form("sahara"),
     model_query: str | None = Query(None, alias="model"),
     language: str | None = Form(None),
     language_query: str | None = Query(None, alias="language"),
     user_id: UUID = Depends(get_current_user_id),
 ) -> CheckInRespondResponse:
-    selected_model = model_query or model or "addisai"
+    selected_model = model_query or model or "sahara"
     selected_language = language_query or language
     audio_bytes = await audio.read()
     try:
@@ -111,13 +111,13 @@ async def voice_correct_item(
     session_id: UUID,
     item_id: str,
     audio: UploadFile = File(...),
-    model: str = Form("addisai"),
+    model: str = Form("sahara"),
     model_query: str | None = Query(None, alias="model"),
     language: str | None = Form(None),
     language_query: str | None = Query(None, alias="language"),
     user_id: UUID = Depends(get_current_user_id),
 ) -> VoiceCorrectItemResponse:
-    selected_model = model_query or model or "addisai"
+    selected_model = model_query or model or "sahara"
     selected_language = language_query or language
     audio_bytes = await audio.read()
     try:
