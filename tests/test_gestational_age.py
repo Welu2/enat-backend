@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-import pytest
 
 from app.services.gestational_age import (
     calculate_gestational_age_and_edd,
@@ -79,7 +78,9 @@ def test_calculate_gestational_age_from_ultrasound() -> None:
     assert result["gestational_age_total_days"] == 84
     assert result["trimester"] == "first_trimester"
     assert result["effective_lnmp_date"] == as_of - timedelta(days=84)
-    assert result["estimated_due_date"] == result["effective_lnmp_date"] + timedelta(days=280)
+    assert result["estimated_due_date"] == result["effective_lnmp_date"] + timedelta(
+        days=280
+    )
 
 
 def test_calculate_gestational_age_manual_override() -> None:
@@ -98,7 +99,9 @@ def test_calculate_gestational_age_manual_override() -> None:
     assert result["trimester"] == "third_trimester"
     assert result["is_gestational_age_manual"] is True
     assert result["effective_lnmp_date"] == as_of - timedelta(days=214)
-    assert result["estimated_due_date"] == result["effective_lnmp_date"] + timedelta(days=280)
+    assert result["estimated_due_date"] == result["effective_lnmp_date"] + timedelta(
+        days=280
+    )
 
 
 def test_get_current_pregnancy_status_progression() -> None:

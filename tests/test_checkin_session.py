@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -6,45 +6,82 @@ import pytest
 from app.services.checkin_session import CheckInSessionService
 
 
+@pytest.fixture(autouse=True)
+def unit_transactions(monkeypatch):
+    # Transaction guarantees are exercised with real PostgreSQL in integration.
+    monkeypatch.setattr(
+        "app.db.idempotency.execute", lambda uid, op, key, payload, action: action()
+    )
+    monkeypatch.setattr("app.db.idempotency.lookup", lambda *args: None)
+
+
 @pytest.fixture
 def service() -> CheckInSessionService:
     return CheckInSessionService()
 
 
-def test_build_stage_order_skips_supplement_when_none_active(service: CheckInSessionService) -> None:
+def test_build_stage_order_skips_supplement_when_none_active(
+    service: CheckInSessionService,
+) -> None:
     user_id = uuid4()
-    with patch.object(service.supplements, "list_active", return_value=[]), \
-         patch.object(service.check_ins, "has_food_logged_today", return_value=False):
+    with (
+        patch.object(service.supplements, "list_active", return_value=[]),
+        patch.object(service.check_ins, "has_food_logged_today", return_value=False),
+    ):
         stages = service._build_stage_order(user_id)
     assert stages == ["symptoms", "food", "closing"]
 
 
-def test_build_stage_order_includes_supplement_when_active_and_not_logged_today(service: CheckInSessionService) -> None:
+def test_build_stage_order_includes_supplement_when_active_and_not_logged_today(
+    service: CheckInSessionService,
+) -> None:
     user_id = uuid4()
-    with patch.object(service.supplements, "list_active", return_value=[{"id": str(uuid4())}]), \
-         patch.object(service.check_ins, "has_food_logged_today", return_value=False), \
-         patch.object(service.check_ins, "has_supplement_logged_today", return_value=False):
+    with (
+        patch.object(
+            service.supplements, "list_active", return_value=[{"id": str(uuid4())}]
+        ),
+        patch.object(service.check_ins, "has_food_logged_today", return_value=False),
+        patch.object(
+            service.check_ins, "has_supplement_logged_today", return_value=False
+        ),
+    ):
         stages = service._build_stage_order(user_id)
     assert stages == ["symptoms", "food", "supplement", "closing"]
 
 
-def test_build_stage_order_skips_supplement_when_already_logged_today(service: CheckInSessionService) -> None:
+def test_build_stage_order_skips_supplement_when_already_logged_today(
+    service: CheckInSessionService,
+) -> None:
     user_id = uuid4()
-    with patch.object(service.supplements, "list_active", return_value=[{"id": str(uuid4())}]), \
-         patch.object(service.check_ins, "has_food_logged_today", return_value=False), \
-         patch.object(service.check_ins, "has_supplement_logged_today", return_value=True):
+    with (
+        patch.object(
+            service.supplements, "list_active", return_value=[{"id": str(uuid4())}]
+        ),
+        patch.object(service.check_ins, "has_food_logged_today", return_value=False),
+        patch.object(
+            service.check_ins, "has_supplement_logged_today", return_value=True
+        ),
+    ):
         stages = service._build_stage_order(user_id)
     assert stages == ["symptoms", "food", "closing"]
 
 
-def test_verify_item_moves_confirmed_symptom_to_draft(service: CheckInSessionService) -> None:
+def test_verify_item_moves_confirmed_symptom_to_draft(
+    service: CheckInSessionService,
+) -> None:
     user_id = uuid4()
     session_id = uuid4()
     item_id = str(uuid4())
     session = {
+        "version": 0,
         "current_stage": "symptoms",
         "stage_order": ["symptoms", "food", "closing"],
-        "draft_data": {"symptoms": [], "food_log": None, "supplement_check": None, "closing_mentions": []},
+        "draft_data": {
+            "symptoms": [],
+            "food_log": None,
+            "supplement_check": None,
+            "closing_mentions": [],
+        },
         "pending_items": [
             {
                 "item_id": item_id,
@@ -58,8 +95,14 @@ def test_verify_item_moves_confirmed_symptom_to_draft(service: CheckInSessionSer
     }
 
     with patch.object(service, "_get_active_session", return_value=session):
-        with patch.object(service.sessions, "update") as update_mock:
-            result = service.verify_item(user_id, session_id, item_id, True, None)
+        with patch.object(
+            service.sessions,
+            "update",
+            return_value={"version": 1, "stage_status": "ready"},
+        ) as update_mock:
+            result = service.verify_item(
+                user_id, session_id, item_id, True, None, expected_version=0
+            )
 
     assert result["confirmed_count"] == 1
     update_mock.assert_called_once()
@@ -67,14 +110,22 @@ def test_verify_item_moves_confirmed_symptom_to_draft(service: CheckInSessionSer
     assert draft_data["symptoms"][0]["danger_sign"] is True
 
 
-def test_verify_item_manual_edit_updates_phrase_and_danger_sign(service: CheckInSessionService) -> None:
+def test_verify_item_manual_edit_updates_phrase_and_danger_sign(
+    service: CheckInSessionService,
+) -> None:
     user_id = uuid4()
     session_id = uuid4()
     item_id = str(uuid4())
     session = {
+        "version": 0,
         "current_stage": "symptoms",
         "stage_order": ["symptoms", "food", "closing"],
-        "draft_data": {"symptoms": [], "food_log": None, "supplement_check": None, "closing_mentions": []},
+        "draft_data": {
+            "symptoms": [],
+            "food_log": None,
+            "supplement_check": None,
+            "closing_mentions": [],
+        },
         "pending_items": [
             {
                 "item_id": item_id,
@@ -89,8 +140,14 @@ def test_verify_item_manual_edit_updates_phrase_and_danger_sign(service: CheckIn
 
     corrected = {"category": "severe_headache", "duration": {"value": 3, "unit": "day"}}
     with patch.object(service, "_get_active_session", return_value=session):
-        with patch.object(service.sessions, "update") as update_mock:
-            result = service.verify_item(user_id, session_id, item_id, True, corrected)
+        with patch.object(
+            service.sessions,
+            "update",
+            return_value={"version": 1, "stage_status": "ready"},
+        ) as update_mock:
+            result = service.verify_item(
+                user_id, session_id, item_id, True, corrected, expected_version=0
+            )
 
     assert result["confirmed_count"] == 1
     draft = update_mock.call_args[0][2]["draft_data"]["symptoms"][0]
@@ -100,11 +157,14 @@ def test_verify_item_manual_edit_updates_phrase_and_danger_sign(service: CheckIn
 
 
 @pytest.mark.asyncio
-async def test_voice_correct_item_updates_pending_item(service: CheckInSessionService) -> None:
+async def test_voice_correct_item_updates_pending_item(
+    service: CheckInSessionService,
+) -> None:
     user_id = uuid4()
     session_id = uuid4()
     item_id = str(uuid4())
     session = {
+        "version": 0,
         "current_stage": "symptoms",
         "stage_order": ["symptoms", "food", "closing"],
         "draft_data": {"symptoms": []},
@@ -122,16 +182,39 @@ async def test_voice_correct_item_updates_pending_item(service: CheckInSessionSe
     }
 
     with patch.object(service, "_get_active_session", return_value=session):
-        with patch.object(service.asr, "transcribe", new=pytest.importorskip("unittest.mock").AsyncMock(return_value="ሶስት ቀን ነው")):
+        with patch.object(
+            service.asr,
+            "transcribe",
+            new=pytest.importorskip("unittest.mock").AsyncMock(
+                return_value="ሶስት ቀን ነው"
+            ),
+        ):
             with patch.object(
                 service.extraction,
                 "extract",
                 new=pytest.importorskip("unittest.mock").AsyncMock(
-                    return_value=[{"category": "severe_headache", "duration": {"value": 3, "unit": "day"}}]
+                    return_value=[
+                        {
+                            "category": "severe_headache",
+                            "duration": {"value": 3, "unit": "day"},
+                        }
+                    ]
                 ),
             ):
-                with patch.object(service.sessions, "update"):
-                    res = await service.voice_correct_item(user_id, session_id, item_id, b"audio", "correction.webm", "audio/webm")
+                with patch.object(
+                    service.sessions,
+                    "update",
+                    return_value={"version": 1, "stage_status": "ready"},
+                ):
+                    res = await service.voice_correct_item(
+                        user_id,
+                        session_id,
+                        item_id,
+                        b"audio",
+                        "correction.webm",
+                        "audio/webm",
+                        expected_version=0,
+                    )
 
     assert res["item_updated"] is True
     updated_item = res["pending_items"][0]
@@ -139,18 +222,31 @@ async def test_voice_correct_item_updates_pending_item(service: CheckInSessionSe
     assert "3 ቀን" in updated_item["verification_phrase"]
 
 
-def test_verify_items_bulk_confirms_multiple_items_at_once(service: CheckInSessionService) -> None:
+def test_verify_items_bulk_confirms_multiple_items_at_once(
+    service: CheckInSessionService,
+) -> None:
     user_id = uuid4()
     session_id = uuid4()
     item1 = str(uuid4())
     item2 = str(uuid4())
     session = {
+        "version": 0,
         "current_stage": "symptoms",
         "stage_order": ["symptoms", "food", "closing"],
         "draft_data": {"symptoms": []},
         "pending_items": [
-            {"item_id": item1, "raw_text": "ማቅለሽለሽ", "category": "persistent_nausea_vomiting", "confirmed": False},
-            {"item_id": item2, "raw_text": "ትኩሳት", "category": "high_fever", "confirmed": False},
+            {
+                "item_id": item1,
+                "raw_text": "ማቅለሽለሽ",
+                "category": "persistent_nausea_vomiting",
+                "confirmed": False,
+            },
+            {
+                "item_id": item2,
+                "raw_text": "ትኩሳት",
+                "category": "high_fever",
+                "confirmed": False,
+            },
         ],
         "status": "in_progress",
         "expires_at": "2099-01-01T00:00:00",
@@ -162,10 +258,49 @@ def test_verify_items_bulk_confirms_multiple_items_at_once(service: CheckInSessi
     ]
 
     with patch.object(service, "_get_active_session", return_value=session):
-        with patch.object(service.sessions, "update") as update_mock:
-            result = service.verify_item(user_id, session_id, items_payload=items_payload)
+        with patch.object(
+            service.sessions,
+            "update",
+            return_value={"version": 1, "stage_status": "ready"},
+        ) as update_mock:
+            result = service.verify_item(
+                user_id, session_id, items_payload=items_payload, expected_version=0
+            )
 
     assert result["confirmed_count"] == 2
     assert result["pending_items"] == []
     draft_data = update_mock.call_args[0][2]["draft_data"]
     assert len(draft_data["symptoms"]) == 2
+
+
+def test_explicit_manual_add_allocates_uuid(service):
+    # Regression for the previously undefined uuid4 branch. Typed manual-add
+    # semantics remain part of the Phase 2 correction redesign.
+    from uuid import UUID
+
+    session = {
+        "version": 0,
+        "current_stage": "closing",
+        "draft_data": {"closing_mentions": []},
+        "pending_items": [],
+    }
+    with (
+        patch.object(service, "_get_active_session", return_value=session),
+        patch.object(
+            service.sessions,
+            "update",
+            return_value={"version": 1, "stage_status": "ready"},
+        ) as update,
+    ):
+        result = service.verify_item(
+            uuid4(),
+            uuid4(),
+            confirmed=False,
+            expected_version=0,
+            action="add",
+            corrected_value={"raw_text": "A question", "topic": "other"},
+        )
+    item = result["pending_items"][0]
+    assert UUID(item["item_id"]).version == 4
+    assert item["confirmed"] is False
+    update.assert_called_once()

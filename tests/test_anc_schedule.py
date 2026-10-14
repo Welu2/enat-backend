@@ -1,8 +1,6 @@
 from datetime import date, timedelta
-import pytest
 
 from app.services.anc_schedule import (
-    WHO_ANC_CONTACTS,
     advance_to_next_anc_contact,
     calculate_all_anc_dates,
     generate_checkin_summary_text,
@@ -106,7 +104,9 @@ def test_generate_checkin_summary_text_danger_sign() -> None:
     assert "ከባድ ራስ ምታት" in res["summary_text_am"]
     assert "የአደጋ ምልክት ተገኝቷል፣ በአስቸቋይ የህክምና እርዳታ ያግኙ" in res["summary_text_am"]
     assert "severe headache" in res["summary_text_en"].lower()
-    assert "danger sign detected, seek medical help immediately." in res["summary_text_en"]
+    assert (
+        "danger sign detected, seek medical help immediately." in res["summary_text_en"]
+    )
 
 
 def test_generate_checkin_summary_text_non_danger_symptoms() -> None:
@@ -120,7 +120,7 @@ def test_generate_checkin_summary_text_non_danger_symptoms() -> None:
     ]
     res = generate_checkin_summary_text(symptoms)
     assert res["danger_sign_triggered"] is False
-    assert "ምንም የአደጋ ምልክት አልተገኘም" in res["summary_text_am"]
+    assert "Classification is uncertain" in res["summary_text_en"]
     assert "ቀላል የጀርባ ህመም" in res["summary_text_am"]
     assert "ምልክት ተመዝግቧል" in res["summary_text_am"]
 
@@ -128,5 +128,5 @@ def test_generate_checkin_summary_text_non_danger_symptoms() -> None:
 def test_generate_checkin_summary_text_no_symptoms() -> None:
     res = generate_checkin_summary_text([])
     assert res["danger_sign_triggered"] is False
-    assert res["summary_text_am"] == "ምንም የአደጋ ምልክት አልተገኘም"
-    assert res["summary_text_en"] == "No danger signs detected."
+    assert res["summary_text_am"] == "የተረጋገጠ የምልክት ግምገማ የለም"
+    assert res["summary_text_en"] == "No confirmed symptom assessment is available."

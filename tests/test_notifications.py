@@ -1,7 +1,7 @@
 from uuid import uuid4
-import pytest
-from app.services.reminders import ReminderService
+
 from app.db.repositories.reminders import ReminderRepository
+from app.services.reminders import ReminderService
 
 
 def test_notifications_list_and_dismiss(monkeypatch) -> None:
@@ -27,7 +27,9 @@ def test_notifications_list_and_dismiss(monkeypatch) -> None:
     assert pending[0]["type"] == "supplement"
 
     repo = ReminderRepository()
-    monkeypatch.setattr(repo, "dismiss", lambda uid, rid: {**fake_reminder, "dismissed": True})
+    monkeypatch.setattr(
+        repo, "dismiss", lambda uid, rid: {**fake_reminder, "dismissed": True}
+    )
 
     dismissed = repo.dismiss(user_id, rem_id)
     assert dismissed["dismissed"] is True
