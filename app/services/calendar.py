@@ -1,14 +1,22 @@
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from urllib.parse import urlencode
 
+from app.core.clock import LOCAL_ZONE
 
-def generate_google_calendar_url(appointment_date: date, title: str = "የእናቶች ጤና ቀጠሮ (ANC Appointment)", details: str = "የእናቶች ጤና ክትትል ቀጠሮ — EnatAI Intake Summary") -> str:
-    start_dt = datetime.combine(appointment_date, time(hour=9))
+
+def generate_google_calendar_url(
+    appointment_date: date,
+    title: str = "የእናቶች ጤና ቀጠሮ (ANC Appointment)",
+    details: str = "የእናቶች ጤና ክትትል ቀጠሮ — EnatAI Intake Summary",
+) -> str:
+    start_dt = datetime.combine(appointment_date, time(hour=9), LOCAL_ZONE).astimezone(
+        timezone.utc
+    )
     end_dt = start_dt + timedelta(hours=1)
-    
+
     fmt = "%Y%m%dT%H%M%SZ"
     dates_str = f"{start_dt.strftime(fmt)}/{end_dt.strftime(fmt)}"
-    
+
     params = {
         "action": "TEMPLATE",
         "text": title,
@@ -18,8 +26,14 @@ def generate_google_calendar_url(appointment_date: date, title: str = "የእና
     return f"https://calendar.google.com/calendar/render?{urlencode(params)}"
 
 
-def generate_ical_content(appointment_date: date, title: str = "የእናቶች ጤና ቀጠሮ (ANC Appointment)", details: str = "የእናቶች ጤና ክትትል ቀጠሮ — EnatAI Intake Summary") -> str:
-    start_dt = datetime.combine(appointment_date, time(hour=9))
+def generate_ical_content(
+    appointment_date: date,
+    title: str = "የእናቶች ጤና ቀጠሮ (ANC Appointment)",
+    details: str = "የእናቶች ጤና ክትትል ቀጠሮ — EnatAI Intake Summary",
+) -> str:
+    start_dt = datetime.combine(appointment_date, time(hour=9), LOCAL_ZONE).astimezone(
+        timezone.utc
+    )
     end_dt = start_dt + timedelta(hours=1)
     fmt = "%Y%m%dT%H%M%SZ"
 

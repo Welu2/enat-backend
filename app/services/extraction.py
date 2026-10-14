@@ -1,31 +1,41 @@
 import json
 import re
 from typing import Any
-from uuid import uuid4
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.core.constants import DANGER_SIGN_CATEGORIES, NUTRITION_TOPICS
+from app.core.errors import InvalidMutation
 from app.models.checkin import CheckInStage
+from app.models.clinical import (
+    STAGE_KEYS,
+    ClosingFields,
+    FoodFields,
+    SupplementFields,
+    SymptomFields,
+)
 from app.services.addis_ai import AddisAIClient
-from app.services.danger_signs import check_danger_sign
-from app.services.nutrition import classify_ethiopian_food
+from app.services.clinical_policy import PROMPT_VERSION, collection, normalize_item
 
 
-class SymptomsExtraction(BaseModel):
-    symptoms: list[dict[str, Any]]
+class Extraction(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
 
-class FoodExtraction(BaseModel):
-    food_log: dict[str, Any] | None = None
+class SymptomsExtraction(Extraction):
+    symptoms: list[SymptomFields] = Field(max_length=50)
 
 
-class SupplementExtraction(BaseModel):
-    supplement_check: dict[str, Any] | None = None
+class FoodExtraction(Extraction):
+    food_log: list[FoodFields] | FoodFields | None
 
 
-class ClosingExtraction(BaseModel):
-    closing_mentions: list[dict[str, Any]]
+class SupplementExtraction(Extraction):
+    supplement_check: list[SupplementFields] | SupplementFields | None
+
+
+class ClosingExtraction(Extraction):
+    closing_mentions: list[ClosingFields] = Field(max_length=50)
 
 
 STAGE_SCHEMAS: dict[CheckInStage, type[BaseModel]] = {
@@ -40,49 +50,33 @@ STAGE_SCHEMAS: dict[CheckInStage, type[BaseModel]] = {
 # hallucinate a non-existent category that would silently bypass the rules engine.
 _CATEGORY_LIST = ", ".join(sorted(DANGER_SIGN_CATEGORIES))
 
-# Human-readable display labels for the per-item verification read-back phrase.
-_CATEGORY_DISPLAY: dict[str, str] = {
-    "vaginal_bleeding": "vaginal bleeding",
-    "swelling_hands_face": "swelling of hands or face",
-    "blurred_vision": "blurred vision",
-    "severe_abdominal_pain": "severe abdominal pain",
-    "fluid_leakage": "fluid leakage",
-    "severe_headache": "severe headache",
-    "persistent_nausea_vomiting": "persistent nausea or vomiting",
-    "high_fever": "high fever",
-    "convulsions_loss_of_consciousness": "convulsions or loss of consciousness",
-    "difficulty_breathing": "difficulty breathing",
-    "severe_weakness_or_backache": "severe weakness or backache",
-    "abnormal_fetal_movement": "abnormal fetal movement",
-}
-
 FEW_SHOT_PROMPTS: dict[CheckInStage, str] = {
-    "symptoms": f"""\
+    "symptoms": """\
 Examples:
 
 Input: "ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው"
-Output: {{"symptoms":[{{"raw_text":"ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው","category":"severe_headache","duration":{{"value":2,"unit":"day"}},"severity":"severe"}}]}}
+Output: {"symptoms":[{"raw_text":"ሁለት ቀን ከባድ ራስ ምታት እያለኝ ነው","category":"severe_headache","duration":{"value":2,"unit":"day"},"severity":"severe"}]}
 
 Input: "ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ"
-Output: {{"symptoms":[{{"raw_text":"ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ","category":null,"duration":{{"value":null,"unit":"unspecified"}},"severity":"mild"}}]}}
+Output: {"symptoms":[{"raw_text":"ቀላል የድካም ስሜት እና የጀርባ ህመም አለኝ","category":null,"duration":{"value":null,"unit":"unspecified"},"severity":"mild"}]}
 
 Input: "ማቅለሽለሽ ማስታወክ እና ትኩሳት አለብኝ"
-Output: {{"symptoms":[
-  {{"raw_text":"ማቅለሽለሽ እና ማስታወክ","category":"persistent_nausea_vomiting","duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}},
-  {{"raw_text":"ትኩሳት","category":"high_fever","duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}}
-]}}
+Output: {"symptoms":[
+  {"raw_text":"ማቅለሽለሽ እና ማስታወክ","category":"persistent_nausea_vomiting","duration":{"value":null,"unit":"unspecified"},"severity":"unspecified"},
+  {"raw_text":"ትኩሳት","category":"high_fever","duration":{"value":null,"unit":"unspecified"},"severity":"unspecified"}
+]}
 
 Input: "እግሮቼ ለሶስት ቀናት እያበጡ ነው እና ከባድ ራስ ምታት አለኝ"
-Output: {{"symptoms":[
-  {{"raw_text":"እግሮቼ ለሶስት ቀናት እያበጡ ነው","category":"swelling_hands_face","duration":{{"value":3,"unit":"day"}},"severity":"moderate"}},
-  {{"raw_text":"ከባድ ራስ ምታት አለኝ","category":"severe_headache","duration":{{"value":null,"unit":"unspecified"}},"severity":"severe"}}
-]}}
+Output: {"symptoms":[
+  {"raw_text":"እግሮቼ ለሶስት ቀናት እያበጡ ነው","category":"swelling_hands_face","duration":{"value":3,"unit":"day"},"severity":"moderate"},
+  {"raw_text":"ከባድ ራስ ምታት አለኝ","category":"severe_headache","duration":{"value":null,"unit":"unspecified"},"severity":"severe"}
+]}
 
 Input: "አይ ምንም ይለኛል"
-Output: {{"symptoms":[{{"raw_text":"አይ ምንም ይለኛል","category":null,"duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}}]}}
+Output: {"symptoms":[{"raw_text":"አይ ምንም ይለኛል","category":null,"duration":{"value":null,"unit":"unspecified"},"severity":"unspecified"}]}
 
 Input: "ምንም ምልክት የለም ደህና ነኝ"
-Output: {{"symptoms":[{{"raw_text":"ምንም ምልክት የለም ደህና ነኝ","category":null,"duration":{{"value":null,"unit":"unspecified"}},"severity":"unspecified"}}]}}
+Output: {"symptoms":[{"raw_text":"ምንም ምልክት የለም ደህና ነኝ","category":null,"duration":{"value":null,"unit":"unspecified"},"severity":"unspecified"}]}
 """,
     "food": """\
 Examples:
@@ -144,13 +138,13 @@ _SYSTEM_PROMPT_BASE = (
     "raw_text set to their exact words, category set to null, and duration set to null. NEVER return an empty array if the patient gave a spoken response. "
     "Preserve the raw_text field exactly as it appears in the transcript — do not translate or paraphrase. "
     "Never set the danger_sign field — that is computed deterministically by the rules engine, not by you. "
-    "duration must be an object: {\"value\": <integer or null>, \"unit\": \"hour|day|week|month|unspecified\"}. "
-    "If no duration is mentioned, use {\"value\": null, \"unit\": \"unspecified\"}. "
+    'duration must be an object: {"value": <integer or null>, "unit": "hour|day|week|month|unspecified"}. '
+    'If no duration is mentioned, use {"value": null, "unit": "unspecified"}. '
     "severity must be exactly one of: mild, moderate, severe, unspecified. "
-    "CRITICAL CATEGORY RULE: Most common pregnancy symptoms (such as mild weakness/fatigue, mild back pain, "
-    "mild nausea, normal leg swelling, or mild headache) are NON-DANGER symptoms and MUST have category set to null. "
-    "Do NOT force mild or non-critical symptoms into danger categories. Only set category to one of the 12 danger sign "
-    "keys if the transcript explicitly describes a severe, persistent, or alarming danger sign: "
+    "Preserve uncertainty: category may be null when classification is unclear. "
+    "Do not discard a recognized danger category solely because severity is mild. "
+    "Only use categories supported by the transcript; never infer missing symptoms. "
+    "Allowed categories: "
     f"{_CATEGORY_LIST}."
 )
 
@@ -158,9 +152,11 @@ _SYSTEM_PROMPT_BASE = (
 def _build_system_prompt(stage: CheckInStage) -> str:
     topic_hint = ""
     if stage == "closing":
-        topic_hint = f" Valid topic values: {', '.join(NUTRITION_TOPICS)}."
+        topic_hint = (
+            f" Valid topic values: general_closing, {', '.join(NUTRITION_TOPICS)}."
+        )
 
-    return f"{_SYSTEM_PROMPT_BASE}{topic_hint}\n\n{FEW_SHOT_PROMPTS[stage]}"
+    return f"{_SYSTEM_PROMPT_BASE}{topic_hint}\nSchema: {json.dumps(STAGE_SCHEMAS[stage].model_json_schema())}\n\n{FEW_SHOT_PROMPTS[stage]}"
 
 
 def _parse_json_response(text: str) -> dict[str, Any]:
@@ -176,20 +172,41 @@ def _parse_json_response(text: str) -> dict[str, Any]:
 # between languages (the old two-separate-dicts setup could silently lose
 # a category from one language and not the other).
 _CATEGORY_DISPLAY: dict[str, dict[str, str]] = {
-    "no_danger_sign_detected": {"am": "ምንም የአደጋ ምልክት አልተገኘም (መደበኛ)", "en": "no danger sign detected (normal)"},
-    "normal_or_expected": {"am": "የተለመደ የእርግዝና ስሜት", "en": "expected pregnancy symptom"},
+    "no_danger_sign_detected": {
+        "am": "ምንም የአደጋ ምልክት አልተገኘም (መደበኛ)",
+        "en": "no danger sign detected (normal)",
+    },
+    "normal_or_expected": {
+        "am": "የተለመደ የእርግዝና ስሜት",
+        "en": "expected pregnancy symptom",
+    },
     "vaginal_bleeding": {"am": "የማህፀን ደም መፍሰስ", "en": "vaginal bleeding"},
-    "swelling_hands_face": {"am": "የእጅ ወይም የፊት እብጠት", "en": "swelling of hands or face"},
+    "swelling_hands_face": {
+        "am": "የእጅ ወይም የፊት እብጠት",
+        "en": "swelling of hands or face",
+    },
     "blurred_vision": {"am": "የእይታ ብዥታ", "en": "blurred vision"},
     "severe_abdominal_pain": {"am": "ከባድ የሆድ ህመም", "en": "severe abdominal pain"},
     "fluid_leakage": {"am": "የፈሳሽ መፍሰስ", "en": "fluid leakage"},
     "severe_headache": {"am": "ከባድ ራስ ምታት", "en": "severe headache"},
-    "persistent_nausea_vomiting": {"am": "የማይቋረጥ ማስታወክ", "en": "persistent nausea or vomiting"},
+    "persistent_nausea_vomiting": {
+        "am": "የማይቋረጥ ማስታወክ",
+        "en": "persistent nausea or vomiting",
+    },
     "high_fever": {"am": "ከፍተኛ ትኩሳት", "en": "high fever"},
-    "convulsions_loss_of_consciousness": {"am": "መንቀጥቀጥ ወይም ራስን መሳት", "en": "convulsions or loss of consciousness"},
+    "convulsions_loss_of_consciousness": {
+        "am": "መንቀጥቀጥ ወይም ራስን መሳት",
+        "en": "convulsions or loss of consciousness",
+    },
     "difficulty_breathing": {"am": "የመተንፈስ ችግር", "en": "difficulty breathing"},
-    "severe_weakness_or_backache": {"am": "ከባድ ድካም ወይም የጀርባ ህመም", "en": "severe weakness or backache"},
-    "abnormal_fetal_movement": {"am": "የፅንስ እንቅስቃሴ መለወጥ", "en": "abnormal fetal movement"},
+    "severe_weakness_or_backache": {
+        "am": "ከባድ ድካም ወይም የጀርባ ህመም",
+        "en": "severe weakness or backache",
+    },
+    "abnormal_fetal_movement": {
+        "am": "የፅንስ እንቅስቃሴ መለወጥ",
+        "en": "abnormal fetal movement",
+    },
 }
 
 
@@ -202,8 +219,15 @@ def _category_display(category: str, lang: str = "am") -> str:
     """
     labels = _CATEGORY_DISPLAY.get(category)
     if not labels:
-        return category.replace("_", " ") if category else "ምልክት" if lang == "am" else "symptom"
+        return (
+            category.replace("_", " ")
+            if category
+            else "ምልክት"
+            if lang == "am"
+            else "symptom"
+        )
     return labels.get(lang, labels.get("am", category))
+
 
 # Duration unit display labels per language. Add a new top-level key here
 # (e.g. "om" for Afaan Oromo) to support another language without touching
@@ -241,7 +265,7 @@ def _format_duration(duration: dict[str, Any] | str | None, lang: str = "am") ->
         return ""
     unit_labels = _DURATION_UNIT_DISPLAY.get(lang, _DURATION_UNIT_DISPLAY["am"])
     unit_label = unit_labels.get(unit, unit)
-    return f"{value} {unit_label}"
+    return f"{value:g} {unit_label}"
 
 
 _SUPPLEMENT_NAME_AMHARIC: dict[str, str] = {
@@ -268,12 +292,16 @@ def build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
     if stage == "symptoms":
         raw_text = (item.get("raw_text") or "").strip()
         category = item.get("category")
-        severity = str(item.get("severity") or "").lower()
         duration_str = _format_duration(item.get("duration"), lang="am")
 
         # For active danger sign categories, use the localized danger sign display label.
         # For non-danger symptoms (category is "no_danger_sign_detected" or severity is mild), use the patient's actual reported text (raw_text).
-        if category and category not in ("no_danger_sign_detected", "normal_or_expected", "none", "null") and severity != "mild" and item.get("danger_sign", True):
+        if (
+            category
+            and category
+            not in ("no_danger_sign_detected", "normal_or_expected", "none", "null")
+            and item.get("danger_sign", True)
+        ):
             display = _category_display(category, lang="am")
         else:
             display = raw_text if raw_text else "ምልክት"
@@ -290,7 +318,13 @@ def build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
     if stage == "supplement":
         raw_name = item.get("supplement_name")
         display_name = _supplement_display(raw_name)
-        taken = "ዛሬ ወስደዋል" if item.get("taken_today") else "ዛሬ አልወሰዱም"
+        taken = (
+            "ዛሬ ወስደዋል"
+            if item.get("taken_today") is True
+            else "ዛሬ አልወሰዱም"
+            if item.get("taken_today") is False
+            else "መውሰድዎ አልተገለጸም"
+        )
         return f"{display_name} {taken} — ትክክል ነው?"
 
     # closing
@@ -301,146 +335,30 @@ def build_verification_phrase(item: dict[str, Any], stage: CheckInStage) -> str:
 _build_verification_phrase = build_verification_phrase
 
 
-from urllib.parse import quote
+def build_tts_url(text: str) -> None:
+    # Clients POST verification_phrase to authenticated /tts and play the blob.
+    return None
 
 
-def build_tts_url(text: str) -> str:
-    return f"/tts?text={quote(text)}"
-
-
-def _attach_item_ids(
-    stage: CheckInStage,
-    data: dict[str, Any],
-    transcript: str = "",
-) -> list[dict[str, Any]]:
-    clean_transcript = transcript.strip()
-
-    if stage == "symptoms":
-        items = []
-        for item in data.get("symptoms", []):
-            item = dict(item)
-            item["item_id"] = str(uuid4())
-            item["confirmed"] = False
-
-            severity = str(item.get("severity") or "").lower()
-            category = item.get("category")
-            if severity == "mild" or not category or category in ("none", "null", "no_danger_sign_detected"):
-                item["category"] = None
-                item["danger_sign"] = False
-            else:
-                item["danger_sign"] = check_danger_sign(category)
-                if not item["danger_sign"]:
-                    item["category"] = None
-
+def _attach_item_ids(stage, data, transcript=""):
+    values = collection(data.get(STAGE_KEYS[stage]))
+    if len(values) > 50:
+        raise ValueError("Too many extracted items")
+    items = []
+    for value in values:
+        try:
+            item = normalize_item(stage, value, source="voice")
+        except InvalidMutation as exc:
+            raise ValueError("Invalid extracted item") from exc
+        item["prompt_version"] = PROMPT_VERSION
+        # Addis AI does not currently return a stable model identifier.
+        item["model_version"] = None
+        if stage == "symptoms":
             item["category_display"] = _category_display(item["category"], lang="am")
             item["category_display_en"] = _category_display(item["category"], lang="en")
-            phrase = build_verification_phrase(item, stage)
-            item["verification_phrase"] = phrase
-            item["verification_audio_url"] = build_tts_url(phrase)
-            items.append(item)
-
-        if not items and clean_transcript and "symptoms" not in data:
-            fallback = {
-                "item_id": str(uuid4()),
-                "raw_text": clean_transcript,
-                "category": None,
-                "category_display": _category_display(None, lang="am"),
-                "category_display_en": _category_display(None, lang="en"),
-                "duration": {"value": None, "unit": "unspecified"},
-                "severity": "unspecified",
-                "danger_sign": False,
-                "confirmed": False,
-            }
-            phrase = build_verification_phrase(fallback, stage)
-            fallback["verification_phrase"] = phrase
-            fallback["verification_audio_url"] = build_tts_url(phrase)
-            items.append(fallback)
-
-        return items
-
-    if stage == "food":
-        food = data.get("food_log")
-        items = []
-        if food:
-            food_list = food if isinstance(food, list) else [food]
-            for f in food_list:
-                if not isinstance(f, dict):
-                    continue
-                item = dict(f)
-                item["item_id"] = str(uuid4())
-                item["confirmed"] = False
-                raw = item.get("raw_text") or ""
-                item["food_groups"] = classify_ethiopian_food(raw)
-                phrase = build_verification_phrase(item, stage)
-                item["verification_phrase"] = phrase
-                item["verification_audio_url"] = build_tts_url(phrase)
-                items.append(item)
-
-        if not items and clean_transcript and "food_log" not in data:
-            fallback = {
-                "item_id": str(uuid4()),
-                "raw_text": clean_transcript,
-                "food_groups": classify_ethiopian_food(clean_transcript),
-                "confirmed": False,
-            }
-            phrase = build_verification_phrase(fallback, stage)
-            fallback["verification_phrase"] = phrase
-            fallback["verification_audio_url"] = build_tts_url(phrase)
-            items.append(fallback)
-
-        return items
-
-    if stage == "supplement":
-        supplement = data.get("supplement_check")
-        items = []
-        if supplement and isinstance(supplement, dict):
-            item = dict(supplement)
-            item["item_id"] = str(uuid4())
-            item["confirmed"] = False
-            phrase = _build_verification_phrase(item, stage)
-            item["verification_phrase"] = phrase
-            item["verification_audio_url"] = build_tts_url(phrase)
-            items.append(item)
-
-        if not items and clean_transcript and "supplement_check" not in data:
-            taken = "አዎ" in clean_transcript or ("ወሰድ" in clean_transcript and "አልወሰድ" not in clean_transcript)
-            fallback = {
-                "item_id": str(uuid4()),
-                "supplement_name": "unknown",
-                "taken_today": taken,
-                "raw_text": clean_transcript,
-                "confirmed": False,
-            }
-            phrase = _build_verification_phrase(fallback, stage)
-            fallback["verification_phrase"] = phrase
-            fallback["verification_audio_url"] = build_tts_url(phrase)
-            items.append(fallback)
-
-        return items
-
-    # closing
-    items = []
-    for mention in data.get("closing_mentions", []):
-        item = dict(mention)
-        item["item_id"] = str(uuid4())
-        item["confirmed"] = False
-        phrase = _build_verification_phrase(item, stage)
-        item["verification_phrase"] = phrase
-        item["verification_audio_url"] = build_tts_url(phrase)
+        item["verification_phrase"] = build_verification_phrase(item, stage)
+        item["verification_audio_url"] = None
         items.append(item)
-
-    if not items and clean_transcript and "closing_mentions" not in data:
-        fallback = {
-            "item_id": str(uuid4()),
-            "raw_text": clean_transcript,
-            "topic": "general_closing",
-            "confirmed": False,
-        }
-        phrase = _build_verification_phrase(fallback, stage)
-        fallback["verification_phrase"] = phrase
-        fallback["verification_audio_url"] = build_tts_url(phrase)
-        items.append(fallback)
-
     return items
 
 
@@ -448,20 +366,28 @@ class ExtractionService:
     def __init__(self) -> None:
         self.client = AddisAIClient()
 
-    async def extract(self, transcript: str, stage: CheckInStage) -> list[dict[str, Any]]:
+    async def extract(
+        self, transcript: str, stage: CheckInStage
+    ) -> list[dict[str, Any]]:
         schema = STAGE_SCHEMAS[stage]
         system_prompt = _build_system_prompt(stage)
         user_prompt = f"Stage: {stage}\nTranscript:\n{transcript}"
 
         last_error: Exception | None = None
-        for _ in range(3):
+        for _ in range(2):
             try:
                 raw = await self.client.generate_json(system_prompt, user_prompt)
                 parsed = _parse_json_response(raw)
                 validated = schema.model_validate(parsed)
-                return _attach_item_ids(stage, validated.model_dump(), transcript=transcript)
+                return _attach_item_ids(
+                    stage, validated.model_dump(), transcript=transcript
+                )
             except (json.JSONDecodeError, ValidationError, ValueError) as exc:
                 last_error = exc
                 continue
 
-        raise ValueError(f"Failed to extract valid JSON for stage {stage}") from last_error
+        from app.core.errors import ProviderUnavailable
+
+        raise ProviderUnavailable(
+            "Extraction needs retry or manual input"
+        ) from last_error

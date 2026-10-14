@@ -1,22 +1,25 @@
-from datetime import date, datetime
+from datetime import date
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from fastapi.responses import Response
 
-from app.dependencies import get_current_user
+from app.core.clock import LOCAL_ZONE, utc_now
+from app.db import idempotency
+from app.db.data import atomic
+from app.db.pagination import PAGE_RESPONSE
 from app.db.repositories.appointments import AppointmentRepository
-from app.db.repositories.check_ins import CheckInRepository
 from app.db.repositories.push_tokens import PushTokenRepository
 from app.db.repositories.reminders import ReminderRepository
 from app.db.repositories.supplements import SupplementRepository
 from app.db.repositories.users import UserRepository
+from app.dependencies import get_current_user
 from app.models.user import (
     ANCScheduleResponse,
     AppointmentCreate,
     AppointmentResponse,
-    AppointmentUpdate,
+    AppointmentTransition,
     FoodVerifyRequest,
     FoodVerifyResponse,
     GestationalAgeCalculateRequest,
@@ -35,12 +38,11 @@ from app.models.user import (
 )
 from app.services.anc_schedule import calculate_all_anc_dates, get_next_anc_contact
 from app.services.calendar import generate_google_calendar_url, generate_ical_content
-from app.services.extraction import _supplement_display
 from app.services.gestational_age import (
     calculate_gestational_age_and_edd,
     get_current_pregnancy_status,
 )
-from app.services.nutrition import classify_ethiopian_food
+from app.services.manual_intake import log_food, log_supplement
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -91,7 +93,9 @@ def _build_user_profile(user: dict[str, Any]) -> UserProfile:
     )
 
 
-@router.post("/calculate-gestational-age", response_model=GestationalAgeCalculateResponse)
+@router.post(
+    "/calculate-gestational-age", response_model=GestationalAgeCalculateResponse
+)
 def calculate_gestational_age(
     payload: GestationalAgeCalculateRequest,
 ) -> GestationalAgeCalculateResponse:
@@ -127,6 +131,7 @@ def get_me(current_user: dict = Depends(get_current_user)) -> UserProfile:
 
 
 @router.post("/me/onboarding", response_model=UserProfile)
+@atomic
 def submit_onboarding(
     payload: OnboardingSubmitRequest,
     current_user: dict = Depends(get_current_user),
@@ -156,7 +161,9 @@ def submit_onboarding(
         "area": payload.area,
         "pregnancy_counting_method": payload.pregnancy_counting_method,
         "lnmp_date": payload.lnmp_date.isoformat() if payload.lnmp_date else None,
-        "ultrasound_date": payload.ultrasound_date.isoformat() if payload.ultrasound_date else None,
+        "ultrasound_date": payload.ultrasound_date.isoformat()
+        if payload.ultrasound_date
+        else None,
         "ultrasound_weeks": payload.ultrasound_weeks,
         "gestational_age_weeks": calc_res["gestational_age_weeks"],
         "gestational_age_days": calc_res["gestational_age_days"],
@@ -186,7 +193,12 @@ def submit_onboarding(
     }
 
     # Clean out None values where appropriate
-    cleaned_update = {k: v for k, v in update_data.items() if v is not None or k in ("custom_medical_condition", "current_medications", "hospital")}
+    cleaned_update = {
+        k: v
+        for k, v in update_data.items()
+        if v is not None
+        or k in ("custom_medical_condition", "current_medications", "hospital")
+    }
     user_repo.update_profile(user_id, cleaned_update)
 
     # 2. Seed supplements into the supplements table if provided
@@ -196,8 +208,8 @@ def submit_onboarding(
             name: str = ""
             if isinstance(supp, str):
                 name = supp.strip()
-            elif isinstance(supp, dict) and supp.get("name"):
-                name = str(supp["name"]).strip()
+            else:
+                name = supp.name.strip()
 
             if name and name.lower() not in existing_supps:
                 supp_repo.create(
@@ -214,9 +226,15 @@ def submit_onboarding(
     # 3. Auto-schedule first upcoming WHO ANC contact if user has no appointment yet
     existing_apt = app_repo.get_by_user(user_id)
     if not existing_apt:
-        eff_lnmp_str = update_data.get("effective_lnmp_date") or update_data.get("lnmp_date")
+        eff_lnmp_str = update_data.get("effective_lnmp_date") or update_data.get(
+            "lnmp_date"
+        )
         if eff_lnmp_str:
-            eff_lnmp_date = date.fromisoformat(eff_lnmp_str) if isinstance(eff_lnmp_str, str) else eff_lnmp_str
+            eff_lnmp_date = (
+                date.fromisoformat(eff_lnmp_str)
+                if isinstance(eff_lnmp_str, str)
+                else eff_lnmp_str
+            )
             next_anc = get_next_anc_contact(eff_lnmp_date)
             app_repo.create(
                 user_id,
@@ -247,16 +265,31 @@ def update_user_profile(
 
     # If date or calculation fields are modified, recompute pregnancy status
     date_fields_changed = any(
-        k in data for k in ("lnmp_date", "ultrasound_date", "ultrasound_weeks", "gestational_age_weeks", "pregnancy_counting_method")
+        k in data
+        for k in (
+            "lnmp_date",
+            "ultrasound_date",
+            "ultrasound_weeks",
+            "gestational_age_weeks",
+            "pregnancy_counting_method",
+        )
     )
     if date_fields_changed:
         existing = user_repo.get_by_id(user_id) or current_user
-        method = data.get("pregnancy_counting_method") or existing.get("pregnancy_counting_method") or "lnmp"
+        method = (
+            data.get("pregnancy_counting_method")
+            or existing.get("pregnancy_counting_method")
+            or "lnmp"
+        )
         lnmp_d = data.get("lnmp_date") or (
-            date.fromisoformat(existing["lnmp_date"]) if existing.get("lnmp_date") else None
+            date.fromisoformat(existing["lnmp_date"])
+            if existing.get("lnmp_date")
+            else None
         )
         us_d = data.get("ultrasound_date") or (
-            date.fromisoformat(existing["ultrasound_date"]) if existing.get("ultrasound_date") else None
+            date.fromisoformat(existing["ultrasound_date"])
+            if existing.get("ultrasound_date")
+            else None
         )
         us_w = data.get("ultrasound_weeks", existing.get("ultrasound_weeks"))
         manual_w = data.get("gestational_age_weeks")
@@ -285,7 +318,12 @@ def update_user_profile(
             data["trimester"] = calc_res["trimester"]
 
     # Convert dates to iso strings
-    for k in ("lnmp_date", "ultrasound_date", "estimated_due_date", "effective_lnmp_date"):
+    for k in (
+        "lnmp_date",
+        "ultrasound_date",
+        "estimated_due_date",
+        "effective_lnmp_date",
+    ):
         if k in data and isinstance(data[k], date):
             data[k] = data[k].isoformat()
 
@@ -311,6 +349,7 @@ def update_hospital(
 
 @router.put("/me/settings", response_model=UserProfile)
 @router.patch("/me/settings", response_model=UserProfile)
+@atomic
 def update_user_settings(
     payload: UserSettingsUpdate,
     current_user: dict = Depends(get_current_user),
@@ -341,10 +380,7 @@ def update_user_settings(
             if "reminder_time" in s_data and s_data["reminder_time"] is not None:
                 s_data["reminder_time"] = s_data["reminder_time"].isoformat()
             if s_id:
-                try:
-                    supp_repo.update(user_id, s_id, s_data)
-                except ValueError:
-                    pass
+                supp_repo.update(user_id, s_id, s_data)
             elif s_data and "name" in s_data:
                 supp_repo.create(user_id, s_data)
 
@@ -352,11 +388,22 @@ def update_user_settings(
     return _build_user_profile(fresh_user)
 
 
-@router.get("/me/supplements", response_model=list[SupplementResponse])
+@router.get(
+    "/me/supplements", response_model=list[SupplementResponse], responses=PAGE_RESPONSE
+)
 def list_supplements(
+    response: Response,
     current_user: dict = Depends(get_current_user),
+    limit: int = Query(50, ge=1, le=100),
+    cursor: str | None = Query(None, max_length=256),
 ) -> list[SupplementResponse]:
-    supplements = SupplementRepository().list_all(UUID(current_user["id"]))
+    from app.db.pagination import page
+
+    supplements, next_cursor = page(
+        "supplements", UUID(current_user["id"]), limit, cursor
+    )
+    if next_cursor:
+        response.headers["X-Next-Cursor"] = next_cursor
     return [SupplementResponse(**s) for s in supplements]
 
 
@@ -381,10 +428,9 @@ def update_supplement(
     data = payload.model_dump(exclude_unset=True)
     if "reminder_time" in data and data["reminder_time"] is not None:
         data["reminder_time"] = data["reminder_time"].isoformat()
-    try:
-        supplement = SupplementRepository().update(UUID(current_user["id"]), supplement_id, data)
-    except ValueError as exc:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    supplement = SupplementRepository().update(
+        UUID(current_user["id"]), supplement_id, data
+    )
     return SupplementResponse(**supplement)
 
 
@@ -400,55 +446,28 @@ def delete_supplement(
 
 
 @router.post("/me/supplements/verify", response_model=SupplementVerifyResponse)
-@router.post("/me/supplements/{supplement_id}/verify", response_model=SupplementVerifyResponse)
+@router.post(
+    "/me/supplements/{supplement_id}/verify", response_model=SupplementVerifyResponse
+)
 def verify_supplement_manually(
-    payload: SupplementVerifyRequest = SupplementVerifyRequest(),
+    payload: SupplementVerifyRequest,
     supplement_id: UUID | None = None,
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
     current_user: dict = Depends(get_current_user),
 ) -> SupplementVerifyResponse:
-    """Manually verify/log supplement intake today outside of voice checkin intake."""
-    user_id = UUID(current_user["id"])
-    target_id = supplement_id or payload.supplement_id
-
-    all_supps = SupplementRepository().list_all(user_id)
-    supp_name = payload.supplement_name or "iron"
-    if target_id:
-        match = next((s for s in all_supps if str(s["id"]) == str(target_id)), None)
-        if match:
-            supp_name = match.get("name", supp_name)
-    elif all_supps:
-        supp_name = all_supps[0].get("name", supp_name)
-
-    disp_name = _supplement_display(supp_name)
-    raw_text = payload.raw_text or (
-        f"የ{disp_name} ወስጃለሁ" if payload.taken_today else f"የ{disp_name} አልወሰድኩም"
-    )
-
-    checkin_data = {
-        "symptoms": [],
-        "food_log": None,
-        "supplement_check": {
-            "supplement_name": supp_name,
-            "taken_today": payload.taken_today,
-            "raw_text": raw_text,
-            "confirmed": True,
-        },
-        "closing_mentions": [],
-        "danger_sign_triggered": False,
-    }
-
-    CheckInRepository().create(user_id, checkin_data)
-
-    reminders = ReminderRepository().list_pending(user_id)
-    for r in reminders:
-        if r.get("type") == "supplement":
-            ReminderRepository().dismiss(user_id, UUID(r["id"]))
-
+    if (
+        supplement_id
+        and payload.supplement_id
+        and supplement_id != payload.supplement_id
+    ):
+        raise HTTPException(422, "Supplement identifiers disagree")
     return SupplementVerifyResponse(
-        status="verified",
-        supplement_name=supp_name,
-        taken_today=payload.taken_today,
-        logged_at=datetime.utcnow(),
+        **log_supplement(
+            UUID(current_user["id"]),
+            payload,
+            supplement_id or payload.supplement_id,
+            key,
+        )
     )
 
 
@@ -456,56 +475,29 @@ def verify_supplement_manually(
 @router.post("/me/food-log", response_model=FoodVerifyResponse)
 def verify_food_manually(
     payload: FoodVerifyRequest,
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
     current_user: dict = Depends(get_current_user),
 ) -> FoodVerifyResponse:
-    """Manually verify/log food intake from the 4-food-group checkbox UI outside of voice intake.
-    
-    Logging food for today automatically causes the voice check-in session (POST /checkin/start)
-    to skip Stage 2 (food)!
-    """
-    user_id = UUID(current_user["id"])
-    raw_text = payload.raw_text or (
-        ", ".join(payload.items) if payload.items else ", ".join(payload.food_groups)
-    ) or "የዕለቱ ምግብ"
-
-    # If food_groups is empty but raw_text/items are provided, classify automatically
-    groups = payload.food_groups
-    if not groups:
-        groups = classify_ethiopian_food(raw_text)
-
-    checkin_data = {
-        "symptoms": [],
-        "food_log": {
-            "raw_text": raw_text,
-            "food_groups": groups,
-            "items": payload.items,
-            "confirmed": True,
-        },
-        "supplement_check": None,
-        "closing_mentions": [],
-        "danger_sign_triggered": False,
-    }
-
-    CheckInRepository().create(user_id, checkin_data)
-
-    return FoodVerifyResponse(
-        status="verified",
-        food_groups=groups,
-        raw_text=raw_text,
-        logged_at=datetime.utcnow(),
-    )
+    return FoodVerifyResponse(**log_food(UUID(current_user["id"]), payload, key))
 
 
 @router.post("/me/appointment", response_model=AppointmentResponse)
 @router.put("/me/appointment", response_model=AppointmentResponse)
 def upsert_appointment(
     payload: AppointmentCreate,
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
     current_user: dict = Depends(get_current_user),
 ) -> AppointmentResponse:
     user_id = UUID(current_user["id"])
     data = payload.model_dump()
     data["appointment_date"] = payload.appointment_date.isoformat()
-    appointment = AppointmentRepository().upsert(user_id, data)
+    appointment = idempotency.execute(
+        user_id,
+        "appointment:upsert",
+        key,
+        data,
+        lambda: AppointmentRepository().upsert(user_id, data),
+    )
     return AppointmentResponse(**appointment)
 
 
@@ -525,7 +517,9 @@ def register_push_token(
     current_user: dict = Depends(get_current_user),
 ) -> dict[str, str]:
     """Registers device FCM or Web Push token for offline notifications."""
-    PushTokenRepository().register(UUID(current_user["id"]), payload.token, payload.platform)
+    PushTokenRepository().register(
+        UUID(current_user["id"]), payload.token, payload.platform
+    )
     return {"status": "registered", "token": payload.token}
 
 
@@ -548,7 +542,11 @@ def get_appointment_calendar_link(
     }
 
 
-@router.get("/me/appointment/calendar.ics")
+@router.get(
+    "/me/appointment/calendar.ics",
+    response_class=Response,
+    responses={200: {"content": {"text/calendar": {"schema": {"type": "string"}}}}},
+)
 def download_appointment_ical(
     current_user: dict = Depends(get_current_user),
 ) -> Response:
@@ -564,7 +562,9 @@ def download_appointment_ical(
     return Response(
         content=ical_text,
         media_type="text/calendar",
-        headers={"Content-Disposition": f"attachment; filename=anc_appointment_{app_date}.ics"},
+        headers={
+            "Content-Disposition": f"attachment; filename=anc_appointment_{app_date}.ics"
+        },
     )
 
 
@@ -581,16 +581,39 @@ def get_user_anc_schedule(
     if eff_lnmp_str:
         eff_lnmp_date = date.fromisoformat(eff_lnmp_str[:10])
     else:
-        eff_lnmp_date = date.today()
+        eff_lnmp_date = utc_now().astimezone(LOCAL_ZONE).date()
 
     all_contacts = calculate_all_anc_dates(eff_lnmp_date)
     next_anc = get_next_anc_contact(eff_lnmp_date)
 
     return ANCScheduleResponse(
-        current_gestational_age_weeks=status_info.get("gestational_age_weeks", 0) if status_info else 0,
-        current_gestational_age_days=status_info.get("gestational_age_days", 0) if status_info else 0,
+        current_gestational_age_weeks=status_info.get("gestational_age_weeks", 0)
+        if status_info
+        else 0,
+        current_gestational_age_days=status_info.get("gestational_age_days", 0)
+        if status_info
+        else 0,
         effective_lnmp_date=eff_lnmp_date if eff_lnmp_str else None,
-        estimated_due_date=date.fromisoformat(user["estimated_due_date"][:10]) if user.get("estimated_due_date") else None,
+        estimated_due_date=date.fromisoformat(user["estimated_due_date"][:10])
+        if user.get("estimated_due_date")
+        else None,
         next_anc_contact=next_anc,
         all_contacts=all_contacts,
+    )
+
+
+@router.post("/me/appointment/transition", response_model=AppointmentResponse)
+def transition_appointment(
+    payload: AppointmentTransition,
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = UUID(current_user["id"])
+    data = payload.model_dump(mode="json")
+    return idempotency.execute(
+        user_id,
+        "appointment:transition",
+        key,
+        data,
+        lambda: AppointmentRepository().transition(user_id, **data),
     )

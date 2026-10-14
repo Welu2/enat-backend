@@ -1,22 +1,30 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 
-from app.config import get_settings
+from app.db.pagination import PAGE_RESPONSE
 from app.dependencies import get_current_user_id
-from app.services.reminders import ReminderService
 
 router = APIRouter(prefix="/reminders", tags=["reminders"])
+dev_router = APIRouter(prefix="/reminders", tags=["development"])
 
 
-@router.get("")
-def list_reminders(user_id: UUID = Depends(get_current_user_id)) -> list[dict]:
-    return ReminderService().list_pending(user_id)
+@router.get("", responses=PAGE_RESPONSE)
+def list_reminders(
+    response: Response,
+    user_id: UUID = Depends(get_current_user_id),
+    limit: int = Query(50, ge=1, le=100),
+    cursor: str | None = Query(None, max_length=256),
+) -> list[dict]:
+    from app.core.clock import utc_now
+    from app.db.pagination import page
+
+    rows, next_cursor = page("reminders", user_id, limit, cursor, due=utc_now())
+    if next_cursor:
+        response.headers["X-Next-Cursor"] = next_cursor
+    return rows
 
 
-@router.post("/run-daily")
+@dev_router.post("/run-daily")
 def run_daily_reminders() -> dict:
-    settings = get_settings()
-    if not settings.enable_dev_routes:
-        return {"detail": "Daily reminder route disabled"}
-    return ReminderService().run_daily_job()
+    raise HTTPException(410, "Run the separate scheduler process")

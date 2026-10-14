@@ -2,12 +2,13 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Query, Response
 from pydantic import BaseModel
 
+from app.api.routes.reminders import list_reminders
+from app.db.pagination import PAGE_RESPONSE
 from app.db.repositories.reminders import ReminderRepository
 from app.dependencies import get_current_user_id
-from app.services.reminders import ReminderService
 
 
 class NotificationItem(BaseModel):
@@ -24,11 +25,16 @@ class NotificationItem(BaseModel):
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 
-@router.get("", response_model=list[NotificationItem])
-@router.get("/", response_model=list[NotificationItem])
-def get_notifications(user_id: UUID = Depends(get_current_user_id)) -> list[NotificationItem]:
+@router.get("", response_model=list[NotificationItem], responses=PAGE_RESPONSE)
+@router.get("/", response_model=list[NotificationItem], responses=PAGE_RESPONSE)
+def get_notifications(
+    response: Response,
+    user_id: UUID = Depends(get_current_user_id),
+    limit: int = Query(50, ge=1, le=100),
+    cursor: str | None = Query(None, max_length=256),
+) -> list[NotificationItem]:
     """Retrieve active notification messages for supplements, appointments, and generated reports."""
-    notifications = ReminderService().list_pending(user_id)
+    notifications = list_reminders(response, user_id, limit, cursor)
     return [NotificationItem(**item) for item in notifications]
 
 
@@ -38,8 +44,5 @@ def dismiss_notification(
     user_id: UUID = Depends(get_current_user_id),
 ) -> dict[str, Any]:
     """Dismiss a specific notification."""
-    try:
-        updated = ReminderRepository().dismiss(user_id, notification_id)
-    except ValueError as exc:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    updated = ReminderRepository().dismiss(user_id, notification_id)
     return {"status": "dismissed", "notification": updated}

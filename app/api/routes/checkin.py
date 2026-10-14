@@ -1,19 +1,32 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Header,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
 from fastapi.responses import Response
 
-from app.dependencies import get_current_user_id
+from app.db.pagination import PAGE_RESPONSE
 from app.db.repositories.check_ins import CheckInRepository
+from app.dependencies import get_current_user_id
 from app.models.checkin import (
     CheckInHistoryItem,
     CheckInRespondResponse,
     CheckInStartResponse,
+    CheckInStateResponse,
+    CompleteStageRequest,
     CompleteStageResponse,
     VerifyItemRequest,
     VerifyItemResponse,
     VoiceCorrectItemResponse,
 )
+from app.services.audio_upload import read_audio
 from app.services.checkin_session import CheckInSessionService
 from app.services.stage_audio import (
     get_all_stage_prompts_metadata,
@@ -29,45 +42,55 @@ def list_checkin_prompts() -> list[dict]:
     return get_all_stage_prompts_metadata()
 
 
-@router.get("/prompts/{stage}/audio")
+@router.get(
+    "/prompts/{stage}/audio",
+    response_class=Response,
+    responses={
+        200: {
+            "content": {
+                media: {"schema": {"type": "string", "format": "binary"}}
+                for media in ("audio/mpeg", "audio/wav")
+            }
+        }
+    },
+)
 async def get_stage_prompt_audio(stage: str) -> Response:
     """Streams the stored/pre-cached Amharic question prompt audio for the given stage (zero redundant TTS calls)."""
-    try:
-        audio_bytes = await get_or_synthesize_stage_audio(stage)
-        return Response(
-            content=audio_bytes,
-            media_type="audio/mpeg",
-            headers={"Content-Disposition": f"inline; filename=prompt_{stage}.mp3"},
-        )
-    except ValueError as exc:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Audio retrieval failed: {exc}") from exc
+    audio_bytes = await get_or_synthesize_stage_audio(stage)
+    return Response(
+        content=audio_bytes,
+        media_type="audio/wav" if audio_bytes.startswith(b"RIFF") else "audio/mpeg",
+        headers={"Content-Disposition": "inline"},
+    )
 
 
 @router.post("/start", response_model=CheckInStartResponse)
-def start_checkin(user_id: UUID = Depends(get_current_user_id)) -> CheckInStartResponse:
-    result = CheckInSessionService().start_session(user_id)
+def start_checkin(
+    user_id: UUID = Depends(get_current_user_id),
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
+) -> CheckInStartResponse:
+    result = CheckInSessionService().start_session(user_id, key=key)
     return CheckInStartResponse(**result)
 
 
 @router.post("/{session_id}/respond", response_model=CheckInRespondResponse)
 async def respond_to_checkin(
     session_id: UUID,
+    expected_version: int = Header(..., alias="X-Session-Version", ge=0),
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
     audio: UploadFile = File(...),
     user_id: UUID = Depends(get_current_user_id),
 ) -> CheckInRespondResponse:
-    audio_bytes = await audio.read()
-    try:
-        result = await CheckInSessionService().respond(
-            user_id,
-            session_id,
-            audio_bytes,
-            audio.filename or "audio.webm",
-            audio.content_type or "audio/webm",
-        )
-    except ValueError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    audio_bytes = await read_audio(audio)
+    result = await CheckInSessionService().respond(
+        user_id,
+        session_id,
+        audio_bytes,
+        audio.filename or "audio.webm",
+        audio.content_type or "audio/webm",
+        expected_version=expected_version,
+        key=key,
+    )
     return CheckInRespondResponse(**result)
 
 
@@ -75,60 +98,79 @@ async def respond_to_checkin(
 def verify_checkin_item(
     session_id: UUID,
     payload: VerifyItemRequest,
+    expected_version: int = Header(..., alias="X-Session-Version", ge=0),
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
     user_id: UUID = Depends(get_current_user_id),
 ) -> VerifyItemResponse:
-    try:
-        items_payload = [item.model_dump() for item in payload.items] if payload.items else None
-        result = CheckInSessionService().verify_item(
-            user_id,
-            session_id,
-            payload.item_id,
-            payload.confirmed,
-            payload.corrected_value,
-            items_payload=items_payload,
-        )
-    except ValueError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    items_payload = [item.model_dump(exclude_unset=True) for item in payload.items]
+    result = CheckInSessionService().verify_item(
+        user_id,
+        session_id,
+        items_payload=items_payload,
+        expected_version=expected_version,
+        key=key,
+    )
     return VerifyItemResponse(**result)
 
 
-@router.post("/{session_id}/items/{item_id}/voice-correct", response_model=VoiceCorrectItemResponse)
+@router.post(
+    "/{session_id}/items/{item_id}/voice-correct",
+    response_model=VoiceCorrectItemResponse,
+)
 async def voice_correct_item(
     session_id: UUID,
     item_id: str,
+    expected_version: int = Header(..., alias="X-Session-Version", ge=0),
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
     audio: UploadFile = File(...),
     user_id: UUID = Depends(get_current_user_id),
 ) -> VoiceCorrectItemResponse:
-    audio_bytes = await audio.read()
-    try:
-        result = await CheckInSessionService().voice_correct_item(
-            user_id,
-            session_id,
-            item_id,
-            audio_bytes,
-            audio.filename or "correction.webm",
-            audio.content_type or "audio/webm",
-        )
-    except ValueError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    audio_bytes = await read_audio(audio)
+    result = await CheckInSessionService().voice_correct_item(
+        user_id,
+        session_id,
+        item_id,
+        audio_bytes,
+        audio.filename or "correction.webm",
+        audio.content_type or "audio/webm",
+        expected_version=expected_version,
+        key=key,
+    )
     return VoiceCorrectItemResponse(**result)
 
 
 @router.post("/{session_id}/complete", response_model=CompleteStageResponse)
 def complete_checkin_stage(
     session_id: UUID,
+    payload: CompleteStageRequest,
+    expected_version: int = Header(..., alias="X-Session-Version", ge=0),
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
     user_id: UUID = Depends(get_current_user_id),
 ) -> CompleteStageResponse:
-    try:
-        result = CheckInSessionService().complete_stage(user_id, session_id)
-    except ValueError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    result = CheckInSessionService().complete_stage(
+        user_id,
+        session_id,
+        expected_version=expected_version,
+        key=key,
+        skip=payload.skip,
+    )
     return CompleteStageResponse(**result)
 
 
-@router.get("/history", response_model=list[CheckInHistoryItem])
-def get_checkin_history(user_id: UUID = Depends(get_current_user_id)) -> list[CheckInHistoryItem]:
-    rows = CheckInRepository().list_by_user(user_id)
+@router.get(
+    "/history", response_model=list[CheckInHistoryItem], responses=PAGE_RESPONSE
+)
+def get_checkin_history(
+    response: Response,
+    user_id: UUID = Depends(get_current_user_id),
+    limit: int = Query(50, ge=1, le=100),
+    cursor: str | None = Query(None, max_length=256),
+) -> list[CheckInHistoryItem]:
+    from app.db.pagination import page
+
+    rows, next_cursor = page("check_ins", user_id, limit, cursor)
+    if next_cursor:
+        response.headers["X-Next-Cursor"] = next_cursor
     return [CheckInHistoryItem(**row) for row in rows]
 
 
@@ -139,5 +181,12 @@ def get_checkin_history_detail(
 ) -> CheckInHistoryItem:
     row = CheckInRepository().get_by_id(user_id, checkin_id)
     if not row:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Check-in record not found")
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="Check-in record not found"
+        )
     return CheckInHistoryItem(**row)
+
+
+@router.get("/{session_id}/state", response_model=CheckInStateResponse)
+def get_checkin_state(session_id: UUID, user_id: UUID = Depends(get_current_user_id)):
+    return CheckInSessionService().get_state(user_id, session_id)
