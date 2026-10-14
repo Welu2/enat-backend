@@ -1,0 +1,39 @@
+rule_files: [alerts.yml]
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series: []
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: EnatApiUnavailable
+        exp_alerts:
+          - exp_labels: {severity: critical}
+            exp_annotations: {summary: 'API replica unavailable; check readiness and restore capacity', runbook: 'docs/operations-runbook.md'}
+  - interval: 1m
+    input_series:
+      - series: 'enat_oldest_due_job_seconds{job="enat-worker"}'
+        values: '600+0x10'
+      - series: 'enat_scheduler_lag_seconds{job="enat-worker"}'
+        values: '0+0x10'
+      - series: 'up{job="enat-api",instance="api-a"}'
+        values: '1+0x10'
+      - series: 'up{job="enat-api",instance="api-b"}'
+        values: '0+0x10'
+      - series: 'enat_jobs{status="failed"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: EnatJobLate
+        exp_alerts:
+          - exp_labels: {severity: critical}
+            exp_annotations: {summary: 'Jobs or scheduler are over five minutes late', runbook: 'docs/operations-runbook.md'}
+      - eval_time: 3m
+        alertname: EnatApiUnavailable
+        exp_alerts:
+          - exp_labels: {severity: critical}
+            exp_annotations: {summary: 'API replica unavailable; check readiness and restore capacity', runbook: 'docs/operations-runbook.md'}
+      - eval_time: 2m
+        alertname: EnatFailedJob
+        exp_alerts:
+          - exp_labels: {severity: warning}
+            exp_annotations: {summary: 'Terminal jobs require diagnosis and explicit replay', runbook: 'docs/operations-runbook.md'}

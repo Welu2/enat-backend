@@ -1,0 +1,11 @@
+**
+!Dockerfile
+!requirements.lock
+!app/
+!app/**
+!migrations/
+!migrations/*.sql
+!scripts/
+!scripts/run_api.sh
+**/__pycache__/
+**/*.pyc

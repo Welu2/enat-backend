@@ -28,77 +28,33 @@
 
 ## 1. Authentication Flow
 
-All endpoints (except `/auth/*` and `/summary/public/*`) require a Bearer Access Token in the HTTP Request Header:
+The generated [OpenAPI schema](docs/openapi.json) and
+[operation inventory](docs/api-operations.md) define current paths, bearer
+requirements, request bodies, and mutation headers. CI validates the Postman
+examples against this schema.
 
-```http
-Authorization: Bearer <access_token>
-```
+Authenticated patient endpoints use `Authorization: Bearer <access_token>`.
+Health and generic prompts are public; public summary resolution requires an
+explicitly created, unexpired bearer share. `/auth/link` and `/auth/logout`
+require authentication.
 
-### Sign Up
-- **Endpoint**: `POST /auth/signup`
-- **Request Body**:
-```json
-{
-  "email": "mother@example.com",
-  "password": "securepassword123"
-}
-```
-- **Response** `(200 OK)`:
-```json
-{
-  "access_token": "eyJhbGciOi...",
-  "token_type": "bearer",
-  "user_id": "e81acbf1-5f43-4afc-90be-b2d86c9a6802",
-  "email": "mother@example.com"
-}
-```
+| Endpoint | Request / behavior |
+| --- | --- |
+| `POST /auth/signup` | `{"email":"mother@example.com","password":"securepassword123"}` → **202**, `status=verification_required`; no session. Confirm email before login. |
+| `POST /auth/login` | Email/password → access token, refresh token, expiry, internal user ID and email. Failures return generic 401. |
+| `POST /auth/refresh` | `{"refresh_token":"..."}` → rotated session. Replace both tokens atomically. |
+| `POST /auth/forgot-password` | Email → generic **202**, whether an eligible account exists or not. |
+| `POST /auth/reset-password` | `{"token_hash":"recovery hash from email","new_password":"newsecurepassword123"}` → consumes a recovery OTP, changes password, invalidates previous Supabase sessions. Ordinary access tokens are not accepted as recovery proof. |
+| `POST /auth/telegram` | `{"init_data":"Telegram.WebApp.initData"}` → short-lived application bearer token. Launch data must be fresh and can be exchanged only once. Direct `tma` authentication is retired. |
+| `POST /auth/link` | Current bearer token plus either `{"access_token":"second verified Supabase token"}` or `{"init_data":"fresh Telegram data"}`. Existing separate accounts return 409; no automatic data merge. |
+| `POST /auth/logout` | Current bearer token → **204**; revoke its session and remove the account's device push registrations. |
 
-### Log In
-- **Endpoint**: `POST /auth/login`
-- **Request Body**:
-```json
-{
-  "email": "mother@example.com",
-  "password": "securepassword123"
-}
-```
-- **Response** `(200 OK)`: Returns `access_token`, `user_id`, and `email`.
-
-### Forgot Password (Send Reset Email)
-- **Endpoint**: `POST /auth/forgot-password`
-- **Request Body**:
-```json
-{
-  "email": "mother@example.com"
-}
-```
-- **Response** `(200 OK)`:
-```json
-{
-  "status": "success",
-  "message": "If an account with that email exists, a password reset link has been sent to your email."
-}
-```
-
-### Reset Password (Update Password with Recovery Token)
-- **Endpoint**: `POST /auth/reset-password`
-- **Request Body**:
-```json
-{
-  "access_token": "recovery_access_token_from_email_link",
-  "new_password": "newsecurepassword123"
-}
-```
-- **Response** `(200 OK)`:
-```json
-{
-  "status": "success",
-  "message": "Password updated successfully. You can now log in with your new password."
-}
-```
-
-> [!NOTE]
-> The backend handles Supabase ES256 and HS256 JWT decoding seamlessly. Save the `access_token` securely on device storage.
+ES256/RS256 tokens are verified through Supabase Auth on each request. HS256 is
+rejected unless an operator sets a short, explicit migration deadline. Auth
+outages return 503 and never enable weaker verification. Never log credentials,
+recovery hashes, launch data, or bearer shares. Configure the Supabase recovery
+email template and frontend callback as described in
+[the Phase 1 deployment notes](docs/phase1-security.md).
 
 ---
 
@@ -148,6 +104,9 @@ Allows the frontend to instantly compute fetal age, trimester classification, an
 ### 2.2 Submit Initial Onboarding Questions
 When a mother registers for the first time, she completes the baseline onboarding questionnaire. Submitting this endpoint calculates and saves her baseline pregnancy metrics, medical history, preferred hospital, and **automatically seeds her supplements** into the supplements database table.
 - **Endpoint**: `POST /users/me/onboarding`
+- Profile, initial supplements, and first appointment commit in one transaction.
+  Supplements accept at most 50 nonempty names or objects containing only
+  `{"name":"iron"}`; malformed values return 422 before writes.
 - **Request Body**:
 ```json
 {
@@ -267,10 +226,14 @@ Frontend apps can query `GET /users/me` at launch to load all user configuration
 
 ### Unified Settings Update (Bulk Update All Settings)
 - **Endpoint**: `PUT /users/me/settings` or `PATCH /users/me/settings`
+- All changes commit together. An unknown or another patient's supplement ID
+  returns 404 and rolls back preceding changes. Updating an existing appointment
+  requires its current `version`; stale versions return 409.
 - **Request Body**:
 ```json
 {
   "appointment": {
+    "version": 0,
     "appointment_date": "2026-08-25",
     "reminder_lead_days": 3
   },
@@ -302,7 +265,7 @@ Frontend apps can query `GET /users/me` at launch to load all user configuration
 - **Response** `(200 OK)`: `{"status": "deleted"}`
 
 ### Manual Supplement Intake Verification (Skip Stage 3 in Voice Check-in)
-Allows the patient to manually confirm supplement intake (e.g. from home screen checklist button). Logging supplement intake for today automatically dismisses pending reminders and **skips Stage 3 (Supplement)** during voice check-in!
+Allows the patient to manually confirm supplement intake (e.g. from home screen checklist button). The supplement stage is skipped only when every active named supplement has a confirmed boolean observation today. Unrelated reminders remain pending. Choose a supplement ID or explicit name; no default supplement is inferred. This endpoint requires an `Idempotency-Key` header.
 - **Endpoint**: `POST /users/me/supplements/verify` or `POST /users/me/supplements/{supplement_id}/verify`
 - **Request Body**:
 ```json
@@ -323,6 +286,7 @@ Allows the patient to manually confirm supplement intake (e.g. from home screen 
 ```
 
 ### Manual 4-Food-Group Logging (Skip Stage 2 in Voice Check-in)
+This endpoint requires `Idempotency-Key`; retries return the original logged result.
 Allows the patient to select the food groups she ate today directly via a 4-group checkbox UI (`grains`, `proteins`, `dairy`, `fruits_and_vegetables`). Logging food for today automatically **skips Stage 2 (Food)** during the voice check-in session!
 - **Endpoint**: `POST /users/me/food/verify` or `POST /users/me/food-log`
 - **Request Body**:
@@ -356,6 +320,17 @@ Allows the patient to select the food groups she ate today directly via a 4-grou
 ```
 
 ### Set or Update ANC Appointment
+Send `Idempotency-Key`. Initial creation omits `version`; updates must include
+`version` from the current appointment response. A date update is an explicit
+reschedule and records an event. Reports never change attendance or contact number.
+
+`POST /users/me/appointment/transition` accepts, for example,
+`{"action":"completed","version":0}` or `{"action":"missed","version":0}`.
+A new date uses `{"action":"rescheduled","version":1,"appointment_date":"2026-11-01"}`;
+optional `anc_contact_number` explicitly selects the next contact. No contact
+advancement happens automatically. Future visits cannot be marked completed/missed.
+The appointment response includes `status` and `version`.
+
 - **Endpoint**: `POST /users/me/appointment` or `PUT /users/me/appointment`
 - **Request Body**:
 ```json
@@ -476,189 +451,101 @@ Returns the complete WHO 8-contact antenatal schedule calculated directly from t
 
 ## 3. Voice Check-in Intake Workflow
 
-The intake session is a multi-stage conversational state machine:
-`symptoms` → `food` → `supplement` (if active supplement exists) → `closing`.
+The session runs `symptoms` → `food` → `supplement` → `closing`, with food or
+supplement stages omitted when confirmed observations already cover that local day.
+All local days use `Africa/Addis_Ababa`; persisted instants use UTC.
 
-```mermaid
-graph TD
-    Start[POST /checkin/start] --> Stage1[Stage: symptoms]
-    Stage1 --> Voice1[POST /checkin/{id}/respond audio]
-    Voice1 --> Verify1[POST /checkin/{id}/verify]
-    Verify1 --> Complete1[POST /checkin/{id}/complete]
-    Complete1 --> Stage2[Stage: food]
-    Stage2 --> Voice2[POST /checkin/{id}/respond audio]
-    Voice2 --> Verify2[POST /checkin/{id}/verify]
-    Verify2 --> Complete2[POST /checkin/{id}/complete]
-    Complete2 --> Stage3{Supplement Active?}
-    Stage3 -- Yes --> Stage3Supp[Stage: supplement]
-    Stage3Supp --> Complete3[POST /checkin/{id}/complete]
-    Stage3 -- No --> Stage4[Stage: closing]
-    Complete3 --> Stage4
-    Stage4 --> Finish[Intake Complete status: completed]
-```
+Every check-in POST requires `Idempotency-Key` (8–128 characters from
+`A-Z a-z 0-9 _ . : -`). Generate a new key for each logical mutation, retain it
+across network retries, and resend the exact same payload. Reusing a key for a
+different payload returns `409`. Start accepts no body and returns version `0`.
 
-### Step 0: Check-in Stage Prompts & Stored Voice Audio
-Frontend can query all 4 standard check-in prompts or play the stored Amharic voice for each stage directly (zero dynamic TTS latency!):
-- **Get All Stage Prompts**: `GET /checkin/prompts`
-- **Stream Stored Audio for Stage**: `GET /checkin/prompts/{stage}/audio` (e.g. `/checkin/prompts/symptoms/audio`)
+Every subsequent session mutation also requires `X-Session-Version` containing
+the most recent version returned by the server. Successful mutations increment
+it. A stale version returns `409`; load `GET /checkin/{session_id}/state` before
+retrying with a new key. A committed retry returns its original result, which can
+have an older version than current state; reload state after reconnecting.
 
-### Step 1: Start Session
-- **Endpoint**: `POST /checkin/start`
-- **Response** `(200 OK)`:
-```json
-{
-  "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
-  "stage": "symptoms",
-  "question_prompt": "ዛሬ ጽኑ ራስ ምታት፣ የዓይን ብዥታ፣ ደም መፍሰስ፣ ፈሳሽ መፍሰስ ወይም ከፍተኛ የሆድ ህመም ተሰምቶዎታል?",
-  "question_audio_url": "/checkin/prompts/symptoms/audio"
-}
-```
+| Operation | Request | Response/state |
+|---|---|---|
+| `POST /checkin/start` | Retry key | `session_id`, `version`, `stage`, `stage_status`, prompt/audio URL |
+| `POST /checkin/{id}/respond` | Version, retry key; multipart `audio` | Transcript and every extracted `pending_items`; no confirmation yet |
+| `POST /checkin/{id}/items/{item_id}/voice-correct` | Version, retry key; multipart `audio` | Exactly one corrected pending item; requires confirmation again |
+| `POST /checkin/{id}/verify` | Version, retry key; JSON `items` operations below | Pending list, confirmed count, version, immediate `danger_sign_triggered` |
+| `POST /checkin/{id}/complete` | Version, retry key; `{}` | Next stage, or one durable terminal result and `check_in_id` |
+| `GET /checkin/{id}/state` | Authentication | Current stage/status/version, pending items, draft, completed stages, expiry, terminal result |
 
-### Step 2: Send Voice Response (Audio Upload)
-- **Endpoint**: `POST /checkin/{session_id}/respond`
-- **Content-Type**: `multipart/form-data`
-- **Form Field**: `audio` (file upload: `.webm`, `.wav`, `.m4a`, `.mp3`)
-- **Response** `(200 OK)`:
-```json
-{
-  "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
-  "stage": "symptoms",
-  "transcript": "ቀላል የድካም ስሜት አለኝ",
-  "pending_items": [
-    {
-      "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
-      "raw_text": "ቀላል የድካም ስሜት አለኝ",
-      "category": null,
-      "duration": {"value": null, "unit": "unspecified"},
-      "severity": "mild",
-      "danger_sign": false,
-      "confirmed": false,
-      "verification_phrase": "ቀላል የድካም ስሜት አለኝ — ትክክል ነው?"
-    }
-  ]
-}
-```
+Stage status is `awaiting_response`, `awaiting_confirmation`, `ready`, or
+`completed`. An unanswered stage requires an explicit `{"skip":true}` completion.
+Pending items must first be verified, corrected, or explicitly discarded. Skipped
+and empty stages are not evidence that symptoms are absent. Provider failures
+preserve the previous draft; offer retry or manual input.
 
-> [!IMPORTANT]
-> **Danger Signs Rule**: If `severity` is `"mild"`, `category` is automatically set to `null` and `danger_sign` is `false`. Danger signs are strictly reserved for severe/persistent protocol conditions.
+Generic prompts: `GET /checkin/prompts` and
+`GET /checkin/prompts/{stage}/audio`. Patient-specific read-backs use authenticated
+`POST /tts`; `verification_audio_url` is null.
 
----
+Phase 3 provider failures return **503** with `code: "provider_unavailable"`,
+`draft_preserved: true`, `recovery: ["retry", "manual_input"]`, and `Retry-After`.
+Resume the stored session, retain the retry key for the same audio/version, and
+offer explicit manual correction/addition. Never interpret an outage as an empty
+or reassuring clinical result. Provider work has a shared 45-second deadline.
+Generic prompt URLs now contain a content version; missing assets require
+operator provisioning and never trigger public synthesis.
 
 ## 4. Verification & Correction Flows
 
-Each stage presents `pending_items` for patient read-back confirmation.
+The only request shape is an `items` list (1–50 operations), including for one
+item. Confirmation must be a JSON boolean. IDs, provenance, confirmation time,
+policy/prompt/model versions, danger flags, and read-back phrases are server-owned.
+Unknown IDs and fields return `422`; no single-item ID fallback exists.
 
-### A. Manual Text Verification & Edits
-When the patient confirms or manually edits an item:
-
-- **Endpoint**: `POST /checkin/{session_id}/verify`
-- **Request Body (Single Item Verification)**:
-```json
-{
-  "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
-  "confirmed": true,
-  "corrected_value": {
-    "raw_text": "ቀላል የድካም ስሜት ብቻ ነው"
-  }
-}
-```
-
-- **Request Body (Bulk Verification for All Items at Once)**:
 ```json
 {
   "items": [
     {
+      "action": "verify",
       "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
-      "confirmed": true
-    },
-    {
-      "item_id": "889bb790-ce6d-4008-8254-9435f3d8642c",
       "confirmed": true,
-      "corrected_value": {
-        "severity": "mild"
-      }
-    }
-  ]
-}
-```
-- **Response** `(200 OK)`:
-```json
-{
-  "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
-  "stage": "symptoms",
-  "pending_items": [],
-  "confirmed_count": 2
-}
-```
-
-> [!TIP]
-> **Bulk Verification**: When multiple symptoms, foods, or closing questions are returned in `pending_items`, the frontend can present all items at once and confirm them all in a single bulk `POST /verify` call!
-> **Single-Item Fallback**: On single-item stages (`food`, `supplement`), if the client accidentally sends the `session_id` in `item_id`, the backend automatically targets the single pending item.
-
-### B. Single-Item Voice Correction
-If the patient taps "Re-record voice for this item":
-
-- **Endpoint**: `POST /checkin/{session_id}/items/{item_id}/voice-correct`
-- **Content-Type**: `multipart/form-data`
-- **Form Field**: `audio` (file upload)
-- **Response** `(200 OK)`:
-```json
-{
-  "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
-  "stage": "symptoms",
-  "correction_transcript": "ከባድ ራስ ምታት ለሁለት ቀን",
-  "item_updated": true,
-  "pending_items": [
-    {
-      "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
-      "raw_text": "ከባድ ራስ ምታት ለሁለት ቀን",
-      "category": "severe_headache",
-      "duration": {"value": 2, "unit": "day"},
-      "severity": "severe",
-      "danger_sign": true,
-      "confirmed": false,
-      "verification_phrase": "ከባድ ራስ ምታት፣ 2 ቀን — ትክክል ነው?"
+      "corrected_value": {"duration": {"value": 2, "unit": "day"}}
     }
   ]
 }
 ```
 
-### C. Complete Stage & Advance
-Once all pending items in a stage are verified (or if `pending_items` is `[]` because "Nothing" was reported):
+Omit `corrected_value` to confirm unchanged. Use `confirmed:false` to retain a
+corrected item pending confirmation. Use `{"action":"discard","item_id":"..."}`
+to explicitly remove a pending item. Manual addition is a separate action and
+must omit `item_id`:
 
-- **Endpoint**: `POST /checkin/{session_id}/complete`
-- **Response (Intermediate Stage)** `(200 OK)`:
 ```json
-{
-  "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
-  "stage_completed": "symptoms",
-  "next_stage": "food",
-  "question_prompt": "ዛሬ ምን አይነት ምግቦች ተመገቡ?",
-  "session_completed": false,
-  "danger_sign_triggered": false
-}
+{"items":[{"action":"add","confirmed":true,"corrected_value":{"raw_text":"እንጀራ በሽሮ"}}]}
 ```
 
-- **Response (Final Stage Completed)** `(200 OK)`:
-```json
-{
-  "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
-  "stage_completed": "closing",
-  "next_stage": null,
-  "question_prompt": null,
-  "session_completed": true,
-  "danger_sign_triggered": false,
-  "summary_text_am": "ምንም የአደጋ ምልክት አልተገኘም፣ ነገር ግን ቀላል የድካም ስሜት ምልክት ተመዝግቧል",
-  "summary_text_en": "No danger signs detected, but mild fatigue symptom recorded.",
-  "check_in_id": "f589c311-2090-482f-b441-11883c5112ab"
-}
-```
+Corrections are validated against the session stage:
 
-> [!NOTE]
-> **Daily Check-in Summary Rules (in Amharic & English)**:
-> - **Danger Signs Detected**: `"{x} የአደጋ ምልክት ተገኝቷል፣ በአስቸቋይ የህክምና እርዳታ ያግኙ"`
-> - **Non-Danger Symptoms**: `"ምንም የአደጋ ምልክት አልተገኘም፣ ነገር ግን {x} ምልክት ተመዝግቧል"`
-> - **No Symptoms Reported**: `"ምንም የአደጋ ምልክት አልተገኘም"`
+| Stage | Editable fields |
+|---|---|
+| symptoms | `raw_text`, nullable recognized `category`, nullable `duration`, `severity` |
+| food | `raw_text`, canonical `food_groups`, `items` |
+| supplement | `raw_text`, `supplement_name`, `taken_today` (boolean or null for unknown) |
+| closing | `raw_text`, recognized `topic` |
+
+Severity is `mild`, `moderate`, `severe`, or `unspecified`. Duration has a finite
+nonnegative numeric value and `minute`, `hour`, `day`, `week`, or `month`; unknown
+is null or `{"value":null,"unit":"unspecified"}`. Text and collection limits are
+published in OpenAPI. Each stage holds at most 100 confirmed and pending items.
+
+Recognized danger categories are preserved even when severity is mild. Show the
+warning immediately when verification returns `danger_sign_triggered:true`;
+do not wait for food, supplement, or closing completion. An unknown classification
+is not a reassuring assessment. Clinical review of the policy and wording remains
+required before release.
+
+Final completion atomically stores explicitly confirmed items, terminal session
+state, and an outbox event. Repeated completion returns the original check-in.
+Food and supplement collections retain every confirmed item. Unknown supplement
+names are never silently replaced with the first configured supplement.
 
 ---
 
@@ -666,6 +553,16 @@ Once all pending items in a stage are verified (or if `pending_items` is `[]` be
 
 ### List User Check-in History
 - **Endpoint**: `GET /checkin/history`
+- Returns an owned array page, newest first (timestamp and ID break ties).
+  `limit` defaults to 50 and accepts 1–100. Send the `X-Next-Cursor` response
+  header as the next request's `cursor`; its absence means the final page.
+  Keep the same endpoint and filters while continuing. Newer inserts appear
+  on a fresh first-page request, not in an existing continuation.
+  The same limit/cursor/header contract applies to `GET /notifications`,
+  `GET /reminders`, and `GET /users/me/supplements`. Notifications are ordered
+  by due time and ID, supplements by creation time and ID, both ascending.
+  Responses remain arrays; clients must follow the header to retrieve all rows.
+  `/users/me` embeds at most 50 pending reminders; use the paginated list for more.
 - **Response** `(200 OK)`:
 ```json
 [
@@ -673,12 +570,12 @@ Once all pending items in a stage are verified (or if `pending_items` is `[]` be
     "id": "f589c311-2090-482f-b441-11883c5112ab",
     "timestamp": "2026-08-15T12:00:00Z",
     "symptoms": [{"raw_text": "ቀላል የድካም ስሜት", "danger_sign": false, "confirmed": true}],
-    "food_log": {"raw_text": "እንጀራ በሽሮ", "confirmed": true},
-    "supplement_check": {"supplement_name": "iron", "taken_today": true, "confirmed": true},
+    "food_log": [{"raw_text": "እንጀራ በሽሮ", "confirmed": true}],
+    "supplement_check": [{"supplement_name": "iron", "taken_today": true, "confirmed": true}],
     "closing_mentions": [],
     "danger_sign_triggered": false,
-    "summary_text_am": "ምንም የአደጋ ምልክት አልተገኘም፣ ነገር ግን ቀላል የድካም ስሜት ምልክት ተመዝግቧል",
-    "summary_text_en": "No danger signs detected, but mild fatigue symptom recorded."
+    "summary_text_am": "ቀላል የድካም ስሜት ምልክት ተመዝግቧል",
+    "summary_text_en": "Reported symptom: mild fatigue. Classification is uncertain."
   }
 ]
 ```
@@ -695,6 +592,17 @@ Summaries aggregate all confirmed check-ins over the ANC window, formatted speci
 
 ### Generate Manual Summary
 - **Endpoint**: `POST /summary/generate`
+- Requires `Idempotency-Key` and a JSON body: `{}` for the default window, or
+  `{"period_start":"2026-09-01T00:00:00+03:00","period_end":"2026-09-18T00:00:00+03:00"}`.
+  Both bounds must be timezone-aware, start < end, end no later than now, at most
+  366 days. The window is start-inclusive and end-exclusive. Default start is
+  the latest of account creation, 30 days ago, and the recorded previous attended
+  appointment. Responses include exact `window_start`/`window_end`; date labels use
+  the local calendar. An empty period remains empty; database failures return 503.
+- Every included item has source/check-in references and confirmation provenance.
+  Legacy missing confirmation is excluded; unknown legacy timestamps stay null.
+  Missing or conflicting supplement-day observations are unknown, not missed doses.
+  Percentages use only known observations; `by_supplement` provides separate counts.
 - **Response** `(200 OK)`:
 ```json
 {
@@ -729,7 +637,8 @@ Summaries aggregate all confirmed check-ins over the ANC window, formatted speci
     "recorded_symptoms": [
       {
         "date": "2026-09-12",
-        "category": "no_danger_sign_detected",
+        "category": null,
+        "assessment": "unclassified",
         "category_display": "ቀላል የድካም ስሜት",
         "raw_text": "ቀላል የድካም ስሜት",
         "severity": "mild"
@@ -752,29 +661,35 @@ Summaries aggregate all confirmed check-ins over the ANC window, formatted speci
       "taken_days": 18,
       "tracked_days": 20,
       "total_days_in_period": 21,
-      "percentage": 86
+      "percentage": 90
     },
     "closing_mentions": [],
     "muac_reminder": "MUAC screening due — check at visit",
     "provenance_note": "All data in this summary is self-reported by the patient (no device-measured data)."
   },
-  "share_link_slug": "ab89ef12",
-  "qr_code_url": "https://.../qr/ab89ef12.png"
+  "share_link_slug": null,
+  "qr_code_url": null
 }
 ```
 
 ### Check & Trigger Automatic Summary
 - **Endpoint**: `POST /summary/check-automatic`
 - **Rules**:
-  - Automatically generates **1 day before appointment date**.
-  - If no appointment is set, automatically generates **every 30 days**.
+  - Generates when a scheduled appointment is today or tomorrow; repeated calls return the same snapshot for that appointment/date/contact. Attendance is unchanged.
+  - If no scheduled appointment exists, checks the 30-day fallback; one automatic snapshot per calendar month. Background execution requires the separate scheduler and worker in `docs/phase3-resilience.md`.
 
 ### Get Latest Summary
 - **Endpoint**: `GET /summary/latest`
 
-### Public Doctor View (No Auth Required)
-- **Endpoint**: `GET /summary/public/{share_link_slug}`
-- Returns de-identified summary for clinical review.
+### Consented summary sharing
+Sharing defaults off pending privacy review. When enabled:
+
+- `POST /summary/{summary_id}/shares` with `{"consent":true,"expires_in_hours":24}` returns **201** with share `id`, `expires_at`, `scope`, `share_url`, and private `qr_code_base64`.
+- QR rendering failure returns `qr_status:"retry_required"` and null `qr_code_base64` alongside the usable URL. Retry `POST /summary/shares/{share_id}/qr` with `{"token":"<token from share_url>"}` and authentication to receive PNG bytes. This creates no new snapshot or share.
+- Expiry is 24 hours by default, at most seven days. Keep the returned token in memory and show it only to the consenting patient; it cannot be retrieved later.
+- `GET /summary/{token}` resolves the bearer link. It returns a structured allowlist, never the original `content_json` or raw patient text. This is sensitive health data, not anonymized data.
+- `DELETE /summary/shares/{share_id}` revokes the owner's share. Expired, revoked and unknown tokens return 404.
+- Set `no-store`, `no-referrer`, and `noindex` on the frontend share page. Remove analytics and redact proxy/CDN request paths and queries. Legacy links and public QR URLs are invalidated by migration 005.
 
 ---
 
@@ -841,47 +756,27 @@ Register device token for lockscreen push notifications when the app or browser 
 | HTTP Status | Detail Example | Cause / Action |
 |---|---|---|
 | `401 Unauthorized` | `"Invalid or expired token"` | Access token missing or expired; redirect user to login. |
-| `400 Bad Request` | `"All pending items must be verified before completing the stage"` | Patient hasn't verified `pending_items`; call `/verify` first. |
+| `422 Unprocessable Entity` | `"Invalid mutation"` | Invalid fields/IDs or unresolved pending items; correct the request. |
 | `404 Not Found` | `"Check-in record not found"` | Resource ID doesn't exist or belongs to another user. |
-| `409 Conflict` | `"Appointment already exists"` | Use `PUT /users/me/appointment` to update an existing appointment. |
+| `409 Conflict` | `"State changed or retry key conflicts; reload and retry"` | Reload current state. Retain keys for identical retries; use a new key for a new mutation. |
 
 ### Frontend UI Checklist
 1. **Always display `verification_phrase`** returned by backend directly on screen.
 2. **Audio File Formats**: Send `.webm` or `.wav` recorded at 16kHz for Addis AI ASR accuracy.
-3. **Empty Stage Handling**: When user says "No / nothing", `pending_items` is `[]`. Directly call `/complete` to move forward.
+3. **Empty Stage Handling**: Confirm explicit negative statements like other observations. Skipping an unanswered stage requires `{"skip":true}` and must not display a reassuring assessment.
 
 ---
 
 ## 9. Text-to-Speech (TTS) Voice Synthesis
 
-The backend includes native **Text-to-Speech (TTS)** via Addis AI so the AI can speak stage prompts and read-back verification phrases in Amharic voice.
+Generic `question_audio_url` values refer to pre-provisioned public prompt
+assets. A missing generic asset does not trigger paid synthesis.
+`verification_audio_url` is now `null`. To play a patient-specific verification
+phrase, send authenticated `POST /tts` with `{"text":"...","voice_id":null}`,
+then play the response blob. Revoke the local object URL after playback.
+Never place health text in a URL. `GET /tts` returns **410**.
 
-### 1. Automatic Audio URLs in Check-in Responses
-All check-in endpoints automatically attach `question_audio_url` and `verification_audio_url`:
-
-- **Start / Advance Stage Response**:
-```json
-{
-  "session_id": "93b761d2-42ba-4270-9bb2-dffd19256ab1",
-  "stage": "symptoms",
-  "question_prompt": "ዛሬ ወይም በቅርቡ ምንም አይነት ያልተለመደ የጤና እክል ወይም ህመም ተሰምቶዎታል?",
-  "question_audio_url": "/tts?text=%E1%8B%AE%E1%88%A5..."
-}
-```
-
-- **Respond / Verify Pending Items Response**:
-```json
-{
-  "item_id": "2e166c60-7461-41fb-86d6-ff99c886c950",
-  "raw_text": "ቀላል የድካም ስሜት",
-  "verification_phrase": "ቀላል የድካም ስሜት — ትክክል ነው?",
-  "verification_audio_url": "/tts?text=%E1%88%A8%E1%8B%AE..."
-}
-```
-
-### 2. Direct TTS Endpoints
-- **Stream Audio via GET (HTML `<audio src="...">` / Mobile Audio Player)**:  
-  `GET /tts?text=ከፍተኛ+ትኩሳት+—+ትክክል+ነው%3F` -> Returns `audio/mpeg` MP3 stream.
-- **Synthesize Audio via POST**:  
-  `POST /tts`  
-  `{"text": "ከፍተኛ ትኩሳት — ትክክል ነው?"}` -> Returns `audio/mpeg` MP3 stream.
+TTS accepts at most 2,000 characters. Uploads accept WAV, WebM, Ogg, MP4 audio,
+and MP3 with matching MIME types; default limits are 6 MB and 120 seconds.
+Oversized bodies/audio return **413**, unsupported or undecodable audio **415**,
+and quota exhaustion **429** with `Retry-After`. Preserve drafts on errors.
