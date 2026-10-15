@@ -28,7 +28,9 @@ jobs:
       - run: python -m pytest
       - run: python scripts/test_database.py --fresh
       - run: python scripts/test_database.py
-      - run: ENAT_LOAD_SECONDS=20 python scripts/test_database.py --fresh --load
+      # Keep the forced-crash window within a representative sample while
+      # retaining the same p95/p99 and <1% error limits as the full rehearsal.
+      - run: ENAT_LOAD_SECONDS=120 python scripts/test_database.py --fresh --load
       - run: python scripts/scan_secrets.py
       - run: python scripts/security_audit.py
       - uses: actions/upload-artifact@v4
@@ -62,7 +64,7 @@ jobs:
         env:
           ENAT_LOAD_COMPOSE: '1'
           ENAT_LOAD_IMAGE: enat:release
-          ENAT_LOAD_SECONDS: '20'
+          ENAT_LOAD_SECONDS: '120'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

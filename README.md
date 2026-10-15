@@ -204,7 +204,7 @@ and uploaded by CI, including on failed scans.
 To rehearse the actual Compose deployment on Linux with Docker and synthetic data:
 
 ```bash
-ENAT_LOAD_COMPOSE=1 ENAT_LOAD_IMAGE=enat:release ENAT_LOAD_SECONDS=20 python scripts/test_database.py --fresh --load
+ENAT_LOAD_COMPOSE=1 ENAT_LOAD_IMAGE=enat:release ENAT_LOAD_SECONDS=120 python scripts/test_database.py --fresh --load
 ENAT_LOAD_COMPOSE=1 ENAT_LOAD_IMAGE=enat:release python scripts/test_database.py --fresh --load
 ```
 

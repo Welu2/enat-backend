@@ -11,12 +11,12 @@ from uuid import uuid4
 
 import httpx
 from fastapi.testclient import TestClient
-from test_security_database import db, pytestmark  # noqa: F401
 
 from app import dependencies
 from app.core.clock import LOCAL_ZONE, utc_now
 from app.main import app
 from app.services import provider_runtime
+from tests.integration.test_security_database import db, pytestmark  # noqa: F401
 
 
 def identity(monkeypatch, user):

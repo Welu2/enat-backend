@@ -9,7 +9,6 @@ from uuid import uuid4
 
 import pytest
 from psycopg.types.json import Jsonb
-from test_security_database import acting, db, pytestmark  # noqa: F401
 
 from app.config import get_settings
 from app.core.clock import LOCAL_ZONE, utc_now
@@ -18,6 +17,7 @@ from app.db import data, idempotency, jobs, worker
 from app.db.repositories.supplements import SupplementRepository
 from app.jobs import handle, process_one
 from app.services.reminders import ReminderService
+from tests.integration.test_security_database import acting, db, pytestmark  # noqa: F401
 
 
 @pytest.fixture

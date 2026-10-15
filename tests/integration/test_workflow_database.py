@@ -11,7 +11,6 @@ from uuid import uuid4
 import psycopg
 import pytest
 from psycopg.types.json import Jsonb
-from test_security_database import acting, db, pytestmark  # noqa: F401
 
 from app.core.clock import LOCAL_ZONE, utc_now
 from app.core.errors import (
@@ -27,6 +26,7 @@ from app.db.repositories.check_ins import CheckInRepository
 from app.services.checkin_session import CheckInSessionService, _empty_draft_data
 from app.services.clinical_policy import normalize_item
 from app.services.summary import SummaryService
+from tests.integration.test_security_database import acting, db, pytestmark  # noqa: F401
 
 
 def session(uid, stage="closing", draft=None, pending=None):

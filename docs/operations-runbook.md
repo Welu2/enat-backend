@@ -125,7 +125,7 @@ checks that a committed outbox event produced exactly one durable notification.
 Temporary services, network and database are removed automatically. Only synthetic
 metrics, redacted service logs and measurement reports remain in artifacts.
 
-Use ENAT_LOAD_SECONDS=20 for a short wiring check (three-second outage and no
+Use ENAT_LOAD_SECONDS=120 for a short wiring check (three-second outage and no
 alert-duration assertion). CI runs this check on the built image; its manual
 capacity job runs the full workload. External staging, ingress, real Auth/Storage,
 human alert delivery and managed recovery still require environment-specific drills.

@@ -85,6 +85,7 @@ async def exercise(env, tokens, reminders, duration, directory, backend=None):
                 await asyncio.sleep(0.25)
 
         monitor = asyncio.create_task(probe())
+        fault = None
         try:
             for _ in range(100):
                 if all(healthy):
@@ -94,6 +95,28 @@ async def exercise(env, tokens, reminders, duration, directory, backend=None):
                 raise RuntimeError("Both APIs must become schema-ready")
             started = time.monotonic()
             pending = set()
+
+            async def inject_failure():
+                nonlocal stopped, restarted
+                await asyncio.sleep(duration / 3)
+                if backend:
+                    await asyncio.to_thread(backend.kill)
+                else:
+                    processes[0].kill()
+                    await asyncio.to_thread(processes[0].wait, timeout=5)
+                stopped = True
+                await asyncio.sleep(
+                    max(0, started + duration / 3 + outage_seconds - time.monotonic())
+                )
+                if backend:
+                    await asyncio.to_thread(backend.restart)
+                else:
+                    processes[0] = await asyncio.to_thread(launch, 0)
+                restarted = True
+
+            # Docker operations must not pause scheduling and turn constant-rate
+            # traffic into a catch-up burst at the surviving API.
+            fault = asyncio.create_task(inject_failure())
 
             async def request(number, planned):
                 dispatched = time.monotonic()
@@ -140,20 +163,6 @@ async def exercise(env, tokens, reminders, duration, directory, backend=None):
             for number in range(duration * 50):
                 planned = started + number / 50
                 await asyncio.sleep(max(0, planned - time.monotonic()))
-                elapsed = time.monotonic() - started
-                if elapsed > duration / 3 and not stopped:
-                    if backend:
-                        await asyncio.to_thread(backend.kill)
-                    else:
-                        processes[0].kill()
-                        processes[0].wait(timeout=5)
-                    stopped = True
-                if elapsed > duration / 3 + outage_seconds and not restarted:
-                    if backend:
-                        await asyncio.to_thread(backend.restart)
-                    else:
-                        processes[0] = launch(0)
-                    restarted = True
                 if len(pending) >= 200:
                     errors["overload"] += 1
                     continue
@@ -166,6 +175,7 @@ async def exercise(env, tokens, reminders, duration, directory, backend=None):
                         flush=True,
                     )
             await asyncio.gather(*pending)
+            await fault
             values = sorted(latencies)
             request_times.sort()
             scheduling_delays.sort()
@@ -217,6 +227,9 @@ async def exercise(env, tokens, reminders, duration, directory, backend=None):
                 and all(healthy),
             }
         finally:
+            if fault is not None:
+                # Join any in-flight Docker operation before removing services.
+                await asyncio.gather(fault, return_exceptions=True)
             stop_probe = True
             await monitor
             for process in processes:

@@ -1,6 +1,6 @@
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--disable-socket --allow-unix-socket"
+addopts = "--import-mode=importlib --disable-socket --allow-unix-socket"
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
 

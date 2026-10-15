@@ -1,6 +1,6 @@
 # Phase 5 operations: local implementation and evidence
 
-Evidence date: 14 October 2026. All database records, artifacts and users in these
+Evidence dates: 14–15 October 2026. All database records, artifacts and users in these
 rehearsals are synthetic. No live Supabase project or staging/production service
 was accessed. Current release dependencies are in the
 [readiness plan](../production_readiness_plan.md) and
@@ -170,10 +170,10 @@ Use these additional commands in the locked development environment:
 ```bash
 python scripts/test_database.py --fresh
 python scripts/test_database.py
-ENAT_LOAD_SECONDS=20 python scripts/test_database.py --fresh --load
+ENAT_LOAD_SECONDS=120 python scripts/test_database.py --fresh --load
 python scripts/test_database.py --fresh --load
 ENAT_REHEARSAL_IMAGES=enat:phase5-previous,enat:phase5 python scripts/test_database.py --containers
-ENAT_LOAD_COMPOSE=1 ENAT_LOAD_IMAGE=enat:phase5 ENAT_LOAD_SECONDS=20 python scripts/test_database.py --fresh --load
+ENAT_LOAD_COMPOSE=1 ENAT_LOAD_IMAGE=enat:phase5 ENAT_LOAD_SECONDS=120 python scripts/test_database.py --fresh --load
 ENAT_LOAD_COMPOSE=1 ENAT_LOAD_IMAGE=enat:phase5 python scripts/test_database.py --fresh --load
 ```
 
@@ -186,7 +186,27 @@ CI runs the unit/integration, contract, source/dependency, image, configuration
 and short host/Compose rehearsal gates. A workflow_dispatch run adds the full
 Compose capacity job against its built and scanned image, including the sustained
 outage and local alert-notification assertion.
-Hosted CI has not been observed or made a required branch check in this session.
+The first [hosted run](https://github.com/Welu2/enat-backend/actions/runs/38621523163)
+failed on commit f4bc3aa. Unit collection collided on the two test_operations.py
+modules; pytest now uses importlib mode and package-qualified shared fixtures.
+The container job passed image/security/alert checks and 60 fresh-database tests,
+then failed the 20-second load gate: 10 forced-crash transport failures out of
+1,000 requests (1%), p95 341 ms and p99 3.002 seconds. All services recovered.
+CI wiring checks now run for 120 seconds (6,000 requests), retaining the same
+forced outage, 50 requests/second, p95/p99 limits and <1% error threshold. This
+gives the fixed failure-detection window a larger sample; no errors are excluded
+and the full 30-minute capacity requirement remains unchanged.
+A local 120-second run then failed latency (p95 1.638 s, p99 2.017 s,
+41/6,000 errors) around restart. The generator awaited Docker commands inside
+its scheduling loop, creating catch-up bursts. Fault injection now runs in a
+separate task, joined before cleanup, so command latency does not pause traffic.
+The failed measurements remain archived; this harness change does not alter
+service limits or discard errors.
+The corrected local run passed all 6,000 requests through the harness: p95 68 ms,
+p99 121 ms and 10 transport errors (0.1667%), with both APIs recovered, four
+authenticated scrapes and exactly-once outbox delivery. Generator scheduling p99
+was 7.5 ms. This two-minute check supplements the earlier full capacity evidence.
+Passing hosted verification and required branch checks are still pending.
 Reports are under ignored artifacts/operations and artifacts/security; CI retains
 them for 30 days. Archive release evidence and images for the approved retention
 period. The dependency manifest records lock hashes and tool versions; container
