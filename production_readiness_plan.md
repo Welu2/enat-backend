@@ -3,7 +3,8 @@
 Prepared 13 October 2026 against repository revision `14975c2`.
 
 **Current status — 15 October 2026:** Phase 4's container blocker is remediated;
-local engineering and verification now extend through Phase 5. Production release
+local engineering and verification now extend through Phase 5. Hosted CI passes
+on a59e999 and `master` requires the `test` and `container` checks. Production release
 acceptance is **not complete**: actual staging/Supabase/provider checks, approved
 clinical/privacy/retention decisions and named operational owners are still pending.
 See [Phase 5 evidence](docs/phase5-operations.md) and the
@@ -135,7 +136,8 @@ Quality and verification gates are implemented locally. See
 - [x] Added non-root image, isolated runtime smoke test, pinned container scanner/SBOM generation, and a fail-closed high/critical gate.
 - [x] Completed local image build, non-root runtime smoke, container vulnerability/secret scan and image-specific SBOM/findings archive.
 - [x] Remediated on 14 October: replaced the rejected Debian runtime with a digest-pinned Alpine 3.24 candidate; final scan has zero HIGH/CRITICAL findings, without exceptions. Historical 213 package findings are archived separately.
-- [ ] Observe hosted CI, configure required branch checks, and complete outstanding clinical/privacy/staging and Phase 5 operational release gates.
+- [x] Observe passing hosted CI and configure required branch checks (15 October, a59e999; details in Phase 5 evidence).
+- [ ] Complete outstanding clinical/privacy/staging and Phase 5 operational release gates.
 
 Local application evidence: **203 unit tests passed**; PostgreSQL **53 fresh-install
 tests** (two upgrade-only skips) and **55 upgrade tests** passed. Strict mypy
@@ -143,8 +145,8 @@ passes **12 source files**, and **54 Postman examples** match the generated API
 contract. Runtime/development dependency audits report zero known vulnerabilities.
 Those are the original 13 October test counts. The container gate was subsequently
 fixed and now passes; current evidence is below and in
-[the image-specific report](docs/container-security-findings.md). Hosted CI and
-the external release checks remain unobserved. No vulnerability exception or
+[the image-specific report](docs/container-security-findings.md). Hosted CI now
+passes; the external release checks remain unobserved. No vulnerability exception or
 production release approval was granted.
 No production service or patient data was changed.
 
@@ -166,7 +168,7 @@ No production service or patient data was changed.
 - [ ] Verify live Supabase grants/Auth/Storage, real-provider Amharic quality/latency and currency budgets, and coordinated frontend rollout.
 - [ ] Obtain clinical/privacy approval, retention/deletion/export policy and accountable primary/backup responders. Clinical retention purge remains intentionally unimplemented until that policy is supplied.
 - [x] Repair hosted-run failures locally: importlib collection and package-qualified fixtures pass 208 unit/HTTP, 60 fresh-database and 62 upgrade tests. Independently scheduled fault injection and a 120-second Compose check pass 6,000 requests, p95 68 ms/p99 121 ms, with 10 transport failures (0.1667%) and successful recovery. Previous failed results remain recorded.
-- [ ] Obtain passing hosted CI and enforce required branch checks. The first hosted run on f4bc3aa failed; the corrected run remains to be observed.
+- [x] Hosted CI [run 38764968793](https://github.com/Welu2/enat-backend/actions/runs/38764968793) passes on a59e999, including both two-minute load/recovery checks and security gates. Compose p95 14 ms/p99 17 ms with 12/6,000 transport errors (0.2%). `master` now requires up-to-date GitHub Actions `test` and `container` checks, including administrators; saved settings verified. The manual full-capacity job was skipped on this push, and earlier full local evidence remains separately recorded.
 - [ ] Approve an actual release/rollback digest and supervised pilot.
 
 Local verification: **208 unit tests**, **60 fresh database tests** (2 legacy-only

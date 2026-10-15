@@ -1,4 +1,4 @@
-# Phase 5 operations: local implementation and evidence
+# Phase 5 operations: implementation and verification evidence
 
 Evidence dates: 14–15 October 2026. All database records, artifacts and users in these
 rehearsals are synthetic. No live Supabase project or staging/production service
@@ -206,7 +206,24 @@ The corrected local run passed all 6,000 requests through the harness: p95 68 ms
 p99 121 ms and 10 transport errors (0.1667%), with both APIs recovered, four
 authenticated scrapes and exactly-once outbox delivery. Generator scheduling p99
 was 7.5 ms. This two-minute check supplements the earlier full capacity evidence.
-Passing hosted verification and required branch checks are still pending.
+The local host-process repeat also passed: p95 38 ms, p99 92 ms and one transport
+error out of 6,000 requests, alongside all 62 legacy-upgrade tests.
+
+The corrected [hosted run](https://github.com/Welu2/enat-backend/actions/runs/38764968793)
+passed on commit a59e999 on 15 October. Both `test` and `container` passed every
+gate. Each two-minute rehearsal attempted 6,000 requests on a four-logical-CPU
+Ubuntu runner: host p95/p99 10/11 ms with seven transport errors (0.1167%);
+Compose p95/p99 14/17 ms with 12 transport errors (0.2%). Recovery, all four
+scrapes and exactly-once outbox delivery passed. The built/scanned Compose image
+was sha256:5cac46ac4b3bb340bac21941cc5bfdc2f586700e8dd6190625eb21b981e2c196.
+The manual 30-minute capacity job was skipped for this push; the earlier full
+local results remain the capacity evidence. Hosted reports were downloaded to
+artifacts/hosted/38764968793.
+
+GitHub branch protection on `master` now requires up-to-date `test` and
+`container` checks from GitHub Actions (app 15368), including for administrators.
+Force pushes and branch deletion are disabled. The saved configuration was read
+back and verified. This protects merges; it does not approve a patient release.
 Reports are under ignored artifacts/operations and artifacts/security; CI retains
 them for 30 days. Archive release evidence and images for the approved retention
 period. The dependency manifest records lock hashes and tool versions; container
@@ -219,6 +236,6 @@ Supabase Auth/Storage/grant tests, staged migration/rollback/failure drills, ale
 delivery and managed-PITR/object recovery. Validate frontend pagination and retry
 contracts, real-provider Amharic quality and 20-concurrent-voice latency, and
 approved monetary budgets. Obtain clinical and privacy decisions, retention/
-deletion/export policy, named primary/backup responders, required hosted CI checks
-and an accountable supervised-pilot release decision. These dependencies keep
+deletion/export policy, named primary/backup responders and an accountable
+supervised-pilot release decision. These dependencies keep
 full phase/release acceptance open despite the completed local implementation.

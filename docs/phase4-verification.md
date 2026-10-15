@@ -107,11 +107,11 @@ run `python scripts/generate_postman_collection.py`, then
 ## Open release acceptance
 
 Phase 4 implementation and local gates now pass, including container security.
-See [the remediation record](security-remediation.md). Hosted CI observation and
-release enforcement still require the hosting repository.
-
-Hosted CI and branch-protection enforcement have not been observed. Configure
-both workflow jobs as required checks in the hosting repository. No named
+See [the remediation record](security-remediation.md). On 15 October, hosted CI
+[passed on a59e999](https://github.com/Welu2/enat-backend/actions/runs/38764968793).
+The `test` and `container` GitHub Actions checks are now required and must be
+up to date on `master`, including for administrators. Branch force pushes and
+deletion are disabled; the saved settings were verified. No named
 security exception has been accepted, and a failing high/critical container
 gate must not be bypassed.
 
