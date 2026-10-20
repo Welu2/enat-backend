@@ -19,7 +19,12 @@ def database_ready():
             row = conn.execute("""SELECT count(*) AS total,
                 count(*) FILTER(WHERE status='applied') AS applied, max(name) AS latest
                 FROM enat_ops.migrations""").fetchone()
-            return row == {"total": 9, "applied": 9, "latest": SCHEMA_VERSION}
+            # Migration 010 is additive. This bridge remains a valid rollback
+            # target after its ledger entry commits; unknown schemas still fail.
+            return row in (
+                {"total": 9, "applied": 9, "latest": SCHEMA_VERSION},
+                {"total": 10, "applied": 10, "latest": "010_privacy_workflows.sql"},
+            )
     except Exception:
         # Probe errors contain DSNs/SQL; expose only the bounded boolean outcome.
         return False
