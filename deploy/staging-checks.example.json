@@ -1,0 +1,10 @@
+{
+  "environment": "staging",
+  "environment_id": "replace-with-staging-project-id",
+  "api_origin": "https://staging.example.invalid",
+  "synthetic_accounts_only": true,
+  "user_ids": {
+    "a": "00000000-0000-4000-8000-000000000001",
+    "b": "00000000-0000-4000-8000-000000000002"
+  }
+}

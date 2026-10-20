@@ -37,3 +37,13 @@ tests:
         exp_alerts:
           - exp_labels: {severity: warning}
             exp_annotations: {summary: 'Terminal jobs require diagnosis and explicit replay', runbook: 'docs/operations-runbook.md'}
+  - interval: 1m
+    input_series:
+      - series: 'enat_privacy_requests_pending{job="enat-worker"}'
+        values: '1+0x5'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: EnatPrivacyRequestPending
+        exp_alerts:
+          - exp_labels: {severity: warning}
+            exp_annotations: {summary: 'Privacy requests await assigned reviewer; inspect restricted queue', runbook: 'docs/privacy-operations.md'}

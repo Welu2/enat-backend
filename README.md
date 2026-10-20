@@ -13,6 +13,16 @@ Local Phase 5 implementation and load/restore evidence are recorded in
 [operations verification](docs/phase5-operations.md). Live staging, clinical/privacy
 approval and operational ownership remain release requirements.
 
+Release candidate publication, digest promotion/rollback, guarded live staging
+checks, Auth capacity tests and voice evaluation are documented in
+[release delivery](docs/release-delivery.md). These tools keep clinical/privacy
+and live operational acceptance explicit.
+
+Migration 010 adds [personal-data export, deletion-review requests and privacy/share
+audit events](docs/privacy-operations.md). Enable these only after configuring the
+approved policy, support channel and request owner. Existing deployments need the
+documented schema-compatibility bridge before this migration.
+
 ---
 
 ## 🛡️ Core Clinical & Safety Principles

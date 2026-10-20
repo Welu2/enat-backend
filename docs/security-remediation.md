@@ -107,3 +107,13 @@ Expected artifact failures have typed errors and independent retry behavior.
   [image scanning](https://trivy.dev/docs/latest/guide/target/container_image/)
   and [SBOM documentation](https://trivy.dev/docs/latest/guide/supply-chain/sbom/)
   when changing the scanner integration.
+
+## Release operator tools — 20 October 2026
+
+The source gate also scans the release-record validator, deployment controller,
+staging verification/load tools and offline voice scorer. The deployment tool's
+B404/B603 suppressions cover internal Docker/Git argument arrays with no shell.
+Image references are validated immutable digests, service names are fixed, and
+private environment-file paths are passed through Compose environment values.
+Subprocess output is captured to prevent environment material reaching normal
+logs. This review does not replace host access controls or live deployment tests.

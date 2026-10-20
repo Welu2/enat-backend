@@ -1,0 +1,63 @@
+name: Publish verified release candidate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-candidate
+  cancel-in-progress: false
+jobs:
+  quality:
+    if: github.ref == 'refs/heads/master'
+    uses: ./.github/workflows/ci.yml
+    with:
+      skip_capacity: true
+  candidate:
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: actions/download-artifact@v4
+        with:
+          name: dependency-and-source-security
+          path: artifacts
+      - run: sudo apt-get update && sudo apt-get install -y postgresql-16 ffmpeg
+      - run: python -m pip install --require-hashes -r requirements-dev.lock
+      - name: Build the candidate once
+        run: docker build --pull --label "org.opencontainers.image.revision=$GITHUB_SHA" -t enat:candidate .
+      - run: python scripts/smoke_container.py enat:candidate
+      - run: python scripts/scan_container.py --image enat:candidate
+      - name: Full capacity and recovery rehearsal on this image
+        run: python scripts/test_database.py --fresh --load
+        env:
+          ENAT_LOAD_COMPOSE: '1'
+          ENAT_LOAD_IMAGE: enat:candidate
+          ENAT_LOAD_SECONDS: '1800'
+      - name: Publish exactly the verified image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          registry_image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          candidate_tag="${registry_image}:candidate-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          trap 'docker logout ghcr.io' EXIT
+          docker tag enat:candidate "$candidate_tag"
+          docker push "$candidate_tag"
+          image_id="$(docker image inspect --format '{{.Id}}' "$candidate_tag")"
+          image_digest="$(docker image inspect --format '{{index .RepoDigests 0}}' "$candidate_tag")"
+          python scripts/release_record.py create --source-revision "$GITHUB_SHA" --image "$image_digest" --image-id "$image_id" --bundle artifacts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-evidence-${{ github.sha }}-${{ github.run_attempt }}
+          path: artifacts/
+          retention-days: 90
+          if-no-files-found: error

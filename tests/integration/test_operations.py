@@ -255,7 +255,7 @@ def test_encrypted_restore_authenticates_and_matches_database_objects(
             restored.execute(
                 "SELECT count(*) FROM enat_ops.migrations WHERE status='applied'"
             ).fetchone()[0]
-            == 9
+            == 10
         )
         assert not restored.execute(
             "SELECT has_table_privilege('anon','check_ins','SELECT')"

@@ -80,6 +80,11 @@
       "key": "idempotency_key",
       "value": "replace-for-each-new-mutation",
       "type": "string"
+    },
+    {
+      "key": "privacy_request_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -2254,6 +2259,147 @@
               "raw": "{\n  \"action\": \"rescheduled\",\n  \"version\": 1,\n  \"appointment_date\": \"2026-11-01\"\n}"
             },
             "description": " Use a new key per logical mutation; retain the exact key and body for retries."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Privacy and personal data",
+      "item": [
+        {
+          "name": "Personal data export manifest",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/privacy/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "privacy",
+                "export"
+              ]
+            },
+            "description": "Requires configured privacy tools. Requests are reviewed, not automatically erased. Export pages are independently consistent; follow next_cursor using the after query parameter."
+          }
+        },
+        {
+          "name": "Export owned check-in page",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/privacy/export/check_ins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "privacy",
+                "export",
+                "check_ins"
+              ]
+            },
+            "description": "Requires configured privacy tools. Requests are reviewed, not automatically erased. Export pages are independently consistent; follow next_cursor using the after query parameter."
+          }
+        },
+        {
+          "name": "Request deletion review",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotency_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/privacy/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "privacy",
+                "requests"
+              ]
+            },
+            "description": "Requires configured privacy tools. Requests are reviewed, not automatically erased. Export pages are independently consistent; follow next_cursor using the after query parameter.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"confirm\": true}"
+            }
+          }
+        },
+        {
+          "name": "Cancel deletion request",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/privacy/requests/{{privacy_request_id}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "privacy",
+                "requests",
+                "{{privacy_request_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Requires configured privacy tools. Requests are reviewed, not automatically erased. Export pages are independently consistent; follow next_cursor using the after query parameter."
           }
         }
       ]

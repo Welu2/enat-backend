@@ -780,3 +780,20 @@ TTS accepts at most 2,000 characters. Uploads accept WAV, WebM, Ogg, MP4 audio,
 and MP3 with matching MIME types; default limits are 6 MB and 120 seconds.
 Oversized bodies/audio return **413**, unsupported or undecodable audio **415**,
 and quota exhaustion **429** with `Retry-After`. Preserve drafts on errors.
+
+
+## Privacy tools (migration 010)
+
+The authenticated privacy routes are described in [privacy operations](docs/privacy-operations.md).
+They return 503 while `ENABLE_PRIVACY_TOOLS` is false. Show the configured support
+channel and accurately distinguish a deletion request from completed erasure.
+Use `POST /users/me/privacy/requests` with `{"confirm":true}` and a stable
+`Idempotency-Key`. The 202 response includes a request ID and `requested` status.
+Cancellation uses `POST /users/me/privacy/requests/{id}/cancel`; current requests
+are available in `GET /users/me/privacy/export/requests`.
+
+For personal-data pages, get `/users/me/privacy/export`, then fetch each listed
+section via `/users/me/privacy/export/{section}?limit=50`. Follow the response's
+`next_cursor` as `after` until null. Pagination is per-page consistent; do not
+claim the result is a point-in-time snapshot or includes external processor data.
+Do not store these responses in a shared cache or log clinical contents.

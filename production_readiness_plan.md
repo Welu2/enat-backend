@@ -1,15 +1,204 @@
 # EnatAI production readiness implementation plan
 
-Prepared 13 October 2026 against repository revision `14975c2`.
+## Active release plan — 20 October 2026
 
-**Current status — 15 October 2026:** Phase 4's container blocker is remediated;
-local engineering and verification now extend through Phase 5. Hosted CI passes
-on a59e999 and `master` requires the `test` and `container` checks. Production release
-acceptance is **not complete**: actual staging/Supabase/provider checks, approved
-clinical/privacy/retention decisions and named operational owners are still pending.
-See [Phase 5 evidence](docs/phase5-operations.md) and the
-[operations runbook](docs/operations-runbook.md). The original assessment below
-is retained as historical context, not a statement of remaining source defects.
+**Assessment: substantial production engineering is implemented, but patient
+release is not ready for approval.** Complete the staging, clinical, privacy,
+client and operational gates below before a supervised pilot. Retain the modular
+FastAPI/PostgreSQL architecture.
+
+Initial assessment reviewed revision `7ee7e91`, including configuration, authentication,
+deployment, CI, tests, backup tooling and phase evidence. Re-ran
+`.venv/bin/python -m pytest -q`: **208 passed, 62 skipped, 11 warnings**.
+The skipped database integration tests require the dedicated PostgreSQL harness;
+this run does not revalidate migrations, RLS or recovery.
+
+The repository records passing hosted CI on `a59e999`, required branch checks,
+database tests, container scans and local capacity/recovery drills on 14–15 October.
+These are historical results, not newly verified live state. That initial assessment did not inspect a deployed
+environment, GitHub settings, new vulnerability scans, live provider
+quality or production credentials. Subsequent implementation checks are recorded below. See
+[Phase 5 evidence](docs/phase5-operations.md) and the
+[operations runbook](docs/operations-runbook.md).
+
+### Implementation update — 20 October 2026
+
+Repository tooling now implements candidate build/scan/full-capacity publication,
+hash-bound release evidence with explicit R1–R8 acceptance, host digest promotion
+with readiness/rollback, guarded real-Auth staging checks, bounded live Auth load
+and offline Amharic evaluation scoring. Usage and exact coverage are in
+[release delivery](docs/release-delivery.md).
+
+Verification: **242 unit/HTTP/tooling tests passed**; the separate fresh database
+harness passed **60 tests** (two legacy-only cases skipped). Workflow lint, Ruff,
+configured mypy, contracts, new-tool Bandit and secret scanning passed.
+
+These changes do not mark R1–R8 accepted. Actual deployment, full live-service
+coverage, frontend/voice measurements, policy-driven lifecycle implementation,
+managed recovery and clinical/privacy decisions remain pending. The new workflow
+has not yet been run on GitHub; no image was published or live host changed.
+
+### Application implementation update — 20 October 2026
+
+Migration 010 and authenticated privacy endpoints now provide explicit-field,
+bounded personal-data exports, idempotent deletion-review requests/cancellation,
+immutable export/request/share audit, restricted reviewer access and aggregate
+queue metrics/alerting. Features remain default-off pending an approved policy,
+support channel and assigned queue owner. See [privacy operations](docs/privacy-operations.md).
+No automatic erasure or medical retention period is claimed.
+
+A schema-009 bridge (`d147cbd`) tolerates the reviewed additive 010 migration,
+including running/failed attempts; the new privacy application requires completed
+schema 010. This makes a compatible rollback candidate possible. Local unit/HTTP
+checks pass 250 tests; the legacy upgrade harness passes 71 tests through migration
+010, including privacy isolation, >1,000-row export, concurrency and audit rollback.
+Current dependency scans found no known vulnerabilities. Container and hosted
+release checks are being refreshed for this source; live release acceptance remains open.
+
+### Priorities, owners and acceptance criteria
+
+All gates below are open. Owner roles are proposed; assign a named person and
+backup. P0 decisions block patient use; P1 engineering evidence must also pass
+before pilot entry.
+
+| ID / priority | Work and proposed owner | Dependency | Exit evidence |
+|---|---|---|---|
+| R1 / P0 | Release scope and ownership — release lead | None | Named clinical, privacy/security, backend, platform and frontend/QA owners; pilot features/cohort; hosting region, budget, traffic assumptions, response coverage and approved service targets. |
+| R2 / P1 | Reproducible staging and delivery — platform + backend | R1 | Isolated Supabase project/buckets, TLS ingress, secret-managed identities, current candidate CI/scans, immutable candidate/rollback digests, migration and rollback evidence. |
+| R3 / P0 | Live identity and isolation — backend + security + QA | R2 | Real signup/recovery/refresh/logout/rotation tests; cross-user API/database/Storage tests; verified grants and revocation; no unresolved isolation failures. |
+| R4 / P0 | Clinical and Amharic quality — clinical lead + backend + QA | R1 reviewers; R2 for live evaluation | Approved policy/warnings/confirmation wording; labeled corpus with pre-agreed thresholds; live ASR/extraction/TTS results, failure review and signed intended-use acceptance. |
+| R5 / P0 | Data lifecycle and processor controls — privacy/security + backend | R1 | Approved inventory, consent and processor decisions; retention/export/deletion specification; implemented or explicitly approved operational procedures with repeatable audit evidence. |
+| R6 / P1 | Frontend and provider journeys — frontend + QA + backend | R2/R3; R4 wording | Real-client journeys, pagination, retries/resume and warnings pass; live voice latency and currency costs measured; outage/manual-input behavior demonstrated. |
+| R7 / P1 | Capacity, monitoring and recovery — platform + backend | R2/R3; R6 journeys | Full staging load/failure results through ingress, real alerts acknowledged, timed database/object recovery, credential rotation and host-loss drills. |
+| R8 / P0 | Supervised pilot — release + clinical + operations leads | R1–R7 accepted | Signed release record, monitored limited cohort, stop rules, reviewed incidents/outcomes before expansion. |
+
+### R2–R3: deployment and security tasks
+
+1. Configure real DNS/TLS, readiness-based routing, trusted proxies, CORS/hosts,
+   request limits, private metrics and provider egress using
+   [deploy/compose.yaml](deploy/compose.yaml). Record resource limits and database
+   headroom: configured pools total 28 connections before migration/monitoring.
+   Keep API, worker and migration credentials separate and secrets outside Git.
+2. Add a repeatable delivery workflow to build once, archive evidence, deploy the
+   exact digest to staging and promote the tested artifact through controlled
+   production deployment. The implemented candidate workflow retains release evidence for 90 days;
+   execute it and configure the host promotion target. Retain rollback images
+   under the approved operational retention policy.
+3. Exercise migrations 001–010 on fresh staging and an authorized sanitized copy
+   representative of deployed data. Compare schema/grants and ledger checksums;
+   measure lock/index work. Test serialized migration, rolling API replacement,
+   failed readiness and application rollback against a compatible schema.
+4. Add an opt-in staging test suite with dedicated identities and explicit
+   environment guards. Test confirmation email delivery, recovery OTP reuse,
+   refresh rotation, logout, revoked credentials, banned users, signing-key
+   changes and Auth outages. Include Telegram replay/linking if in pilot scope.
+5. Verify app/worker role memberships, ownership and RLS; exercise two-user
+   isolation across every resource family and direct client database/Storage
+   access. Verify private QR objects, share expiry/revocation, cache headers and
+   redacted logs at ingress and application boundaries. Keep sharing disabled
+   until its privacy gate is accepted.
+
+Supabase distinguishes JWT lifetime from session termination. Test application
+revocation and actual provider behavior together; online user lookup alone is
+not evidence of immediate session revocation.
+Source: [Supabase sessions](https://supabase.com/docs/guides/auth/sessions).
+
+### R4–R6: clinical, privacy and client tasks
+
+- Freeze a versioned, consented or appropriately synthetic Amharic evaluation set
+  with clinical labels. Include negation, uncertainty, corrections, duration,
+  danger categories, noisy audio, dialect variation and silence. Measure
+  transcription error, field extraction accuracy and missed/false danger
+  observations separately. Review patient comprehension of warnings and
+  confirmation. The clinical lead approves thresholds before evaluation;
+  deterministic rule tests alone do not validate provider inputs.
+- Record provider/model identifiers when available, prompt/policy versions,
+  corpus version and error analysis. Review and provision generic Amharic audio
+  prompts. Re-run evaluation after model, prompt or clinical-policy changes.
+- Translate approved retention/export/deletion/correction and access-audit policy
+  into implementation tickets covering database records, immutable summaries,
+  object storage, logs, vendor-held data and backups. Include identity checks,
+  lawful preservation decisions and handling prior deletions after a restore.
+  Current cleanup expires security state and drafts; it is not a complete
+  clinical-data lifecycle. Do not invent retention periods before approval.
+- Test the actual client against [frontend_api_guide.md](frontend_api_guide.md):
+  onboarding → recording → correction/confirmation → completion → summary;
+  connection loss, retries, stale versions, `X-Next-Cursor` pagination, expired
+  login, delayed provider responses, manual entry and warning visibility.
+- Measure live ASR/extraction/TTS with 20 concurrent voice operations,
+  representative clip lengths and mobile-network conditions. Retain candidate
+  p95 ≤20 seconds after upload pending owner approval. If it fails, isolate
+  provider time and queueing; scope durable asynchronous operations with `202`
+  and polling/resume plus coordinated client changes if required.
+- Reconcile calls, audio minutes, retries and actual vendor currency charges.
+  Approve daily user/global budgets, alerts and behavior on exhaustion. Existing
+  call quotas do not establish monetary spending limits.
+
+### R7: measurable staging acceptance
+
+These carry forward proposed targets, subject to R1 approval and measurement on
+the intended infrastructure. They are not current guarantees.
+
+| Area | Acceptance exercise |
+|---|---|
+| Core API | 50 requests/second for 30 minutes on representative data; p95 ≤500 ms, p99 ≤1 second, <1% total failures including fault injection. Include failed/unserved requests, generator delay and resource/pool metrics. |
+| Auth capacity | Exercise both opaque sessions and real Supabase-token traffic at the approved mix. `app/core/security.py` makes an online Auth call for Supabase tokens; prior opaque-session load results do not measure this dependency. Agree test quotas before load. |
+| Resilience | Lose an API, worker and scheduler in separate drills; simulate slow DB, Auth/provider outage and ingress failure. Verify no lost committed work or duplicate effects. Include host loss: two Compose APIs on one host do not establish host-level availability. |
+| Jobs | 99% of due work starts within five minutes under representative backlog/restart; no lost committed jobs. |
+| Monitoring | Scrape all four services; exercise error/latency, missing-target, queue, pool and provider alerts. Deliver real test pages to primary/backup responders and record acknowledgement. Include errors rejected before ASGI. |
+| Recovery | Restore managed DB recovery points and object bytes into isolated targets; verify grants, identities, revocations, history, snapshots and references. Demonstrate candidate RPO ≤15 minutes and RTO ≤60 minutes at representative volume. |
+| Availability | Define the core journey denominator and provider-dependent journey separately. Candidate 99.9% monthly availability requires ongoing observation, not a 30-minute load result. |
+
+Wire automated object snapshots, protected remote backup storage, separate key
+custody, scheduling and failure alerts around the existing backup utility.
+Verify custom-role credentials after recovery. Supabase database backups omit
+Storage object bytes; database PITR alone cannot close the recovery gate.
+Source: [Supabase backups](https://supabase.com/docs/guides/platform/backups).
+
+### Execution sequence and release decision
+
+**Planning estimate:** 4–6 weeks to assemble pilot-entry evidence after access and
+reviewers are available, assuming two backend engineers, part-time platform and
+frontend/QA support, and timely clinical/privacy decisions. This remaining-work
+estimate replaces the historical 8–12-week implementation schedule for current
+planning. Policy-driven features, provider failures or deployment drift may
+extend it. Pilot duration/cohort size require a separate owner decision.
+
+| Window | Deliverable |
+|---|---|
+| First 1–2 working days | Assign R1 owners; agree scope/targets; inventory staging access; create R2–R7 tickets; start clinical/privacy decisions and corpus preparation. |
+| Week 1 | Repeatable staging deployment, fresh candidate CI/scans, migration baseline and guarded live-service test setup. |
+| Weeks 2–3 | Live Auth/Storage/isolation tests, client journeys, clinical evaluation, lifecycle implementation and provider latency/cost findings. |
+| Weeks 3–4 | Full staging capacity, real alert delivery, migration/rollback, managed restore and host/worker failure drills. |
+| Weeks 5–6 if needed | Fix findings, repeat affected gates, assemble signed evidence and approve supervised pilot entry. |
+
+For each gate record owner, source revision, image digest, environment,
+configuration version without secrets, date, command/test case, expected versus
+actual results, protected evidence location and reviewer decision. Use synthetic
+data for technical drills; restrict approved clinical evaluation records
+separately. Preserve failed runs and rerun affected gates after changes.
+
+Pilot entry requires R1–R7 accepted, current candidate CI/security checks passing,
+no unresolved critical safety/isolation/integrity/recovery issues, and explicit
+clinical, privacy and operations approval. Start with the agreed limited cohort
+and daily review. Stop affected flows immediately for cross-user exposure,
+unconfirmed clinical persistence or lost committed records. Clinical owners
+define additional warning/voice failure stop rules. Use rehearsed rollback or
+feature-disable procedures and review evidence before resuming.
+
+Broader release requires R8 review of pilot outcomes, service targets, support
+capacity and incidents. A green test suite alone does not close R8. Assign
+recurring dependency/image scans, access reviews, restore drills, provider
+regression evaluations and capacity/budget reviews. Expand strict typing beyond
+current boundary modules and resolve test deprecations as maintenance work;
+schedule architecture changes only for measured limits.
+
+## Historical implementation plan and evidence
+
+Prepared 13 October 2026 against revision `14975c2`. Original findings, phase
+progress and delivery sequence below are retained for traceability. Defect
+statements in the original assessment are historical, not a claim that repaired
+issues remain open. Use the active release plan above for remaining work.
 
 EnatAI is an MVP with useful separation between routes, services, repositories, and deterministic domain functions. It is not ready for production patient use. The immediate blockers are application import defects, incomplete schema migrations, authentication weaknesses, insufficient controls around shared health data, and inconsistent persistence and clinical-data handling.
 

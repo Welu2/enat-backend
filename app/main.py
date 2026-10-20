@@ -8,7 +8,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from app.api.routes import auth, checkin, notifications, reminders, summary, tts, users
+from app.api.routes import (
+    auth,
+    checkin,
+    notifications,
+    privacy,
+    reminders,
+    summary,
+    tts,
+    users,
+)
 from app.config import Settings, get_settings
 from app.core import observability
 from app.core.http_security import (
@@ -90,6 +99,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     for router in (
         auth.router,
         users.router,
+        privacy.router,
         checkin.router,
         summary.router,
         reminders.router,

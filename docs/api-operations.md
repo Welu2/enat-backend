@@ -52,6 +52,10 @@ Bodies and response schemas: [OpenAPI](openapi.json). Behavior: [frontend guide]
 | PATCH | `/users/me/hospital` | yes | — |
 | PUT | `/users/me/hospital` | yes | — |
 | POST | `/users/me/onboarding` | yes | — |
+| GET | `/users/me/privacy/export` | yes | — |
+| GET | `/users/me/privacy/export/{section}` | yes | — |
+| POST | `/users/me/privacy/requests` | yes | Idempotency-Key |
+| POST | `/users/me/privacy/requests/{request_id}/cancel` | yes | — |
 | PATCH | `/users/me/profile` | yes | — |
 | PUT | `/users/me/profile` | yes | — |
 | POST | `/users/me/push-tokens` | yes | — |

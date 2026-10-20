@@ -131,4 +131,7 @@ def stats():
             AT TIME ZONE 'Africa/Addis_Ababa')))),0) AS lag FROM scheduler_state""",
             (get_settings().reminder_cron_hour,),
         ).fetchone()["lag"]
+        row["privacy_queue"] = conn.execute(
+            "SELECT enat_privacy_queue() AS value"
+        ).fetchone()["value"]
         return row

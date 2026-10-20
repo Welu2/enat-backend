@@ -13,6 +13,12 @@ from app.db import jobs
 HEARTBEAT = Gauge(
     "enat_worker_heartbeat_timestamp_seconds", "Time of last successful worker loop"
 )
+PRIVACY_PENDING = Gauge(
+    "enat_privacy_requests_pending", "Requests awaiting privacy review"
+)
+PRIVACY_AGE = Gauge(
+    "enat_privacy_oldest_request_seconds", "Age of oldest pending privacy request"
+)
 SCHEDULER_LAG = Gauge("enat_scheduler_lag_seconds", "Scheduler cursor delay")
 
 
@@ -22,6 +28,8 @@ def update():
         JOBS.labels(status).set(stats[status])
     JOB_AGE.set(float(stats["oldest_due_seconds"]))
     SCHEDULER_LAG.set(float(stats["scheduler_lag_seconds"]))
+    PRIVACY_PENDING.set(stats["privacy_queue"]["pending"])
+    PRIVACY_AGE.set(float(stats["privacy_queue"]["oldest_seconds"]))
     HEARTBEAT.set(time())
 
 

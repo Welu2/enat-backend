@@ -46,3 +46,8 @@ groups:
         for: 5m
         labels: {severity: warning}
         annotations: {summary: 'Event loop lag exceeds 250ms; inspect blocking work', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatPrivacyRequestPending
+        expr: max(enat_privacy_requests_pending) > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations: {summary: 'Privacy requests await assigned reviewer; inspect restricted queue', runbook: 'docs/privacy-operations.md'}

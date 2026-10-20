@@ -75,6 +75,9 @@ class Settings(BaseSettings):
     telegram_max_age_seconds: int = Field(default=300, ge=30, le=600)
     telegram_clock_skew_seconds: int = Field(default=30, ge=0, le=60)
     enable_summary_sharing: bool = False
+    enable_privacy_tools: bool = False
+    privacy_policy_version: str = Field(default="", max_length=64)
+    privacy_support_url: str = ""
     enable_request_limits: bool = True
     rate_limit_secret: str = ""
     trusted_hosts: str = "localhost,127.0.0.1,testserver"
@@ -87,6 +90,13 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_deployment(self) -> Self:
+        if self.enable_privacy_tools and (
+            not self.privacy_policy_version.strip()
+            or not _secure_url(self.privacy_support_url)
+        ):
+            raise ValueError(
+                "Privacy tools require a policy version and HTTPS support URL"
+            )
         if (
             self.environment in {"staging", "production"}
             and len(self.metrics_token) < 32

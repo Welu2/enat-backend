@@ -1539,6 +1539,47 @@ for group in collection["item"]:
         != ["reminders", "run-daily"]
     ]
 
+# Privacy routes remain disabled until the policy and support owner are configured.
+privacy_examples = []
+for title, method, path, body in (
+    ("Personal data export manifest", "GET", "users/me/privacy/export", None),
+    ("Export owned check-in page", "GET", "users/me/privacy/export/check_ins", None),
+    ("Request deletion review", "POST", "users/me/privacy/requests", {"confirm": True}),
+    (
+        "Cancel deletion request",
+        "POST",
+        "users/me/privacy/requests/{{privacy_request_id}}/cancel",
+        None,
+    ),
+):
+    request = {
+        "method": method,
+        "auth": {
+            "type": "bearer",
+            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}],
+        },
+        "header": [],
+        "url": {
+            "raw": "{{baseUrl}}/" + path,
+            "host": ["{{baseUrl}}"],
+            "path": path.split("/"),
+        },
+        "description": "Requires configured privacy tools. Requests are reviewed, not automatically erased. Export pages are independently consistent; follow next_cursor using the after query parameter.",
+    }
+    if body is not None:
+        request["body"] = {"mode": "raw", "raw": json.dumps(body)}
+        request["header"] = [
+            {"key": "Content-Type", "value": "application/json"},
+            {"key": "Idempotency-Key", "value": "{{idempotency_key}}"},
+        ]
+    privacy_examples.append({"name": title, "request": request})
+collection["item"].append(
+    {"name": "Privacy and personal data", "item": privacy_examples}
+)
+collection["variable"].append(
+    {"key": "privacy_request_id", "value": "", "type": "string"}
+)
+
 output_path = Path(__file__).resolve().parents[1] / "EnatAI_Postman_Collection.json"
 rendered = json.dumps(collection, ensure_ascii=False, indent=2) + "\n"
 if "--check" in sys.argv:

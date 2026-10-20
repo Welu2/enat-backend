@@ -68,7 +68,20 @@ def main():
         "OTLP_ENDPOINT": "",
     }
     steps = []
-    for image in (images[1], images[0], images[1]):
+    for image, ledger_status in (
+        (images[0], "running"),
+        (images[0], "failed"),
+        (images[1], "applied"),
+        (images[0], "applied"),
+        (images[1], "applied"),
+    ):
+        # Isolated fault injection: an additive migration attempt must not take
+        # the bridge out of rotation. No production ledger is ever modified.
+        with psycopg.connect(dsn) as conn:
+            conn.execute(
+                "UPDATE enat_ops.migrations SET status=%s WHERE name='010_privacy_workflows.sql'",
+                (ledger_status,),
+            )
         start = monotonic()
         command = [
             "docker",
@@ -101,6 +114,7 @@ def main():
         steps.append(
             {
                 "image": identifier,
+                "privacy_ledger_status": ledger_status,
                 "seconds": monotonic() - start,
                 "ready_and_history": True,
             }
@@ -109,7 +123,7 @@ def main():
     destination.mkdir(parents=True, exist_ok=True)
     report = {
         "synthetic_only": True,
-        "schema_version": 9,
+        "schema_version": 10,
         "schema_rolled_back": False,
         "steps": steps,
     }

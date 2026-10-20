@@ -40,7 +40,9 @@ The owner DSN belongs only in its private environment file. Alternatively run
 The session advisory lock serializes deployers. Each migration and its applied
 ledger row commit together. Failures record a safe SQLSTATE; interrupted running
 attempts are retried transactionally. Edited checksums and unknown future
-migrations are rejected. Readiness requires all nine known migrations applied.
+migrations are rejected. The current candidate requires all ten known migrations applied. Before migrating
+an existing schema-009 deployment, use the compatibility bridge described in
+[privacy operations](privacy-operations.md).
 
 Existing manually migrated databases must first be cloned and compared with the
 synthetic legacy rehearsal. Do not invent ledger records or automatically mark
@@ -198,3 +200,6 @@ required branch checks, approved image/rollback digest, measured staging load
 under deployment limits, alert delivery, live migration/rollback/failure rehearsal,
 and a timed managed-PITR plus object restore. These are still pending external
 evidence; no production deployment was performed.
+
+Privacy request routing, support configuration, restricted reviewer access and the
+schema-010 compatibility bridge are documented in [privacy operations](privacy-operations.md).
