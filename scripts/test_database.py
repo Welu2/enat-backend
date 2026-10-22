@@ -108,6 +108,10 @@ def main():
                 [sys.executable, "-m", "pytest", "tests/integration", "-q", "-x"],
                 env=env,
             ).returncode
+            if result == 0 and "--demo" in sys.argv:
+                result = subprocess.run(
+                    [sys.executable, "scripts/care_demo.py"], env=env
+                ).returncode
             if result == 0 and "--load" in sys.argv:
                 return subprocess.run(
                     [sys.executable, "scripts/load_rehearsal.py"], env=env

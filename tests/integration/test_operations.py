@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from psycopg.rows import dict_row
 
 from app.core.errors import InvalidMutation
-from app.core.readiness import database_ready
+from app.core.readiness import SCHEMA_COUNT, database_ready
 from app.db import data
 from app.db.pagination import page
 from app.main import app
@@ -255,7 +255,7 @@ def test_encrypted_restore_authenticates_and_matches_database_objects(
             restored.execute(
                 "SELECT count(*) FROM enat_ops.migrations WHERE status='applied'"
             ).fetchone()[0]
-            == 10
+            == SCHEMA_COUNT
         )
         assert not restored.execute(
             "SELECT has_table_privilege('anon','check_ins','SELECT')"

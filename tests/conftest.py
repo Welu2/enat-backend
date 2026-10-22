@@ -22,6 +22,8 @@ os.environ.update(
         "ENABLE_REQUEST_LIMITS": "false",
         "ENABLE_SUMMARY_SHARING": "false",
         "ENABLE_PRIVACY_TOOLS": "false",
+        "ENABLE_CARE_PORTAL": "false",
+        "ENABLE_OFFLINE_CHECKINS": "false",
         "PRIVACY_POLICY_VERSION": "",
         "PRIVACY_SUPPORT_URL": "",
         "RATE_LIMIT_SECRET": "test-limit-secret-at-least-32-characters",

@@ -1580,6 +1580,142 @@ collection["variable"].append(
     {"key": "privacy_request_id", "value": "", "type": "string"}
 )
 
+care_examples = []
+for title, method, path, body, retry in (
+    ("Portal account identity", "GET", "portal/me", None, False),
+    (
+        "Invite care recipient",
+        "POST",
+        "users/me/care-connections",
+        {
+            "recipient_id": "{{recipient_id}}",
+            "relationship": "clinician",
+            "consent": True,
+        },
+        False,
+    ),
+    ("List patient connections", "GET", "users/me/care-connections", None, False),
+    (
+        "Revoke care access",
+        "DELETE",
+        "users/me/care-connections/{{connection_id}}",
+        None,
+        False,
+    ),
+    (
+        "Accept care invitation",
+        "POST",
+        "care-connections/accept",
+        {"token": "{{invitation_token}}"},
+        False,
+    ),
+    ("Connected patients", "GET", "portal/patients", None, False),
+    (
+        "Clinician patient overview",
+        "GET",
+        "portal/patients/{{patient_id}}",
+        None,
+        False,
+    ),
+    (
+        "Confirmed patient history",
+        "GET",
+        "portal/patients/{{patient_id}}/check-ins",
+        None,
+        False,
+    ),
+    (
+        "Patient latest summary",
+        "GET",
+        "portal/patients/{{patient_id}}/summary/latest",
+        None,
+        False,
+    ),
+    (
+        "Upcoming patient appointment",
+        "GET",
+        "portal/patients/{{patient_id}}/appointment",
+        None,
+        False,
+    ),
+    (
+        "Patient emergency alerts",
+        "GET",
+        "portal/patients/{{patient_id}}/alerts",
+        None,
+        False,
+    ),
+    (
+        "Acknowledge alert",
+        "POST",
+        "portal/patients/{{patient_id}}/alerts/{{alert_id}}/acknowledge",
+        None,
+        True,
+    ),
+    (
+        "Sync confirmed offline check-in",
+        "POST",
+        "checkin/offline-sync",
+        {
+            "schema_version": 1,
+            "client_submission_id": "{{client_submission_id}}",
+            "recorded_at": "2026-10-22T08:30:00+03:00",
+            "client_confirmed_at": "2026-10-22T08:32:00+03:00",
+            "confirmed": True,
+            "symptoms": [
+                {
+                    "raw_text": "Synthetic symptom report",
+                    "category": "high_fever",
+                    "severity": "unspecified",
+                }
+            ],
+            "food_log": [],
+            "supplement_check": [],
+            "closing_mentions": [],
+        },
+        True,
+    ),
+):
+    request = {
+        "method": method,
+        "auth": {
+            "type": "bearer",
+            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}],
+        },
+        "header": [],
+        "url": {
+            "raw": "{{baseUrl}}/" + path,
+            "host": ["{{baseUrl}}"],
+            "path": path.split("/"),
+        },
+        "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md.",
+    }
+    if body is not None:
+        request["body"] = {"mode": "raw", "raw": json.dumps(body)}
+        request["header"].append({"key": "Content-Type", "value": "application/json"})
+    if retry:
+        request["header"].append(
+            {
+                "key": "Idempotency-Key",
+                "value": "{{client_submission_id}}"
+                if path == "checkin/offline-sync"
+                else "{{idempotency_key}}",
+            }
+        )
+    care_examples.append({"name": title, "request": request})
+collection["item"].append(
+    {"name": "Care portal and offline check-ins", "item": care_examples}
+)
+for variable in (
+    "recipient_id",
+    "patient_id",
+    "connection_id",
+    "invitation_token",
+    "alert_id",
+    "client_submission_id",
+):
+    collection["variable"].append({"key": variable, "value": "", "type": "string"})
+
 output_path = Path(__file__).resolve().parents[1] / "EnatAI_Postman_Collection.json"
 rendered = json.dumps(collection, ensure_ascii=False, indent=2) + "\n"
 if "--check" in sys.argv:

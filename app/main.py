@@ -10,8 +10,10 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.api.routes import (
     auth,
+    care,
     checkin,
     notifications,
+    portal,
     privacy,
     reminders,
     summary,
@@ -98,6 +100,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     logging.getLogger("uvicorn.access").addFilter(AccessLogFilter())
     for router in (
         auth.router,
+        care.router,
+        portal.router,
         users.router,
         privacy.router,
         checkin.router,

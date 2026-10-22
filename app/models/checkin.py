@@ -112,6 +112,10 @@ class CompleteStageResponse(BaseModel):
 class CheckInHistoryItem(BaseModel):
     id: UUID
     timestamp: datetime
+    recorded_at: datetime | None = None
+    received_at: datetime | None = None
+    client_confirmed_at: datetime | None = None
+    capture_source: Literal["online", "offline_form"] = "online"
     symptoms: list[dict[str, JsonValue]] | None = None
     food_log: list[dict[str, JsonValue]] = Field(default_factory=list)
     supplement_check: list[dict[str, JsonValue]] = Field(default_factory=list)

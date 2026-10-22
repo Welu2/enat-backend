@@ -30,6 +30,8 @@ def application():
             "ENABLE_REQUEST_LIMITS": "false",
             "ENABLE_SUMMARY_SHARING": "false",
             "ENABLE_PRIVACY_TOOLS": "false",
+            "ENABLE_CARE_PORTAL": "false",
+            "ENABLE_OFFLINE_CHECKINS": "false",
             "PRIVACY_POLICY_VERSION": "",
             "PRIVACY_SUPPORT_URL": "",
             "TELEGRAM_BOT_TOKEN": "",
@@ -102,7 +104,7 @@ def check_examples(schema):
                 r"\{\{([^}]+)\}\}",
                 lambda m: (
                     "A" * 43
-                    if m[1] in ("share_token", "share_link_slug")
+                    if m[1] in ("share_token", "share_link_slug", "invitation_token")
                     else "00000000-0000-4000-8000-000000000001"
                 ),
                 body["raw"],

@@ -35,7 +35,7 @@ SECTIONS = {
     "check_ins": (
         "check_ins",
         "user_id",
-        "id timestamp symptoms food_log supplement_check closing_mentions danger_sign_triggered summary_text_am summary_text_en session_id policy_version",
+        "id timestamp recorded_at received_at client_confirmed_at capture_source client_submission_id symptoms food_log supplement_check closing_mentions danger_sign_triggered summary_text_am summary_text_en session_id policy_version",
     ),
     "drafts": (
         "check_in_sessions",
@@ -61,6 +61,21 @@ SECTIONS = {
         "privacy_requests",
         "user_id",
         "id kind status created_at cancelled_at",
+    ),
+    "care_connections": (
+        "care_connections",
+        "patient_id",
+        "id recipient_id relationship status consent_version consented_at created_at accepted_at revoked_at expires_at",
+    ),
+    "emergency_alerts": (
+        "emergency_alerts",
+        "patient_id",
+        "id check_in_id categories recorded_at received_at created_at policy_version status acknowledged_at acknowledged_by",
+    ),
+    "care_audit": (
+        "care_access_events",
+        "patient_id",
+        "id actor_id connection_id action resource resource_id row_count occurred_at",
     ),
     "audit": (
         "privacy_events",
@@ -90,6 +105,7 @@ def manifest():
             "external_processor_records",
             "backups",
             "object_bytes",
+            "invitation_credentials_and_submission_hashes",
         ],
     }
 
@@ -117,7 +133,7 @@ def export_page(user_id, section, limit=50, after=None):
     with transaction() as conn:
         rows = normalize(conn.execute(query, [*params, limit + 1]).fetchall())
         # Auditing audit-page reads would grow the very list being exported.
-        if section != "audit":
+        if section not in {"audit", "care_audit"}:
             conn.execute(
                 "SELECT enat_privacy_event(%s,%s)", (section, min(len(rows), limit))
             )

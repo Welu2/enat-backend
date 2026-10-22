@@ -22,7 +22,7 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.File", "fastapi.Header", "
 [tool.mypy]
 python_version = "3.12"
 plugins = ["pydantic.mypy"]
-files = ["app/config.py", "app/core/clock.py", "app/core/errors.py", "app/models", "app/services/addis_ai.py", "app/services/provider_runtime.py"]
+files = ["app/config.py", "app/core/clock.py", "app/core/errors.py", "app/models", "app/services/addis_ai.py", "app/services/provider_runtime.py", "app/services/care_access.py", "app/services/portal.py", "app/services/alerts.py", "app/services/offline_checkin.py", "app/db/repositories/care_connections.py"]
 strict = true
 follow_imports = "silent"
 warn_unused_configs = true
@@ -34,3 +34,8 @@ warn_required_dynamic_aliases = true
 
 [tool.bandit]
 exclude_dirs = ["tests", ".venv"]
+
+# New services retain strict checking; legacy repository helpers are untyped.
+[[tool.mypy.overrides]]
+module = ["app.services.care_access", "app.services.portal", "app.services.alerts", "app.services.offline_checkin", "app.db.repositories.care_connections"]
+disable_error_code = ["no-untyped-call"]

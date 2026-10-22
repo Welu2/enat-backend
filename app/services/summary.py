@@ -30,7 +30,12 @@ def _provenance(item, checkin):
         "policy_version": item.get("policy_version"),
         "prompt_version": item.get("prompt_version"),
         "model_version": item.get("model_version"),
-        "confirmation_provenance": "recorded"
+        "recorded_at": checkin.get("recorded_at") or checkin.get("timestamp"),
+        "received_at": checkin.get("received_at") or checkin.get("timestamp"),
+        "client_confirmed_at": checkin.get("client_confirmed_at"),
+        "confirmation_provenance": "offline_patient_report_accepted_at_server"
+        if checkin.get("capture_source") == "offline_form"
+        else "recorded"
         if item.get("confirmed_at")
         else "legacy_timestamp_unknown",
     }
@@ -120,6 +125,7 @@ class SummaryService:
                 anc_contact=anc,
                 policy_version=POLICY_VERSION,
                 window={
+                    "basis": "received_at",
                     "start": start.isoformat(),
                     "end_exclusive": end.isoformat(),
                     "calendar_timezone": "Africa/Addis_Ababa",
@@ -195,6 +201,7 @@ class SummaryService:
     @staticmethod
     def _aggregate(check_ins, period_start=None, period_end=None):
         dangers, symptoms, foods, closing, supplements = [], [], [], [], []
+        late_observations = []
         observations = {}
         for record in check_ins:
             timestamp = (
@@ -209,7 +216,30 @@ class SummaryService:
                 continue
             if period_end is not None and instant >= as_utc(period_end):
                 continue
-            day = instant.astimezone(LOCAL_ZONE).date().isoformat()
+            observed = as_utc(record.get("recorded_at") or timestamp)
+            if (period_start is not None and observed < as_utc(period_start)) or (
+                period_end is not None and observed >= as_utc(period_end)
+            ):
+                late_observations.append(
+                    {
+                        "check_in_id": record.get("id"),
+                        "recorded_at": observed.isoformat(),
+                        "received_at": instant.isoformat(),
+                        "client_confirmed_at": record.get("client_confirmed_at"),
+                        "capture_source": record.get("capture_source", "online"),
+                        **{
+                            field: confirmed_items(record.get(field))
+                            for field in (
+                                "symptoms",
+                                "food_log",
+                                "supplement_check",
+                                "closing_mentions",
+                            )
+                        },
+                    }
+                )
+                continue
+            day = observed.astimezone(LOCAL_ZONE).date().isoformat()
             for item in confirmed_items(record.get("symptoms")):
                 is_danger = danger(item)
                 category = item.get("category") if is_danger else None
@@ -306,6 +336,7 @@ class SummaryService:
                 "denominator": "known supplement-day observations; missing or conflicting reports are unknown",
             }
         return {
+            "late_observations": late_observations,
             "danger_signs": dangers,
             "general_symptoms": symptoms,
             "recorded_symptoms": symptoms,

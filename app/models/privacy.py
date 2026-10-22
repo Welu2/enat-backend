@@ -16,6 +16,9 @@ ExportSection = Literal[
     "shares",
     "requests",
     "audit",
+    "care_connections",
+    "emergency_alerts",
+    "care_audit",
 ]
 
 

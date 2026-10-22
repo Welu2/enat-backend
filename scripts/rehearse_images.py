@@ -79,7 +79,7 @@ def main():
         # the bridge out of rotation. No production ledger is ever modified.
         with psycopg.connect(dsn) as conn:
             conn.execute(
-                "UPDATE enat_ops.migrations SET status=%s WHERE name='010_privacy_workflows.sql'",
+                "UPDATE enat_ops.migrations SET status=%s WHERE name='012_offline_checkins.sql'",
                 (ledger_status,),
             )
         start = monotonic()
@@ -106,7 +106,8 @@ def main():
         )
         if result.returncode:
             raise SystemExit(
-                "Candidate rollback probe failed: " + result.stderr[-2000:]
+                f"Rollback probe failed for {image} with schema 012 {ledger_status}: "
+                + result.stderr[-2000:]
             )
         identifier = subprocess.check_output(
             ["docker", "image", "inspect", "--format", "{{.Id}}", image], text=True
@@ -114,7 +115,7 @@ def main():
         steps.append(
             {
                 "image": identifier,
-                "privacy_ledger_status": ledger_status,
+                "offline_ledger_status": ledger_status,
                 "seconds": monotonic() - start,
                 "ready_and_history": True,
             }
@@ -123,7 +124,7 @@ def main():
     destination.mkdir(parents=True, exist_ok=True)
     report = {
         "synthetic_only": True,
-        "schema_version": 10,
+        "schema_version": 12,
         "schema_rolled_back": False,
         "steps": steps,
     }

@@ -797,3 +797,12 @@ section via `/users/me/privacy/export/{section}?limit=50`. Follow the response's
 `next_cursor` as `after` until null. Pagination is per-page consistent; do not
 claim the result is a point-in-time snapshot or includes external processor data.
 Do not store these responses in a shared cache or log clinical contents.
+
+
+## Care portal and offline check-ins
+
+The [care and offline integration guide](docs/care-offline-mvp.md) specifies the new authenticated portal, patient consent, invitation, alert acknowledgement, and offline submission APIs. Both features default off. Portal users use their own login and require an active patient-approved relationship; never reuse a patient token for a clinician or trusted person.
+
+Offline submissions use `POST /checkin/offline-sync` with a frozen payload and an `Idempotency-Key` equal to its `client_submission_id`. Receipt and observation times are separate. The existing voice sessions are not an offline queue. Implement the account-specific local queue and all recovery states in the patient frontend before claiming offline support to users. Portal clinical responses must never be service-worker cached.
+
+Schemas and request examples are generated in [OpenAPI](docs/openapi.json) and the Postman **Care portal and offline check-ins** folder. The frontend implementation remains pending in its own repository.

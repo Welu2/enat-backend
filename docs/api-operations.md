@@ -14,8 +14,10 @@ Bodies and response schemas: [OpenAPI](openapi.json). Behavior: [frontend guide]
 | POST | `/auth/reset-password` | no | — |
 | POST | `/auth/signup` | no | — |
 | POST | `/auth/telegram` | no | — |
+| POST | `/care-connections/accept` | yes | — |
 | GET | `/checkin/history` | yes | — |
 | GET | `/checkin/history/{checkin_id}` | yes | — |
+| POST | `/checkin/offline-sync` | yes | Idempotency-Key |
 | GET | `/checkin/prompts` | no | — |
 | GET | `/checkin/prompts/{stage}/audio` | no | — |
 | POST | `/checkin/start` | yes | Idempotency-Key |
@@ -28,6 +30,14 @@ Bodies and response schemas: [OpenAPI](openapi.json). Behavior: [frontend guide]
 | GET | `/notifications` | yes | — |
 | GET | `/notifications/` | yes | — |
 | POST | `/notifications/{notification_id}/dismiss` | yes | — |
+| GET | `/portal/me` | yes | — |
+| GET | `/portal/patients` | yes | — |
+| GET | `/portal/patients/{patient_id}` | yes | — |
+| GET | `/portal/patients/{patient_id}/alerts` | yes | — |
+| POST | `/portal/patients/{patient_id}/alerts/{alert_id}/acknowledge` | yes | Idempotency-Key |
+| GET | `/portal/patients/{patient_id}/appointment` | yes | — |
+| GET | `/portal/patients/{patient_id}/check-ins` | yes | — |
+| GET | `/portal/patients/{patient_id}/summary/latest` | yes | — |
 | GET | `/reminders` | yes | — |
 | POST | `/summary/check-automatic` | yes | — |
 | POST | `/summary/generate` | yes | Idempotency-Key |
@@ -47,6 +57,9 @@ Bodies and response schemas: [OpenAPI](openapi.json). Behavior: [frontend guide]
 | GET | `/users/me/appointment/calendar-link` | yes | — |
 | GET | `/users/me/appointment/calendar.ics` | yes | — |
 | POST | `/users/me/appointment/transition` | yes | Idempotency-Key |
+| GET | `/users/me/care-connections` | yes | — |
+| POST | `/users/me/care-connections` | yes | — |
+| DELETE | `/users/me/care-connections/{connection_id}` | yes | — |
 | POST | `/users/me/food-log` | yes | Idempotency-Key |
 | POST | `/users/me/food/verify` | yes | Idempotency-Key |
 | PATCH | `/users/me/hospital` | yes | — |

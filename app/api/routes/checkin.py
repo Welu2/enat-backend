@@ -26,6 +26,8 @@ from app.models.checkin import (
     VerifyItemResponse,
     VoiceCorrectItemResponse,
 )
+from app.models.offline_checkin import OfflineCheckInRequest, OfflineCheckInResponse
+from app.services import offline_checkin
 from app.services.audio_upload import read_audio
 from app.services.checkin_session import CheckInSessionService
 from app.services.stage_audio import (
@@ -34,6 +36,15 @@ from app.services.stage_audio import (
 )
 
 router = APIRouter(prefix="/checkin", tags=["checkin"])
+
+
+@router.post("/offline-sync", response_model=OfflineCheckInResponse)
+def sync_offline_checkin(
+    payload: OfflineCheckInRequest,
+    user_id: UUID = Depends(get_current_user_id),
+    key: str = Header(..., alias="Idempotency-Key", min_length=8, max_length=128),
+) -> OfflineCheckInResponse:
+    return OfflineCheckInResponse(**offline_checkin.sync(user_id, payload, key))
 
 
 @router.get("/prompts")

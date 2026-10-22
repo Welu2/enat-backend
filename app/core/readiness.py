@@ -4,8 +4,8 @@ from threading import Lock
 
 from app.db.data import get_pool
 
-SCHEMA_VERSION = "010_privacy_workflows.sql"
-SCHEMA_COUNT = 10
+SCHEMA_VERSION = "012_offline_checkins.sql"
+SCHEMA_COUNT = 12
 _probe_running = Lock()
 
 

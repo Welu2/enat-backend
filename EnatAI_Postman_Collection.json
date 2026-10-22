@@ -85,6 +85,36 @@
       "key": "privacy_request_id",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "recipient_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patient_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "connection_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invitation_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alert_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "client_submission_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -2400,6 +2430,429 @@
               ]
             },
             "description": "Requires configured privacy tools. Requests are reviewed, not automatically erased. Export pages are independently consistent; follow next_cursor using the after query parameter."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Care portal and offline check-ins",
+      "item": [
+        {
+          "name": "Portal account identity",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/portal/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portal",
+                "me"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Invite care recipient",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/care-connections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "care-connections"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"recipient_id\": \"{{recipient_id}}\", \"relationship\": \"clinician\", \"consent\": true}"
+            }
+          }
+        },
+        {
+          "name": "List patient connections",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/care-connections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "care-connections"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Revoke care access",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/care-connections/{{connection_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "care-connections",
+                "{{connection_id}}"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Accept care invitation",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/care-connections/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "care-connections",
+                "accept"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"token\": \"{{invitation_token}}\"}"
+            }
+          }
+        },
+        {
+          "name": "Connected patients",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/portal/patients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portal",
+                "patients"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Clinician patient overview",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/portal/patients/{{patient_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portal",
+                "patients",
+                "{{patient_id}}"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Confirmed patient history",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/portal/patients/{{patient_id}}/check-ins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portal",
+                "patients",
+                "{{patient_id}}",
+                "check-ins"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Patient latest summary",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/portal/patients/{{patient_id}}/summary/latest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portal",
+                "patients",
+                "{{patient_id}}",
+                "summary",
+                "latest"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Upcoming patient appointment",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/portal/patients/{{patient_id}}/appointment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portal",
+                "patients",
+                "{{patient_id}}",
+                "appointment"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Patient emergency alerts",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/portal/patients/{{patient_id}}/alerts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portal",
+                "patients",
+                "{{patient_id}}",
+                "alerts"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Acknowledge alert",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotency_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/portal/patients/{{patient_id}}/alerts/{{alert_id}}/acknowledge",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "portal",
+                "patients",
+                "{{patient_id}}",
+                "alerts",
+                "{{alert_id}}",
+                "acknowledge"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md."
+          }
+        },
+        {
+          "name": "Sync confirmed offline check-in",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{client_submission_id}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkin/offline-sync",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "checkin",
+                "offline-sync"
+              ]
+            },
+            "description": "Care/offline features default off. Use the signed-in actor's token. Patient consent and recipient acceptance are required for portal data. Preserve offline submission UUID and payload on retries. See docs/care-offline-mvp.md.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"schema_version\": 1, \"client_submission_id\": \"{{client_submission_id}}\", \"recorded_at\": \"2026-10-22T08:30:00+03:00\", \"client_confirmed_at\": \"2026-10-22T08:32:00+03:00\", \"confirmed\": true, \"symptoms\": [{\"raw_text\": \"Synthetic symptom report\", \"category\": \"high_fever\", \"severity\": \"unspecified\"}], \"food_log\": [], \"supplement_check\": [], \"closing_mentions\": []}"
+            }
           }
         }
       ]

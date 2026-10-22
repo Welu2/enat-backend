@@ -69,6 +69,7 @@ def main():
                 "scripts/staging_verify.py",
                 "scripts/staging_load.py",
                 "scripts/evaluate_voice.py",
+                "scripts/manage_clinician.py",
                 "-f",
                 "json",
                 "-o",

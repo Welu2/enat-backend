@@ -485,8 +485,320 @@
         "title": "Body_voice_correct_item_checkin__session_id__items__item_id__voice_correct_post",
         "type": "object"
       },
+      "CareAcceptRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "token": {
+            "maxLength": 43,
+            "minLength": 43,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "CareAcceptRequest",
+        "type": "object"
+      },
+      "CareAccepted": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "relationship": {
+            "enum": [
+              "clinician",
+              "trusted_person"
+            ],
+            "title": "Relationship",
+            "type": "string"
+          },
+          "status": {
+            "const": "active",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "relationship",
+          "status"
+        ],
+        "title": "CareAccepted",
+        "type": "object"
+      },
+      "CareConnection": {
+        "properties": {
+          "accepted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted At"
+          },
+          "consent_version": {
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "consented_at": {
+            "format": "date-time",
+            "title": "Consented At",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "recipient_display_name": {
+            "title": "Recipient Display Name",
+            "type": "string"
+          },
+          "recipient_id": {
+            "format": "uuid",
+            "title": "Recipient Id",
+            "type": "string"
+          },
+          "relationship": {
+            "enum": [
+              "clinician",
+              "trusted_person"
+            ],
+            "title": "Relationship",
+            "type": "string"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "active",
+              "revoked",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "recipient_id",
+          "recipient_display_name",
+          "relationship",
+          "status",
+          "consent_version",
+          "consented_at",
+          "created_at",
+          "accepted_at",
+          "revoked_at",
+          "expires_at"
+        ],
+        "title": "CareConnection",
+        "type": "object"
+      },
+      "CareInviteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "consent": {
+            "title": "Consent",
+            "type": "boolean"
+          },
+          "recipient_id": {
+            "format": "uuid",
+            "title": "Recipient Id",
+            "type": "string"
+          },
+          "relationship": {
+            "enum": [
+              "clinician",
+              "trusted_person"
+            ],
+            "title": "Relationship",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recipient_id",
+          "relationship",
+          "consent"
+        ],
+        "title": "CareInviteRequest",
+        "type": "object"
+      },
+      "CareInviteResponse": {
+        "properties": {
+          "accepted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted At"
+          },
+          "consent_version": {
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "consented_at": {
+            "format": "date-time",
+            "title": "Consented At",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "recipient_display_name": {
+            "title": "Recipient Display Name",
+            "type": "string"
+          },
+          "recipient_id": {
+            "format": "uuid",
+            "title": "Recipient Id",
+            "type": "string"
+          },
+          "relationship": {
+            "enum": [
+              "clinician",
+              "trusted_person"
+            ],
+            "title": "Relationship",
+            "type": "string"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "active",
+              "revoked",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "recipient_id",
+          "recipient_display_name",
+          "relationship",
+          "status",
+          "consent_version",
+          "consented_at",
+          "created_at",
+          "accepted_at",
+          "revoked_at",
+          "expires_at",
+          "token"
+        ],
+        "title": "CareInviteResponse",
+        "type": "object"
+      },
+      "CategoryLabel": {
+        "properties": {
+          "am": {
+            "title": "Am",
+            "type": "string"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "en": {
+            "title": "En",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "en",
+          "am"
+        ],
+        "title": "CategoryLabel",
+        "type": "object"
+      },
       "CheckInHistoryItem": {
         "properties": {
+          "capture_source": {
+            "default": "online",
+            "enum": [
+              "online",
+              "offline_form"
+            ],
+            "title": "Capture Source",
+            "type": "string"
+          },
+          "client_confirmed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Confirmed At"
+          },
           "closing_mentions": {
             "anyOf": [
               {
@@ -522,6 +834,30 @@
             "format": "uuid",
             "title": "Id",
             "type": "string"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "recorded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorded At"
           },
           "summary_text_am": {
             "anyOf": [
@@ -829,6 +1165,35 @@
         "title": "ClosingCorrection",
         "type": "object"
       },
+      "ClosingFields": {
+        "additionalProperties": false,
+        "properties": {
+          "raw_text": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Raw Text",
+            "type": "string"
+          },
+          "topic": {
+            "default": "other",
+            "enum": [
+              "dietary_intake",
+              "supplement_taken",
+              "therapeutic_food",
+              "breastfeeding_intent",
+              "other",
+              "general_closing"
+            ],
+            "title": "Topic",
+            "type": "string"
+          }
+        },
+        "required": [
+          "raw_text"
+        ],
+        "title": "ClosingFields",
+        "type": "object"
+      },
       "CompleteStageRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1006,6 +1371,76 @@
         "title": "Duration",
         "type": "object"
       },
+      "EmergencyAlert": {
+        "properties": {
+          "acknowledged_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acknowledged At"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Categories",
+            "type": "array"
+          },
+          "category_labels": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryLabel"
+            },
+            "title": "Category Labels",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "received_at": {
+            "format": "date-time",
+            "title": "Received At",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "unacknowledged",
+              "acknowledged"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "categories",
+          "category_labels",
+          "recorded_at",
+          "received_at",
+          "created_at",
+          "status",
+          "acknowledged_at"
+        ],
+        "title": "EmergencyAlert",
+        "type": "object"
+      },
       "ErrorResponse": {
         "properties": {
           "code": {
@@ -1098,7 +1533,10 @@
                 "reminders",
                 "shares",
                 "requests",
-                "audit"
+                "audit",
+                "care_connections",
+                "emergency_alerts",
+                "care_audit"
               ],
               "type": "string"
             },
@@ -1166,7 +1604,10 @@
               "reminders",
               "shares",
               "requests",
-              "audit"
+              "audit",
+              "care_connections",
+              "emergency_alerts",
+              "care_audit"
             ],
             "title": "Section",
             "type": "string"
@@ -1237,6 +1678,46 @@
           }
         },
         "title": "FoodCorrection",
+        "type": "object"
+      },
+      "FoodFields": {
+        "additionalProperties": false,
+        "properties": {
+          "food_groups": {
+            "items": {
+              "enum": [
+                "grains",
+                "proteins",
+                "dairy",
+                "fruits_and_vegetables"
+              ],
+              "type": "string"
+            },
+            "maxItems": 4,
+            "title": "Food Groups",
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "maxLength": 8000,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Items",
+            "type": "array"
+          },
+          "raw_text": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Raw Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "raw_text"
+        ],
+        "title": "FoodFields",
         "type": "object"
       },
       "FoodVerifyRequest": {
@@ -1934,6 +2415,136 @@
         "title": "NotificationItem",
         "type": "object"
       },
+      "OfflineCheckInRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "client_confirmed_at": {
+            "format": "date-time",
+            "title": "Client Confirmed At",
+            "type": "string"
+          },
+          "client_submission_id": {
+            "format": "uuid",
+            "title": "Client Submission Id",
+            "type": "string"
+          },
+          "closing_mentions": {
+            "items": {
+              "$ref": "#/components/schemas/ClosingFields"
+            },
+            "maxItems": 50,
+            "title": "Closing Mentions",
+            "type": "array"
+          },
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "food_log": {
+            "items": {
+              "$ref": "#/components/schemas/FoodFields"
+            },
+            "maxItems": 50,
+            "title": "Food Log",
+            "type": "array"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "supplement_check": {
+            "items": {
+              "$ref": "#/components/schemas/SupplementFields"
+            },
+            "maxItems": 50,
+            "title": "Supplement Check",
+            "type": "array"
+          },
+          "symptoms": {
+            "items": {
+              "$ref": "#/components/schemas/SymptomFields"
+            },
+            "maxItems": 50,
+            "title": "Symptoms",
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema_version",
+          "client_submission_id",
+          "recorded_at",
+          "client_confirmed_at",
+          "confirmed",
+          "symptoms",
+          "food_log",
+          "supplement_check",
+          "closing_mentions"
+        ],
+        "title": "OfflineCheckInRequest",
+        "type": "object"
+      },
+      "OfflineCheckInResponse": {
+        "properties": {
+          "alert_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alert Id"
+          },
+          "check_in_id": {
+            "format": "uuid",
+            "title": "Check In Id",
+            "type": "string"
+          },
+          "client_submission_id": {
+            "format": "uuid",
+            "title": "Client Submission Id",
+            "type": "string"
+          },
+          "danger_sign_triggered": {
+            "title": "Danger Sign Triggered",
+            "type": "boolean"
+          },
+          "received_at": {
+            "format": "date-time",
+            "title": "Received At",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "status": {
+            "const": "synced",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_submission_id",
+          "check_in_id",
+          "status",
+          "recorded_at",
+          "received_at",
+          "danger_sign_triggered",
+          "alert_id"
+        ],
+        "title": "OfflineCheckInResponse",
+        "type": "object"
+      },
       "OnboardingSubmitRequest": {
         "properties": {
           "age": {
@@ -2199,6 +2810,275 @@
           "name"
         ],
         "title": "OnboardingSupplement",
+        "type": "object"
+      },
+      "PatientCard": {
+        "properties": {
+          "appointment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PortalAppointment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "relationship": {
+            "enum": [
+              "clinician",
+              "trusted_person"
+            ],
+            "title": "Relationship",
+            "type": "string"
+          },
+          "unacknowledged_alert_count": {
+            "title": "Unacknowledged Alert Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "relationship",
+          "appointment",
+          "unacknowledged_alert_count"
+        ],
+        "title": "PatientCard",
+        "type": "object"
+      },
+      "PortalAppointment": {
+        "properties": {
+          "anc_contact_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anc Contact Title"
+          },
+          "anc_contact_title_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anc Contact Title Am"
+          },
+          "appointment_date": {
+            "format": "date",
+            "title": "Appointment Date",
+            "type": "string"
+          },
+          "hospital": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hospital"
+          },
+          "status": {
+            "const": "scheduled",
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "appointment_date",
+          "hospital",
+          "anc_contact_title",
+          "anc_contact_title_am",
+          "status",
+          "version"
+        ],
+        "title": "PortalAppointment",
+        "type": "object"
+      },
+      "PortalIdentity": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_clinician": {
+            "title": "Is Clinician",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "is_clinician"
+        ],
+        "title": "PortalIdentity",
+        "type": "object"
+      },
+      "PortalPatient": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "estimated_due_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Due Date"
+          },
+          "gestational_age_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gestational Age Days"
+          },
+          "gestational_age_weeks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gestational Age Weeks"
+          },
+          "hospital": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hospital"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "latest_check_in_received_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Check In Received At"
+          },
+          "overview_retrieved_at": {
+            "format": "date-time",
+            "title": "Overview Retrieved At",
+            "type": "string"
+          },
+          "pregnancy_as_of": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pregnancy As Of"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "hospital",
+          "estimated_due_date",
+          "gestational_age_weeks",
+          "gestational_age_days",
+          "pregnancy_as_of",
+          "overview_retrieved_at",
+          "latest_check_in_received_at"
+        ],
+        "title": "PortalPatient",
+        "type": "object"
+      },
+      "PortalSummary": {
+        "properties": {
+          "content_json": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "title": "Content Json",
+            "type": "object"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "period_end": {
+            "format": "date",
+            "title": "Period End",
+            "type": "string"
+          },
+          "period_start": {
+            "format": "date",
+            "title": "Period Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "period_start",
+          "period_end",
+          "generated_at",
+          "content_json"
+        ],
+        "title": "PortalSummary",
         "type": "object"
       },
       "PrivacyRequestResponse": {
@@ -2814,6 +3694,40 @@
         "title": "SupplementCreate",
         "type": "object"
       },
+      "SupplementFields": {
+        "additionalProperties": false,
+        "properties": {
+          "raw_text": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Raw Text",
+            "type": "string"
+          },
+          "supplement_name": {
+            "default": "unknown",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Supplement Name",
+            "type": "string"
+          },
+          "taken_today": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taken Today"
+          }
+        },
+        "required": [
+          "raw_text"
+        ],
+        "title": "SupplementFields",
+        "type": "object"
+      },
       "SupplementResponse": {
         "properties": {
           "active": {
@@ -3119,6 +4033,54 @@
           }
         },
         "title": "SymptomCorrection",
+        "type": "object"
+      },
+      "SymptomFields": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Duration"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "raw_text": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Raw Text",
+            "type": "string"
+          },
+          "severity": {
+            "default": "unspecified",
+            "enum": [
+              "mild",
+              "moderate",
+              "severe",
+              "unspecified"
+            ],
+            "title": "Severity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "raw_text"
+        ],
+        "title": "SymptomFields",
         "type": "object"
       },
       "TTSRequest": {
@@ -4763,6 +5725,160 @@
         ]
       }
     },
+    "/care-connections/accept": {
+      "post": {
+        "operationId": "accept_care_connections_accept_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CareAcceptRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CareAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Accept",
+        "tags": [
+          "care"
+        ]
+      }
+    },
     "/checkin/history": {
       "get": {
         "operationId": "get_checkin_history_checkin_history_get",
@@ -5097,6 +6213,171 @@
           }
         ],
         "summary": "Get Checkin History Detail",
+        "tags": [
+          "checkin"
+        ]
+      }
+    },
+    "/checkin/offline-sync": {
+      "post": {
+        "operationId": "sync_offline_checkin_checkin_offline_sync_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 8,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfflineCheckInRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfflineCheckInResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sync Offline Checkin",
         "tags": [
           "checkin"
         ]
@@ -7076,6 +8357,1390 @@
         "summary": "Dismiss Notification",
         "tags": [
           "notifications"
+        ]
+      }
+    },
+    "/portal/me": {
+      "get": {
+        "operationId": "identity_portal_me_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalIdentity"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Identity",
+        "tags": [
+          "portal"
+        ]
+      }
+    },
+    "/portal/patients": {
+      "get": {
+        "operationId": "patients_portal_patients_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 256,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PatientCard"
+                  },
+                  "title": "Response Patients Portal Patients Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response",
+            "headers": {
+              "X-Next-Cursor": {
+                "description": "Opaque next page cursor; absent on the final page",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Patients",
+        "tags": [
+          "portal"
+        ]
+      }
+    },
+    "/portal/patients/{patient_id}": {
+      "get": {
+        "operationId": "patient_portal_patients__patient_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalPatient"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Patient",
+        "tags": [
+          "portal"
+        ]
+      }
+    },
+    "/portal/patients/{patient_id}/alerts": {
+      "get": {
+        "operationId": "alerts_portal_patients__patient_id__alerts_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 256,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "unacknowledged",
+                    "acknowledged"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EmergencyAlert"
+                  },
+                  "title": "Response Alerts Portal Patients  Patient Id  Alerts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response",
+            "headers": {
+              "X-Next-Cursor": {
+                "description": "Opaque next page cursor; absent on the final page",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Alerts",
+        "tags": [
+          "portal"
+        ]
+      }
+    },
+    "/portal/patients/{patient_id}/alerts/{alert_id}/acknowledge": {
+      "post": {
+        "operationId": "acknowledge_portal_patients__patient_id__alerts__alert_id__acknowledge_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alert_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Alert Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 8,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmergencyAlert"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Acknowledge",
+        "tags": [
+          "portal"
+        ]
+      }
+    },
+    "/portal/patients/{patient_id}/appointment": {
+      "get": {
+        "operationId": "appointment_portal_patients__patient_id__appointment_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/PortalAppointment"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Appointment Portal Patients  Patient Id  Appointment Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Appointment",
+        "tags": [
+          "portal"
+        ]
+      }
+    },
+    "/portal/patients/{patient_id}/check-ins": {
+      "get": {
+        "operationId": "history_portal_patients__patient_id__check_ins_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 256,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CheckInHistoryItem"
+                  },
+                  "title": "Response History Portal Patients  Patient Id  Check Ins Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response",
+            "headers": {
+              "X-Next-Cursor": {
+                "description": "Opaque next page cursor; absent on the final page",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "History",
+        "tags": [
+          "portal"
+        ]
+      }
+    },
+    "/portal/patients/{patient_id}/summary/latest": {
+      "get": {
+        "operationId": "summary_portal_patients__patient_id__summary_latest_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Summary",
+        "tags": [
+          "portal"
         ]
       }
     },
@@ -9961,6 +12626,490 @@
         ]
       }
     },
+    "/users/me/care-connections": {
+      "get": {
+        "operationId": "connections_users_me_care_connections_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 256,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CareConnection"
+                  },
+                  "title": "Response Connections Users Me Care Connections Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response",
+            "headers": {
+              "X-Next-Cursor": {
+                "description": "Opaque next page cursor; absent on the final page",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Connections",
+        "tags": [
+          "care"
+        ]
+      },
+      "post": {
+        "operationId": "invite_users_me_care_connections_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CareInviteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CareInviteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Invite",
+        "tags": [
+          "care"
+        ]
+      }
+    },
+    "/users/me/care-connections/{connection_id}": {
+      "delete": {
+        "operationId": "revoke_users_me_care_connections__connection_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Resource not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Version or retry-key conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Request too large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid audio"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid mutation"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limited"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Dependency unavailable; retry or manual input"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Revoke",
+        "tags": [
+          "care"
+        ]
+      }
+    },
     "/users/me/food-log": {
       "post": {
         "operationId": "verify_food_manually_users_me_food_log_post",
@@ -10918,7 +14067,10 @@
                 "reminders",
                 "shares",
                 "requests",
-                "audit"
+                "audit",
+                "care_connections",
+                "emergency_alerts",
+                "care_audit"
               ],
               "title": "Section",
               "type": "string"

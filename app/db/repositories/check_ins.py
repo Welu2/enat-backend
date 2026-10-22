@@ -3,10 +3,11 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from app.core.clock import local_day_bounds, utc_now
-from app.db.data import get_data_client
+from app.db.data import atomic, get_data_client, normalize, transaction
 from app.services.clinical_policy import (
     POLICY_VERSION,
     confirmed_items,
+    danger,
     validated_draft,
 )
 
@@ -15,16 +16,24 @@ class CheckInRepository:
     def __init__(self, clock=utc_now):
         self.clock = clock
 
+    @atomic
     def create(self, user_id: UUID, data: dict[str, Any]) -> dict[str, Any]:
+        from app.services.alerts import create_for_checkin
+
         client = get_data_client()
         data = {**data, **validated_draft(data), "policy_version": POLICY_VERSION}
+        now = self.clock().isoformat()
         payload = {
             "id": str(uuid4()),
             "user_id": str(user_id),
-            "timestamp": self.clock().isoformat(),
             **data,
+            "timestamp": now,
+            "received_at": now,
+            "recorded_at": data.get("recorded_at", now),
+            "danger_sign_triggered": any(danger(i) for i in data["symptoms"]),
         }
         result = client.table("check_ins").insert(payload).execute()
+        create_for_checkin(result.data[0])
         return result.data[0]
 
     def list_by_user(self, user_id: UUID) -> list[dict[str, Any]]:
@@ -68,8 +77,17 @@ class CheckInRepository:
         start, end = local_day_bounds(self.clock())
         return any(
             confirmed_items(row.get(key))
-            for row in self.list_in_period(user_id, start, end)
+            for row in self.list_observed_in_period(user_id, start, end)
         )
+
+    def list_observed_in_period(self, user_id, start, end):
+        with transaction() as conn:
+            return normalize(
+                conn.execute(
+                    "SELECT * FROM check_ins WHERE user_id=%s AND recorded_at>=%s AND recorded_at<%s ORDER BY recorded_at,id",
+                    (user_id, start, end),
+                ).fetchall()
+            )
 
     def has_supplement_logged_today(self, user_id):
         # All active named supplements must have a confirmed observation today.
@@ -82,7 +100,7 @@ class CheckInRepository:
         start, end = local_day_bounds(self.clock())
         observed = {
             i.get("supplement_name", "").strip().casefold()
-            for r in self.list_in_period(user_id, start, end)
+            for r in self.list_observed_in_period(user_id, start, end)
             for i in confirmed_items(r.get("supplement_check"))
             if type(i.get("taken_today")) is bool
         }

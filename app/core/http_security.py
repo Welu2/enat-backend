@@ -107,6 +107,8 @@ class SecurityMiddleware:
             if headers.get(b"content-type", b"").startswith(b"multipart/form-data")
             else min(self.settings.max_request_bytes, 65536)
         )
+        if path.rstrip("/") == "/checkin/offline-sync":
+            maximum = min(maximum, 65536)
         try:
             declared = int(headers.get(b"content-length", b"0"))
             if declared < 0:

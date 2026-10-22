@@ -8,6 +8,11 @@ summary sharing, and speech playback. Read [the deployment and client migration
 notes](docs/phase1-security.md) before upgrading. Sharing remains disabled pending
 privacy review; the service is not yet approved for production patient use.
 
+The [care portal and offline check-in backend](docs/care-offline-mvp.md) adds
+patient-approved clinician/trusted-person access, alerts, and duplicate-safe offline
+ingestion. Features default off. Frontend screens and the local queue remain a
+separate integration step in the [MVP implementation plan](docs/clinician-offline-mvp-plan.md).
+
 The patched container now passes the [security gate](docs/security-remediation.md).
 Local Phase 5 implementation and load/restore evidence are recorded in
 [operations verification](docs/phase5-operations.md). Live staging, clinical/privacy
@@ -151,7 +156,7 @@ python -m piptools compile --generate-hashes --constraint=requirements.lock --ou
 ```
 
 ### 4. Database Configuration
-Apply migrations `001` through `009` with `MIGRATION_DATABASE_URL` and
+Apply migrations `001` through `012` with `MIGRATION_DATABASE_URL` and
 `python -m app.migrate`, using a separate migration owner. The runner serializes
 execution, verifies checksums and records failures. Rehearse existing untracked
 databases before baselining; see [the runbook](docs/operations-runbook.md).

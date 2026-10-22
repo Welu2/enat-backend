@@ -75,6 +75,8 @@ class Settings(BaseSettings):
     telegram_max_age_seconds: int = Field(default=300, ge=30, le=600)
     telegram_clock_skew_seconds: int = Field(default=30, ge=0, le=60)
     enable_summary_sharing: bool = False
+    enable_care_portal: bool = False
+    enable_offline_checkins: bool = False
     enable_privacy_tools: bool = False
     privacy_policy_version: str = Field(default="", max_length=64)
     privacy_support_url: str = ""
