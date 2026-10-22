@@ -1,0 +1,53 @@
+groups:
+  - name: enat
+    rules:
+      - alert: EnatApiUnavailable
+        expr: (sum(up{job="enat-api"}) or vector(0)) < 2
+        for: 2m
+        labels: {severity: critical}
+        annotations: {summary: 'API replica unavailable; check readiness and restore capacity', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatApiErrors
+        expr: sum(rate(enat_http_seconds_count{status=~"5.."}[5m])) / clamp_min(sum(rate(enat_http_seconds_count[5m])), 1) > 0.01
+        for: 5m
+        labels: {severity: critical}
+        annotations: {summary: 'API errors exceed 1%; inspect redacted request traces', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatCoreLatency
+        expr: histogram_quantile(0.95, sum by(le) (rate(enat_http_seconds_bucket{route!~".*respond.*|.*voice-correct.*|/tts|.*audio.*|/health|/ready"}[5m]))) > 0.5
+        for: 10m
+        labels: {severity: warning}
+        annotations: {summary: 'Core API p95 exceeds 500ms; inspect pool and query latency', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatJobLate
+        expr: max(enat_oldest_due_job_seconds) > 300 or max(enat_scheduler_lag_seconds) > 300
+        for: 5m
+        labels: {severity: critical}
+        annotations: {summary: 'Jobs or scheduler are over five minutes late', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatFailedJob
+        expr: max(enat_jobs{status="failed"}) > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations: {summary: 'Terminal jobs require diagnosis and explicit replay', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatWorkerStale
+        expr: time() - enat_worker_heartbeat_timestamp_seconds > 90 or up{job="enat-worker"} == 0
+        for: 1m
+        labels: {severity: critical}
+        annotations: {summary: 'Worker telemetry or processing loop is unavailable', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatProviderDegraded
+        expr: sum(rate(enat_provider_seconds_count{outcome="error"}[5m])) / clamp_min(sum(rate(enat_provider_seconds_count[5m])), 0.01) > 0.05
+        for: 5m
+        labels: {severity: warning}
+        annotations: {summary: 'Speech provider errors exceed 5%; retain drafts and use manual input', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatProviderBudgetNearLimit
+        expr: sum(increase(enat_provider_attempts_total[24h])) > 8000
+        for: 1m
+        labels: {severity: warning}
+        annotations: {summary: 'Attempt estimate exceeds 80% of default 10000-call budget; reconcile vendor billing', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatEventLoopLag
+        expr: enat_event_loop_lag_seconds > 0.25
+        for: 5m
+        labels: {severity: warning}
+        annotations: {summary: 'Event loop lag exceeds 250ms; inspect blocking work', runbook: 'docs/operations-runbook.md'}
+      - alert: EnatPrivacyRequestPending
+        expr: max(enat_privacy_requests_pending) > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations: {summary: 'Privacy requests await assigned reviewer; inspect restricted queue', runbook: 'docs/privacy-operations.md'}

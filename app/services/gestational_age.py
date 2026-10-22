@@ -1,6 +1,8 @@
 from datetime import date, timedelta
 from typing import Any, Literal
 
+from app.core.clock import LOCAL_ZONE, utc_now
+
 TrimesterKey = Literal["first_trimester", "second_trimester", "third_trimester"]
 
 TRIMESTER_INFO: dict[TrimesterKey, dict[str, Any]] = {
@@ -28,7 +30,9 @@ TRIMESTER_INFO: dict[TrimesterKey, dict[str, Any]] = {
 }
 
 
-def classify_trimester(gestational_weeks: int, gestational_days: int = 0) -> TrimesterKey:
+def classify_trimester(
+    gestational_weeks: int, gestational_days: int = 0
+) -> TrimesterKey:
     """Classify pregnancy stage into 1st, 2nd, or 3rd trimester based on gestational age."""
     total_days = (gestational_weeks * 7) + gestational_days
     if total_days < 14 * 7:  # 0 to 13 weeks + 6 days (< 98 days)
@@ -66,14 +70,14 @@ def calculate_gestational_age_and_edd(
     as_of_date: date | None = None,
 ) -> dict[str, Any]:
     """Calculates fetal gestational age, trimester classification, and Estimated Due Date (EDD).
-    
+
     Standard obstetric rules:
     - EDD = LNMP + 280 days (40 weeks) via Naegele's rule.
     - Gestational age = as_of_date - LNMP.
     - If ultrasound is used, effective LNMP = ultrasound_date - (ultrasound_weeks * 7 + days).
     - If manual weeks are entered, effective LNMP is computed backwards and stored alongside manual values.
     """
-    today = as_of_date or date.today()
+    today = as_of_date or utc_now().astimezone(LOCAL_ZONE).date()
     clean_method = (pregnancy_counting_method or "lnmp").lower().strip()
 
     is_manual = False
@@ -89,7 +93,11 @@ def calculate_gestational_age_and_edd(
         edd = effective_lnmp + timedelta(days=280)
 
     # Case 2: Ultrasound scan method
-    elif clean_method == "ultrasound" and ultrasound_date and ultrasound_weeks is not None:
+    elif (
+        clean_method == "ultrasound"
+        and ultrasound_date
+        and ultrasound_weeks is not None
+    ):
         us_days = (ultrasound_weeks * 7) + (ultrasound_days or 0)
         effective_lnmp = ultrasound_date - timedelta(days=us_days)
         total_days = max(0, (today - effective_lnmp).days)
@@ -140,9 +148,11 @@ def calculate_gestational_age_and_edd(
     }
 
 
-def get_current_pregnancy_status(user: dict[str, Any], as_of_date: date | None = None) -> dict[str, Any] | None:
+def get_current_pregnancy_status(
+    user: dict[str, Any], as_of_date: date | None = None
+) -> dict[str, Any] | None:
     """Calculates live current gestational metrics for a user profile based on stored LNMP / EDD."""
-    today = as_of_date or date.today()
+    today = as_of_date or utc_now().astimezone(LOCAL_ZONE).date()
 
     eff_lnmp = user.get("effective_lnmp_date") or user.get("lnmp_date")
     edd_raw = user.get("estimated_due_date")

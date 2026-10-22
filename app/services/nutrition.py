@@ -2,7 +2,12 @@ from typing import Any, Literal
 
 FoodGroupKey = Literal["grains", "proteins", "dairy", "fruits_and_vegetables"]
 
-FOOD_GROUPS: list[FoodGroupKey] = ["grains", "proteins", "dairy", "fruits_and_vegetables"]
+FOOD_GROUPS: list[FoodGroupKey] = [
+    "grains",
+    "proteins",
+    "dairy",
+    "fruits_and_vegetables",
+]
 
 FOOD_GROUP_METADATA: dict[FoodGroupKey, dict[str, Any]] = {
     "grains": {
@@ -71,7 +76,6 @@ _KEYWORD_TAXONOMY: dict[str, list[FoodGroupKey]] = {
     "oats": ["grains"],
     "cereal": ["grains"],
     "እህል": ["grains"],
-
     # Proteins / Legumes / Meats
     "ምስር": ["proteins"],
     "misir": ["proteins"],
@@ -118,7 +122,6 @@ _KEYWORD_TAXONOMY: dict[str, list[FoodGroupKey]] = {
     "peas": ["proteins"],
     "አኩሪ አተር": ["proteins"],
     "soy": ["proteins"],
-
     # Dairy
     "አይብ": ["dairy"],
     "ayibe": ["dairy"],
@@ -135,7 +138,6 @@ _KEYWORD_TAXONOMY: dict[str, list[FoodGroupKey]] = {
     "ወተት": ["dairy"],
     "wetet": ["dairy"],
     "milk": ["dairy"],
-
     # Fruits & Vegetables
     "ጎመን": ["fruits_and_vegetables"],
     "gomen": ["fruits_and_vegetables"],
@@ -222,7 +224,7 @@ def classify_ethiopian_food(raw_text: str | None) -> list[FoodGroupKey]:
 
 def calculate_food_group_shares(food_logs: list[dict[str, Any]]) -> dict[str, Any]:
     """Aggregates all confirmed food logs and computes the exact percentage share out of 100% for each food group.
-    
+
     The sum of all group percentages is guaranteed to equal 100% when food data exists.
     """
     counts: dict[FoodGroupKey, int] = {
@@ -262,7 +264,13 @@ def calculate_food_group_shares(food_logs: list[dict[str, Any]]) -> dict[str, An
                 counts["dairy"] += 1
                 if date_str:
                     daily_groups[date_str].add("dairy")
-            elif clean_g in ("fruit", "fruits", "vegetable", "vegetables", "fruits_and_vegetables"):
+            elif clean_g in (
+                "fruit",
+                "fruits",
+                "vegetable",
+                "vegetables",
+                "fruits_and_vegetables",
+            ):
                 counts["fruits_and_vegetables"] += 1
                 if date_str:
                     daily_groups[date_str].add("fruits_and_vegetables")
@@ -284,7 +292,7 @@ def calculate_food_group_shares(food_logs: list[dict[str, Any]]) -> dict[str, An
         # Distribute remaining points to the highest fractional parts
         fractional_parts = sorted(
             FOOD_GROUPS,
-            key=lambda g: (raw_pcts[g] - floored[g]),
+            key=lambda g: raw_pcts[g] - floored[g],
             reverse=True,
         )
         for i in range(remainder):
