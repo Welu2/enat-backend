@@ -161,9 +161,22 @@ class Settings(BaseSettings):
 
     @property
     def cors_origin_list(self) -> list[str]:
-        return [
+        origins = [
             origin.strip() for origin in self.cors_origins.split(",") if origin.strip()
         ]
+        if self.environment == "development":
+            expanded = list(origins)
+            for o in origins:
+                if "localhost" in o:
+                    alt = o.replace("localhost", "127.0.0.1")
+                    if alt not in expanded:
+                        expanded.append(alt)
+                elif "127.0.0.1" in o:
+                    alt = o.replace("127.0.0.1", "localhost")
+                    if alt not in expanded:
+                        expanded.append(alt)
+            return expanded
+        return origins
 
     @property
     def is_telegram_configured(self) -> bool:

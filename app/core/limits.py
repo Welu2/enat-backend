@@ -14,7 +14,9 @@ def take_rate(identity: str, category: str, limit: int, seconds: int = 60):
     settings = get_settings()
     if not settings.enable_request_limits:
         return
-    if len(settings.rate_limit_secret) < 32:
+    if len(settings.rate_limit_secret) < 32 or not settings.database_url:
+        if settings.environment in {"development", "test"}:
+            return
         from app.core.errors import DataUnavailable
 
         raise DataUnavailable("Rate limiting is not configured")

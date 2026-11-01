@@ -97,7 +97,7 @@ class SecurityMiddleware:
         self.settings = settings
 
     async def __call__(self, scope, receive, send):
-        if scope["type"] != "http":
+        if scope["type"] != "http" or scope.get("method") == "OPTIONS":
             return await self.app(scope, receive, send)
         request_id = scope.get("enat.request_id") or str(uuid4())
         headers = dict(scope.get("headers", []))

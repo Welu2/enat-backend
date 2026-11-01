@@ -80,14 +80,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
         },
     )
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.cors_origin_list,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["X-Next-Cursor", "X-Request-ID"],
-    )
     app.add_exception_handler(RequestValidationError, validation_error)
     app.add_exception_handler(HTTPException, http_error)
     app.add_middleware(SecurityMiddleware, settings=settings)
@@ -98,6 +90,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ],
     )
     app.add_middleware(observability.TelemetryMiddleware, settings=settings)
+    # CORS middleware is registered last so it executes first (outermost) in Starlette's LIFO stack.
+    get_settings.cache_clear()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origin_list,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["X-Next-Cursor", "X-Request-ID"],
+    )
     logging.getLogger("uvicorn.access").addFilter(AccessLogFilter())
     for router in (
         auth.router,
