@@ -61,3 +61,12 @@ Thumbs.db
 .ruff_cache/
 artifacts/
 .cache/
+
+# benchmarking artifacts
+create_voice_metadata.py
+enat_voices/
+en.json
+mix.json
+transcript.json
+
+

@@ -57,6 +57,11 @@ Bodies and response schemas: [OpenAPI](openapi.json). Behavior: [frontend guide]
 | GET | `/users/me/appointment/calendar-link` | yes | — |
 | GET | `/users/me/appointment/calendar.ics` | yes | — |
 | POST | `/users/me/appointment/transition` | yes | Idempotency-Key |
+| GET | `/users/me/calendar/items` | yes | — |
+| POST | `/users/me/calendar/items` | yes | — |
+| DELETE | `/users/me/calendar/items/{item_id}` | yes | — |
+| GET | `/users/me/calendar/items/{item_id}` | yes | — |
+| PUT | `/users/me/calendar/items/{item_id}` | yes | — |
 | GET | `/users/me/care-connections` | yes | — |
 | POST | `/users/me/care-connections` | yes | — |
 | DELETE | `/users/me/care-connections/{connection_id}` | yes | — |
