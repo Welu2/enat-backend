@@ -86,6 +86,7 @@ class OnboardingSupplement(BaseModel):
 
 
 class OnboardingSubmitRequest(BaseModel):
+    name: str | None = None
     age: int | None = None
     area: Literal["urban", "rural"] | str | None = None
     pregnancy_counting_method: str = "lnmp"  # 'lnmp', 'ultrasound', 'manual'
@@ -113,6 +114,7 @@ class OnboardingSubmitRequest(BaseModel):
 
 
 class MaternalProfileUpdate(BaseModel):
+    name: str | None = None
     age: int | None = None
     area: str | None = None
     pregnancy_counting_method: str | None = None
@@ -226,6 +228,7 @@ class UserSettingsUpdate(BaseModel):
 class UserProfile(BaseModel):
     id: UUID
     email: str | None
+    name: str | None = None
     created_at: datetime
 
     # Maternal Onboarding & Pregnancy Profile

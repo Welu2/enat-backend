@@ -2551,6 +2551,17 @@
             ],
             "title": "Malaria Endemic Area"
           },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
           "past_pregnancy_complications": {
             "anyOf": [
               {
@@ -2974,6 +2985,17 @@
               }
             ],
             "title": "Manual Gestational Weeks"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
           },
           "past_pregnancy_complications": {
             "default": [],
@@ -4629,6 +4651,17 @@
               }
             ],
             "title": "Malaria Endemic Area"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
           },
           "onboarding_completed": {
             "default": false,

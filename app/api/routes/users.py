@@ -59,9 +59,11 @@ def _build_user_profile(user: dict[str, Any]) -> UserProfile:
         GestationalAgeCalculateResponse(**live_pregnancy) if live_pregnancy else None
     )
 
+    user_name = user.get("name") or user.get("first_name")
     return UserProfile(
         id=user_id,
         email=user.get("email"),
+        name=user_name,
         created_at=user["created_at"],
         age=user.get("age"),
         area=user.get("area"),
@@ -157,6 +159,7 @@ def submit_onboarding(
     )
 
     update_data: dict[str, Any] = {
+        "name": payload.name,
         "age": payload.age,
         "area": payload.area,
         "pregnancy_counting_method": payload.pregnancy_counting_method,
@@ -197,7 +200,7 @@ def submit_onboarding(
         k: v
         for k, v in update_data.items()
         if v is not None
-        or k in ("custom_medical_condition", "current_medications", "hospital")
+        or k in ("name", "custom_medical_condition", "current_medications", "hospital")
     }
     user_repo.update_profile(user_id, cleaned_update)
 
