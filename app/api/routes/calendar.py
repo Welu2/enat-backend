@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 
+from app.core.errors import NotFound
 from app.db import idempotency
 from app.db.repositories.calendar_items import CalendarItemRepository
 from app.dependencies import get_current_user
@@ -97,7 +98,18 @@ def update_calendar_item(
     if "reminder_at" in data and data["reminder_at"] is not None:
         data["reminder_at"] = data["reminder_at"].isoformat()
 
-    updated = CalendarItemRepository().update(user_id, item_id, data)
+    try:
+        updated = CalendarItemRepository().update(user_id, item_id, data)
+    except NotFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Calendar item not found",
+        )
+    if not updated:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Calendar item not found",
+        )
     return CalendarItemResponse(**updated)
 
 

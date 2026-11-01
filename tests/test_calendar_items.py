@@ -140,3 +140,55 @@ def test_delete_calendar_item(auth_client, monkeypatch):
     missing_id = str(uuid4())
     res = client.delete(f"/users/me/calendar/items/{missing_id}")
     assert res.status_code == 404
+
+
+@pytest.mark.enable_socket
+def test_unauthenticated_request_rejected():
+    client = TestClient(app)
+    res = client.get("/users/me/calendar/items")
+    assert res.status_code == 401
+
+
+@pytest.mark.enable_socket
+def test_validation_errors_rejected(auth_client):
+    client, _ = auth_client
+
+    # Invalid type
+    res = client.post(
+        "/users/me/calendar/items",
+        json={"title": "Invalid Type", "type": "meeting", "date": "2026-11-05"},
+    )
+    assert res.status_code == 422
+
+    # Missing title
+    res = client.post(
+        "/users/me/calendar/items",
+        json={"type": "event", "date": "2026-11-05"},
+    )
+    assert res.status_code == 422
+
+    # Invalid date format
+    res = client.post(
+        "/users/me/calendar/items",
+        json={"title": "Bad Date", "type": "task", "date": "not-a-date"},
+    )
+    assert res.status_code == 422
+
+
+@pytest.mark.enable_socket
+def test_get_not_found_item(auth_client, monkeypatch):
+    client, _ = auth_client
+    mock_repo = Mock()
+    mock_repo.get_by_id.return_value = None
+    mock_repo.update.return_value = None
+    monkeypatch.setattr(
+        "app.api.routes.calendar.CalendarItemRepository", lambda: mock_repo
+    )
+
+    missing_id = str(uuid4())
+    res = client.get(f"/users/me/calendar/items/{missing_id}")
+    assert res.status_code == 404
+
+    res = client.put(f"/users/me/calendar/items/{missing_id}", json={"completed": True})
+    assert res.status_code == 404
+

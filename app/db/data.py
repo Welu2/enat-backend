@@ -55,6 +55,7 @@ TABLES = {
     "push_tokens",
     "summary_shares",
     "stage_audio_prompts",
+    "calendar_items",
 }
 
 

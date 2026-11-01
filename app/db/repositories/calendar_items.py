@@ -43,9 +43,11 @@ class CalendarItemRepository:
         if item_type:
             query = query.eq("type", item_type)
 
-        query = query.order("date", desc=False).order("time", desc=False)
+        query = query.order("date", desc=False)
         result = query.execute()
-        return result.data or []
+        items = result.data or []
+        items.sort(key=lambda r: (r.get("date") or "", r.get("time") or ""))
+        return items
 
     def get_by_id(self, user_id: UUID, item_id: UUID) -> dict[str, Any] | None:
         client = get_data_client()
