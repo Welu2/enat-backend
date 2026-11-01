@@ -24,8 +24,10 @@ def validate_key(key):
 
 
 def lookup(user_id, operation, key, payload):
+    from app.config import get_settings
+
     validate_key(key)
-    if key is None:
+    if key is None or not get_settings().database_url:
         return None
     with transaction() as conn:
         row = conn.execute(
@@ -40,7 +42,12 @@ def lookup(user_id, operation, key, payload):
 
 
 def execute(user_id, operation, key, payload, action):
+    from app.config import get_settings
+
     validate_key(key)
+    if not get_settings().database_url:
+        return normalize(action())
+
     with transaction() as conn:
         if key is not None:
             lock = request_hash([str(user_id), operation, key])
@@ -60,7 +67,11 @@ def execute(user_id, operation, key, payload, action):
 
 
 def emit(user_id, event_type, aggregate_id, payload=None):
+    from app.config import get_settings
     from app.core.observability import trace_headers
+
+    if not get_settings().database_url:
+        return
 
     body = dict(payload or {})
     if parent := trace_headers().get("traceparent"):

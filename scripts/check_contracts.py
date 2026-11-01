@@ -60,7 +60,9 @@ def requests(items):
 def check_examples(schema):
     from jsonschema import Draft202012Validator, FormatChecker
 
-    collection = json.loads((ROOT / "EnatAI_Postman_Collection.json").read_text())
+    collection = json.loads(
+        (ROOT / "EnatAI_Postman_Collection.json").read_text(encoding="utf-8")
+    )
     count = 0
     failures = []
     for name, request in requests(collection["item"]):

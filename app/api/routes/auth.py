@@ -41,12 +41,13 @@ def session_response(result) -> AuthResponse:
         raise HTTPException(401, "Invalid credentials")
     try:
         claims = decode_access_token(token)
-        with transaction() as conn:
-            if conn.execute(
-                "SELECT enat_auth_revoked(%s,%s,%s) AS value",
-                (claims["session_id"], claims["sub"], claims["iat"]),
-            ).fetchone()["value"]:
-                raise ValueError("Revoked session")
+        if get_settings().database_url:
+            with transaction() as conn:
+                if conn.execute(
+                    "SELECT enat_auth_revoked(%s,%s,%s) AS value",
+                    (claims["session_id"], claims["sub"], claims["iat"]),
+                ).fetchone()["value"]:
+                    raise ValueError("Revoked session")
         user = resolve_identity("supabase", claims["sub"], claims.get("email"))
         if not user:
             raise ValueError("Disabled account")
@@ -218,14 +219,15 @@ def logout(user=Depends(get_current_user), authorization: str = Header()):
             conn.execute("DELETE FROM push_tokens WHERE user_id=%s", (user["id"],))
     else:
         claims = decode_access_token(token)
-        with transaction() as conn:
-            # Keep the family revoked beyond the current access-token expiry.
-            conn.execute(
-                "SELECT enat_revoke_auth(%s,%s)",
-                (claims["session_id"], datetime(9999, 1, 1, tzinfo=timezone.utc)),
-            )
-        with transaction() as conn:
-            conn.execute("DELETE FROM push_tokens WHERE user_id=%s", (user["id"],))
+        if get_settings().database_url:
+            with transaction() as conn:
+                # Keep the family revoked beyond the current access-token expiry.
+                conn.execute(
+                    "SELECT enat_revoke_auth(%s,%s)",
+                    (claims["session_id"], datetime(9999, 1, 1, tzinfo=timezone.utc)),
+                )
+            with transaction() as conn:
+                conn.execute("DELETE FROM push_tokens WHERE user_id=%s", (user["id"],))
         try:
             auth_request("POST", "logout?scope=local", token=token)
         except ValueError:

@@ -5,6 +5,7 @@ from fastapi import Depends, Header, HTTPException, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette.concurrency import run_in_threadpool
 
+from app.config import get_settings
 from app.core.security import decode_access_token
 from app.db.data import current_user_id, normalize, resolve_identity, transaction
 
@@ -34,13 +35,14 @@ def authenticate(authorization: str | None) -> dict:
                 )
         else:
             payload = decode_access_token(token)
-            with transaction() as conn:
-                revoked = conn.execute(
-                    "SELECT public.enat_auth_revoked(%s,%s,%s) AS value",
-                    (payload["session_id"], payload["sub"], payload["iat"]),
-                ).fetchone()["value"]
-            if revoked:
-                raise ValueError("Revoked session")
+            if get_settings().database_url:
+                with transaction() as conn:
+                    revoked = conn.execute(
+                        "SELECT public.enat_auth_revoked(%s,%s,%s) AS value",
+                        (payload["session_id"], payload["sub"], payload["iat"]),
+                    ).fetchone()["value"]
+                if revoked:
+                    raise ValueError("Revoked session")
             user = resolve_identity("supabase", payload["sub"], payload.get("email"))
         if not user:
             raise ValueError("Disabled account")

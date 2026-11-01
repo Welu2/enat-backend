@@ -68,11 +68,17 @@ class AppointmentRepository:
         ).eq("user_id", str(user_id)).execute()
 
     def upsert(self, user_id, data):
+        from app.config import get_settings
         from app.core.errors import Conflict, InvalidMutation
         from app.db.data import transaction
 
         values = dict(data)
         version = values.pop("version", None)
+        if not get_settings().database_url:
+            existing = self.get_by_user(user_id)
+            if existing:
+                return self.update(user_id, values)
+            return self.create(user_id, values)
         with transaction() as conn:
             conn.execute(
                 "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))",

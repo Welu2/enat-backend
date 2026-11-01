@@ -52,10 +52,43 @@ def decode(cursor):
 
 
 def page(table, user_id, limit=50, cursor=None, *, start=None, end=None, due=None):
+    from app.config import get_settings
+
     field = TABLES[table]
     if not 1 <= limit <= 100:
         raise InvalidMutation("Page size must be between 1 and 100")
     descending = table == "check_ins"
+
+    if not get_settings().database_url:
+        from app.db.data import get_data_client
+
+        client = get_data_client()
+        query = (
+            client.table(table)
+            .select("*")
+            .eq("user_id", str(user_id))
+        )
+        if start is not None:
+            query = query.gte(
+                field, start.isoformat() if hasattr(start, "isoformat") else str(start)
+            )
+        if end is not None:
+            query = query.lt(
+                field, end.isoformat() if hasattr(end, "isoformat") else str(end)
+            )
+        if due is not None:
+            query = query.lte(
+                field, due.isoformat() if hasattr(due, "isoformat") else str(due)
+            )
+        if table == "reminders":
+            query = query.eq("dismissed", False)
+
+        query = query.order(field, desc=descending).limit(limit + 1)
+        res = query.execute()
+        rows = res.data or []
+        next_c = encode(rows[limit - 1], field) if len(rows) > limit else None
+        return rows[:limit], next_c
+
     conditions = [sql.SQL("user_id=%s")]
     values = [user_id]
     if cursor:

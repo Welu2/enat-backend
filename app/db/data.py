@@ -38,6 +38,8 @@ def atomic(action: Callable[P, R]) -> Callable[P, R]:
 
     @wraps(action)
     def wrapped(*args: P.args, **kwargs: P.kwargs) -> R:
+        if not get_settings().database_url:
+            return action(*args, **kwargs)
         with transaction():
             return action(*args, **kwargs)
 
@@ -265,6 +267,11 @@ class Query:
 
 class DataClient:
     def table(self, name):
+        settings = get_settings()
+        if not settings.database_url:
+            from app.db.client import get_supabase_client
+
+            return get_supabase_client().table(name)
         return Query(name)
 
 
@@ -273,6 +280,19 @@ def get_data_client():
 
 
 def resolve_identity(provider, subject, email=None, first_name=None, username=None):
+    if not get_settings().database_url:
+        from app.db.client import get_supabase_client
+
+        sb = get_supabase_client()
+        res = sb.table("users").select("*").eq("id", subject).execute()
+        if res and res.data:
+            return res.data[0]
+        new_row = {"id": subject, "email": email}
+        if first_name:
+            new_row["name"] = first_name
+        created = sb.table("users").insert(new_row).execute()
+        return created.data[0] if created.data else None
+
     with transaction() as conn:
         return normalize(
             conn.execute(

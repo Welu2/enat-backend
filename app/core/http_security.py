@@ -192,6 +192,12 @@ class SecurityMiddleware:
         try:
             await self.app(scope, replay, private_send)
         except ApplicationError as exc:
+            logging.getLogger("enat.security").warning(
+                "application_error request_id=%s type=%s detail=%s",
+                request_id,
+                type(exc).__name__,
+                str(exc),
+            )
             if started:
                 raise RuntimeError("Response failed after headers") from None
             await error_response(exc)(scope, replay, private_send)
