@@ -8,17 +8,44 @@ from app.db.data import get_data_client, transaction
 
 
 class ReminderRepository:
-    def create_once(self, user_id, kind, message, due_at, occurrence_key):
-        with transaction() as conn:
-            return conn.execute(
-                """INSERT INTO reminders(user_id,type,message,due_at,occurrence_key)
-                VALUES(%s,%s,%s,%s,%s) ON CONFLICT(user_id,occurrence_key)
-                WHERE occurrence_key IS NOT NULL DO NOTHING RETURNING id""",
-                (user_id, kind, message, due_at, occurrence_key),
-            ).fetchone()
-
     def __init__(self, clock=utc_now):
         self.clock = clock
+
+    def create_once(self, user_id, kind, message, due_at, occurrence_key):
+        try:
+            with transaction() as conn:
+                return conn.execute(
+                    """INSERT INTO reminders(user_id,type,message,due_at,occurrence_key)
+                    VALUES(%s,%s,%s,%s,%s) ON CONFLICT(user_id,occurrence_key)
+                    WHERE occurrence_key IS NOT NULL DO NOTHING RETURNING id""",
+                    (user_id, kind, message, due_at, occurrence_key),
+                ).fetchone()
+        except Exception:
+            client = get_data_client()
+            due_iso = due_at.isoformat() if hasattr(due_at, "isoformat") else str(due_at)
+            existing = (
+                client.table("reminders")
+                .select("id")
+                .eq("user_id", str(user_id))
+                .eq("type", kind)
+                .gte("due_at", due_iso[:10])
+                .limit(1)
+                .execute()
+            )
+            if existing and existing.data:
+                return existing.data[0]
+            now = self.clock().isoformat()
+            payload = {
+                "id": str(uuid4()),
+                "user_id": str(user_id),
+                "type": kind,
+                "message": message,
+                "due_at": due_iso,
+                "dismissed": False,
+                "created_at": now,
+            }
+            res = client.table("reminders").insert(payload).execute()
+            return res.data[0] if res and res.data else None
 
     def create(self, user_id: UUID, data: dict[str, Any]) -> dict[str, Any]:
         client = get_data_client()

@@ -1,7 +1,8 @@
 from datetime import date, datetime, time
 
-from app.core.clock import LOCAL_ZONE, utc_now
+from app.core.clock import LOCAL_ZONE, local_day_bounds, utc_now
 from app.db.repositories.appointments import AppointmentRepository
+from app.db.repositories.check_ins import CheckInRepository
 from app.db.repositories.reminders import ReminderRepository
 from app.db.repositories.supplements import SupplementRepository
 from app.db.repositories.users import UserRepository
@@ -15,6 +16,7 @@ class ReminderService:
         self.appointments = AppointmentRepository(clock)
         self.supplements = SupplementRepository(clock)
         self.reminders = ReminderRepository(clock)
+        self.checkins = CheckInRepository(clock)
         self.summary_service = SummaryService(clock)
 
     def list_pending(self, user_id):
@@ -30,9 +32,10 @@ class ReminderService:
         appointment = self.appointments.get_by_user(user_id)
 
         def create(kind, related, hour, message):
-            due = datetime.combine(today, hour, LOCAL_ZONE)
+            target_time = datetime.combine(today, hour, LOCAL_ZONE)
+            due = min(target_time, self.clock())
             self.reminders.create_once(
-                user_id, kind, message, due, f"{kind}:{related}:{due.isoformat()}"
+                user_id, kind, message, due, f"{kind}:{related}:{target_time.isoformat()}"
             )
 
         if not appointment or appointment.get("status", "scheduled") != "scheduled":
@@ -62,3 +65,13 @@ class ReminderService:
                     reminder_time,
                     f"Reminder to take your {supplement['name']} supplement.",
                 )
+
+        start, end = local_day_bounds(self.clock())
+        has_checked_in = bool(self.checkins.list_observed_in_period(user_id, start, end))
+        if not has_checked_in:
+            create(
+                "checkin",
+                "daily",
+                time(8),
+                "Take 60 seconds to speak how you're feeling today. Your daily check-in is ready.",
+            )

@@ -32,9 +32,21 @@ def get_notifications(
     user_id: UUID = Depends(get_current_user_id),
     limit: int = Query(50, ge=1, le=100),
     cursor: str | None = Query(None, max_length=256),
+    include_dismissed: bool = Query(True),
 ) -> list[NotificationItem]:
-    """Retrieve active notification messages for supplements, appointments, and generated reports."""
-    notifications = list_reminders(response, user_id, limit, cursor)
+    """Retrieve active and historical notification messages for supplements, appointments, check-ins, and generated reports."""
+    try:
+        from app.core.clock import LOCAL_ZONE, utc_now
+        from app.services.reminders import ReminderService
+
+        today = utc_now().astimezone(LOCAL_ZONE).date()
+        ReminderService().run_user_day(user_id, today)
+    except Exception:
+        pass
+
+    notifications = list_reminders(
+        response, user_id, limit, cursor, include_dismissed=include_dismissed
+    )
     return [NotificationItem(**item) for item in notifications]
 
 

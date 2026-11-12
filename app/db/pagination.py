@@ -51,7 +51,17 @@ def decode(cursor):
         raise InvalidMutation("Invalid page cursor") from exc
 
 
-def page(table, user_id, limit=50, cursor=None, *, start=None, end=None, due=None):
+def page(
+    table,
+    user_id,
+    limit=50,
+    cursor=None,
+    *,
+    start=None,
+    end=None,
+    due=None,
+    include_dismissed: bool = False,
+):
     from app.config import get_settings
 
     field = TABLES[table]
@@ -80,7 +90,7 @@ def page(table, user_id, limit=50, cursor=None, *, start=None, end=None, due=Non
             query = query.lte(
                 field, due.isoformat() if hasattr(due, "isoformat") else str(due)
             )
-        if table == "reminders":
+        if table == "reminders" and not include_dismissed:
             query = query.eq("dismissed", False)
 
         query = query.order(field, desc=descending).limit(limit + 1)
@@ -105,7 +115,7 @@ def page(table, user_id, limit=50, cursor=None, *, start=None, end=None, due=Non
                 sql.SQL("{} {} %s").format(sql.Identifier(field), sql.SQL(operator))
             )
             values.append(boundary)
-    if table == "reminders":
+    if table == "reminders" and not include_dismissed:
         conditions.append(sql.SQL("NOT dismissed"))
     query = sql.SQL("SELECT * FROM {} WHERE {} ORDER BY {} {}, id {} LIMIT %s").format(
         sql.Identifier(table),

@@ -15,11 +15,19 @@ def list_reminders(
     user_id: UUID = Depends(get_current_user_id),
     limit: int = Query(50, ge=1, le=100),
     cursor: str | None = Query(None, max_length=256),
+    include_dismissed: bool = Query(False),
 ) -> list[dict]:
     from app.core.clock import utc_now
     from app.db.pagination import page
 
-    rows, next_cursor = page("reminders", user_id, limit, cursor, due=utc_now())
+    rows, next_cursor = page(
+        "reminders",
+        user_id,
+        limit,
+        cursor,
+        due=utc_now(),
+        include_dismissed=include_dismissed,
+    )
     if next_cursor:
         response.headers["X-Next-Cursor"] = next_cursor
     return rows
