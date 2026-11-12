@@ -4,6 +4,38 @@ from uuid import uuid4
 from app.services.summary import SummaryService
 
 
+def test_summary_multi_checkin_same_day_supplements_taken() -> None:
+    now_iso = datetime.utcnow().isoformat()
+    check_ins = [
+        {
+            "timestamp": now_iso,
+            "supplement_check": [
+                {
+                    "confirmed": True,
+                    "taken_today": False,
+                    "supplement_name": "Iron & Folic Acid (IFA)",
+                }
+            ],
+        },
+        {
+            "timestamp": now_iso,
+            "supplement_check": [
+                {
+                    "confirmed": True,
+                    "taken_today": True,
+                    "supplement_name": "Iron & Folic Acid (IFA)",
+                }
+            ],
+        },
+    ]
+
+    content = SummaryService._aggregate(check_ins)
+    adherence = content["supplement_adherence"]
+    assert adherence["taken_days"] == 1
+    assert adherence["tracked_days"] == 1
+    assert adherence["percentage"] == 100
+
+
 def test_summary_aggregation_includes_only_confirmed_items() -> None:
     check_ins = [
         {

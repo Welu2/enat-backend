@@ -309,8 +309,8 @@ class SummaryService:
                     for (n, day), values in observations.items()
                     if n == name
                 }
-                taken = sum(v == {True} for v in daily.values())
-                not_taken = sum(v == {False} for v in daily.values())
+                taken = sum(True in v for v in daily.values())
+                not_taken = sum(True not in v and False in v for v in daily.values())
                 known = taken + not_taken
                 total = period_days or len(daily)
                 details.append(
