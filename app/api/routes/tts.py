@@ -1,131 +1,59 @@
-import hashlib
-import logging
 import re
-from urllib.parse import quote
+from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from app.core.errors import InvalidMutation, ProviderUnavailable
+from app.dependencies import get_current_user_id
+from app.models.errors import ErrorResponse
 from app.services.addis_ai import AddisAIClient
-
-logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/tts", tags=["tts"])
 
-# In-memory audio cache for frequent prompts (e.g., standard check-in questions)
-_audio_cache: dict[str, bytes] = {}
-
 
 class TTSRequest(BaseModel):
-    text: str
-    voice_id: str | None = None
+    text: str = Field(min_length=1, max_length=2000)
+    voice_id: str | None = Field(
+        default=None, max_length=64, pattern=r"^[A-Za-z0-9_-]+$"
+    )
 
 
 def sanitize_amharic_text(text: str) -> str:
-    """Strip complex punctuation marks that cause Addis AI synthesis failures."""
-    # Replace Ethiopian & standard punctuation with spaces
-    cleaned = re.sub(r"[።፤፥፣\.\!\?\:\-\_\(\)\[\]\"']", " ", text)
-    # Collapse multiple whitespace characters into a single space
-    cleaned = re.sub(r"\s+", " ", cleaned).strip()
-    return cleaned
+    return re.sub(r"\s+", " ", text).strip()
 
 
-def build_tts_url(text: str) -> str:
-    """Helper to generate a clean /tts audio URL for any text string."""
-    encoded = quote(text)
-    return f"/tts?text={encoded}"
+@router.post(
+    "",
+    response_class=Response,
+    responses={
+        200: {
+            "content": {
+                media: {"schema": {"type": "string", "format": "binary"}}
+                for media in ("audio/mpeg", "audio/wav")
+            }
+        }
+    },
+)
+async def synthesize_post(
+    payload: TTSRequest, user_id: UUID = Depends(get_current_user_id)
+) -> Response:
+    text = sanitize_amharic_text(payload.text)
+    if not text:
+        raise InvalidMutation("Text cannot be empty")
+    audio = await AddisAIClient().synthesize_speech(text, payload.voice_id)
+    if not audio:
+        raise ProviderUnavailable("Speech provider unavailable")
+    return Response(
+        content=audio,
+        media_type="audio/wav" if audio.startswith(b"RIFF") else "audio/mpeg",
+        headers={"Cache-Control": "no-store"},
+    )
 
 
-@router.post("")
-async def synthesize_post(payload: TTSRequest) -> Response:
-    """Synthesize Amharic text into MP3/WAV audio via POST request."""
-    clean_text = sanitize_amharic_text(payload.text)
-    if not clean_text:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Text cannot be empty or contain only punctuation",
-        )
-
-    # Check cache
-    cache_key = hashlib.md5(f"{clean_text}:{payload.voice_id}".encode()).hexdigest()
-    if cache_key in _audio_cache:
-        return Response(
-            content=_audio_cache[cache_key],
-            media_type="audio/mpeg",
-            headers={"Content-Disposition": "inline; filename=speech.mp3"},
-        )
-
-    try:
-        client = AddisAIClient()
-        audio_bytes = await client.synthesize_speech(clean_text, payload.voice_id)
-        if not audio_bytes:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to synthesize audio from upstream service",
-            )
-
-        # Cache up to 100 entries
-        if len(_audio_cache) < 100:
-            _audio_cache[cache_key] = audio_bytes
-
-        return Response(
-            content=audio_bytes,
-            media_type="audio/mpeg",
-            headers={"Content-Disposition": "inline; filename=speech.mp3"},
-        )
-    except HTTPException:
-        raise
-    except Exception as exc:
-        logger.error(f"[AddisAI TTS POST] Unexpected synthesis failure: {exc}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"TTS synthesis error: {str(exc)}",
-        )
-
-
-@router.get("")
-async def synthesize_get(text: str = Query(..., description="Amharic text to speak")) -> Response:
-    """Synthesize Amharic text into MP3/WAV audio via GET request (FastAPI automatically decodes text)."""
-    # Note: text is already decoded by FastAPI/Starlette query parser
-    clean_text = sanitize_amharic_text(text)
-    if not clean_text:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Text cannot be empty or contain only punctuation",
-        )
-
-    # Check cache
-    cache_key = hashlib.md5(clean_text.encode()).hexdigest()
-    if cache_key in _audio_cache:
-        return Response(
-            content=_audio_cache[cache_key],
-            media_type="audio/mpeg",
-            headers={"Content-Disposition": "inline; filename=speech.mp3"},
-        )
-
-    try:
-        client = AddisAIClient()
-        audio_bytes = await client.synthesize_speech(clean_text)
-        if not audio_bytes:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to synthesize audio from upstream service",
-            )
-
-        if len(_audio_cache) < 100:
-            _audio_cache[cache_key] = audio_bytes
-
-        return Response(
-            content=audio_bytes,
-            media_type="audio/mpeg",
-            headers={"Content-Disposition": "inline; filename=speech.mp3"},
-        )
-    except HTTPException:
-        raise
-    except Exception as exc:
-        logger.error(f"[AddisAI TTS GET] Unexpected synthesis failure for text '{clean_text}': {exc}", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"TTS synthesis error: {str(exc)}",
-        )
+@router.get("", status_code=410, responses={410: {"model": ErrorResponse}})
+def retired_query_tts():
+    raise HTTPException(
+        410, "Use authenticated POST /tts with text in the request body"
+    )

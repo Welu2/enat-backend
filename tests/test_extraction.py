@@ -59,15 +59,16 @@ async def test_extraction_raises_after_max_retries() -> None:
         "generate_json",
         new=AsyncMock(return_value="not-json"),
     ):
-        with pytest.raises(ValueError):
+        from app.core.errors import ProviderUnavailable
+
+        with pytest.raises(ProviderUnavailable):
             await service.extract("test", "symptoms")
 
 
 @pytest.mark.asyncio
-async def test_extraction_mild_symptom_overrides_danger_sign_to_false() -> None:
+async def test_extraction_does_not_erase_category_for_mild_severity() -> None:
     service = ExtractionService()
-    # Even if LLM erroneously outputs a category for a mild symptom,
-    # server-side guard forces category=None and danger_sign=False.
+    # Clinical review remains required; normalization preserves the category.
     llm_payload = {
         "symptoms": [
             {
@@ -87,13 +88,15 @@ async def test_extraction_mild_symptom_overrides_danger_sign_to_false() -> None:
         items = await service.extract("ቀላል የድካም ስሜት", "symptoms")
 
     assert len(items) == 1
-    assert items[0]["category"] is None
-    assert items[0]["danger_sign"] is False
-    assert items[0]["verification_phrase"] == "ቀላል የድካም ስሜት — ትክክል ነው?"
+    assert items[0]["category"] == "severe_weakness_or_backache"
+    assert items[0]["danger_sign"] is True
+    assert items[0]["policy_version"] == "clinical-conservative-v1"
 
 
 @pytest.mark.asyncio
-async def test_extraction_supplement_unknown_name_formats_clean_amharic_phrase() -> None:
+async def test_extraction_supplement_unknown_name_formats_clean_amharic_phrase() -> (
+    None
+):
     service = ExtractionService()
     llm_payload = {
         "supplement_check": {

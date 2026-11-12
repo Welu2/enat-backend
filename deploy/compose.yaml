@@ -1,0 +1,64 @@
+name: enat-${DEPLOYMENT_ENV:?Choose staging or production}
+x-runtime: &runtime
+  image: ${ENAT_IMAGE:?Set a reviewed image by digest}
+  user: '10001:10001'
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs: ['/tmp:rw,noexec,nosuid,size=64m,uid=10001,gid=10001']
+  pids_limit: 128
+  mem_limit: 512m
+  cpus: 1.0
+  restart: unless-stopped
+  stop_grace_period: 40s
+  logging:
+    driver: json-file
+    options: {max-size: '10m', max-file: '3'}
+x-api: &api
+  <<: *runtime
+  # One surviving API must sustain the full 50-request/second workload.
+  cpus: 2.0
+  env_file: ['${API_ENV_FILE:?Use a private environment-specific API secret file}']
+  environment:
+    ENVIRONMENT: ${DEPLOYMENT_ENV}
+    PROCESS_ROLE: api
+    WORKER_DATABASE_URL: ''
+    ENABLE_DEV_ROUTES: 'false'
+    DATABASE_POOL_SIZE: '10'
+  healthcheck:
+    test: [CMD, python, -m, app.probes, live]
+    interval: 15s
+    timeout: 3s
+    retries: 3
+x-worker: &worker
+  <<: *runtime
+  env_file: ['${WORKER_ENV_FILE:?Use a separate restricted worker secret file}']
+  environment:
+    ENVIRONMENT: ${DEPLOYMENT_ENV}
+    PROCESS_ROLE: worker
+    DATABASE_URL: ''
+    WORKER_POOL_SIZE: '4'
+  healthcheck:
+    test: [CMD, python, -m, app.probes, worker]
+    interval: 30s
+    timeout: 3s
+    retries: 3
+services:
+  api-a:
+    <<: *api
+    ports: ['127.0.0.1:${API_A_PORT:-8001}:8000']
+  api-b:
+    <<: *api
+    ports: ['127.0.0.1:${API_B_PORT:-8002}:8000']
+  worker:
+    <<: *worker
+    command: [python, -m, app.jobs, worker]
+  scheduler:
+    <<: *worker
+    command: [python, -m, app.jobs, scheduler]
+  migrate:
+    <<: *runtime
+    profiles: [tools]
+    restart: 'no'
+    env_file: ['${MIGRATION_ENV_FILE:?Use the separately controlled migration credential}']
+    command: [python, -m, app.migrate]

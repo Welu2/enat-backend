@@ -1,0 +1,7 @@
+{
+  "environment_id": "replace-with-provisioned-staging-id",
+  "environment": "staging",
+  "api_env_file": "/etc/enat/staging/api.env",
+  "worker_env_file": "/etc/enat/staging/worker.env",
+  "migration_env_file": "/etc/enat/staging/migration.env"
+}

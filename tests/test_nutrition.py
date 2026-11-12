@@ -1,4 +1,3 @@
-import pytest
 from app.services.nutrition import (
     FOOD_GROUPS,
     calculate_food_group_shares,
@@ -26,18 +25,38 @@ def test_classify_ethiopian_food_dairy() -> None:
     text = "ክትፎ በአይብ እና ቅቤ በላሁ"
     groups = classify_ethiopian_food(text)
     assert "proteins" in groups  # kitfo
-    assert "dairy" in groups     # ayib / kibe
+    assert "dairy" in groups  # ayib / kibe
 
 
 def test_calculate_food_group_shares_sums_to_100_percent() -> None:
     # 7 food entries spanning multiple dates and groups
     food_logs = [
-        {"date": "2026-08-20", "raw_text": "እንጀራ በሽሮ", "food_groups": ["grains", "proteins"]},
-        {"date": "2026-08-21", "raw_text": "ዳቦ እና ወተት", "food_groups": ["grains", "dairy"]},
-        {"date": "2026-08-22", "raw_text": "ጎመን እና ድንች", "food_groups": ["fruits_and_vegetables"]},
+        {
+            "date": "2026-08-20",
+            "raw_text": "እንጀራ በሽሮ",
+            "food_groups": ["grains", "proteins"],
+        },
+        {
+            "date": "2026-08-21",
+            "raw_text": "ዳቦ እና ወተት",
+            "food_groups": ["grains", "dairy"],
+        },
+        {
+            "date": "2026-08-22",
+            "raw_text": "ጎመን እና ድንች",
+            "food_groups": ["fruits_and_vegetables"],
+        },
         {"date": "2026-08-23", "raw_text": "ምስር ወጥ", "food_groups": ["proteins"]},
-        {"date": "2026-08-24", "raw_text": "ክትፎ በአይብ", "food_groups": ["proteins", "dairy"]},
-        {"date": "2026-08-25", "raw_text": "ሙዝ እና አቮካዶ", "food_groups": ["fruits_and_vegetables"]},
+        {
+            "date": "2026-08-24",
+            "raw_text": "ክትፎ በአይብ",
+            "food_groups": ["proteins", "dairy"],
+        },
+        {
+            "date": "2026-08-25",
+            "raw_text": "ሙዝ እና አቮካዶ",
+            "food_groups": ["fruits_and_vegetables"],
+        },
     ]
 
     shares = calculate_food_group_shares(food_logs)

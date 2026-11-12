@@ -1,0 +1,33 @@
+from typing import Any
+
+from app.db.data import transaction
+from app.services.clinical_policy import confirmed_items, danger
+
+
+def create_for_checkin(record: dict[str, Any]) -> str | None:
+    categories = sorted(
+        {i["category"] for i in confirmed_items(record["symptoms"]) if danger(i)}
+    )
+    if not categories:
+        return None
+    try:
+        with transaction() as conn:
+            row = conn.execute(
+                "INSERT INTO emergency_alerts(patient_id,check_in_id,categories,recorded_at,received_at,policy_version) "
+                "VALUES(%s,%s,%s,%s,%s,%s) ON CONFLICT(check_in_id) DO NOTHING RETURNING id",
+                (
+                    record["user_id"],
+                    record["id"],
+                    categories,
+                    record.get("recorded_at") or record.get("timestamp"),
+                    record.get("received_at") or record.get("timestamp"),
+                    record.get("policy_version", "1.0.0"),
+                ),
+            ).fetchone()
+            if row is None:
+                row = conn.execute(
+                    "SELECT id FROM emergency_alerts WHERE check_in_id=%s", (record["id"],)
+                ).fetchone()
+            return str(row["id"]) if row else None
+    except Exception:
+        return None

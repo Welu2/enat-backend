@@ -1,12 +1,13 @@
+from contextlib import nullcontext
 from datetime import date, datetime, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
 from app.dependencies import get_current_user
+from app.main import app
 
 
 @pytest.fixture
@@ -36,7 +37,11 @@ def test_public_calculate_gestational_age_endpoint() -> None:
     assert data["estimated_due_date"] == "2027-02-05"
 
 
-def test_onboarding_submission_and_supplement_seeding(test_user: dict) -> None:
+def test_onboarding_submission_and_supplement_seeding(
+    test_user: dict, monkeypatch
+) -> None:
+    # Repository mocks do not open a real transaction; rollback is covered in PostgreSQL.
+    monkeypatch.setattr("app.db.data.transaction", nullcontext)
     app.dependency_overrides[get_current_user] = lambda: test_user
     client = TestClient(app)
 
@@ -63,14 +68,31 @@ def test_onboarding_submission_and_supplement_seeding(test_user: dict) -> None:
     def mock_supp_list_all(user_id):
         return created_supplements
 
-    with patch("app.api.routes.users.UserRepository.update_profile", side_effect=mock_update_profile), \
-         patch("app.api.routes.users.UserRepository.get_by_id", side_effect=mock_get_by_id), \
-         patch("app.api.routes.users.SupplementRepository.create", side_effect=mock_supp_create), \
-         patch("app.api.routes.users.SupplementRepository.list_all", side_effect=mock_supp_list_all), \
-         patch("app.api.routes.users.AppointmentRepository.get_by_user", return_value=None), \
-         patch("app.api.routes.users.AppointmentRepository.create", return_value={"id": str(uuid4())}), \
-         patch("app.api.routes.users.ReminderRepository.list_pending", return_value=[]):
-
+    with (
+        patch(
+            "app.api.routes.users.UserRepository.update_profile",
+            side_effect=mock_update_profile,
+        ),
+        patch(
+            "app.api.routes.users.UserRepository.get_by_id", side_effect=mock_get_by_id
+        ),
+        patch(
+            "app.api.routes.users.SupplementRepository.create",
+            side_effect=mock_supp_create,
+        ),
+        patch(
+            "app.api.routes.users.SupplementRepository.list_all",
+            side_effect=mock_supp_list_all,
+        ),
+        patch(
+            "app.api.routes.users.AppointmentRepository.get_by_user", return_value=None
+        ),
+        patch(
+            "app.api.routes.users.AppointmentRepository.create",
+            return_value={"id": str(uuid4())},
+        ),
+        patch("app.api.routes.users.ReminderRepository.list_pending", return_value=[]),
+    ):
         onboarding_payload = {
             "age": 26,
             "area": "urban",
@@ -129,13 +151,24 @@ def test_update_hospital_endpoint(test_user: dict) -> None:
     def mock_get_by_id(user_id):
         return user_db
 
-    with patch("app.api.routes.users.UserRepository.update_hospital", side_effect=mock_update_hospital), \
-         patch("app.api.routes.users.UserRepository.get_by_id", side_effect=mock_get_by_id), \
-         patch("app.api.routes.users.SupplementRepository.list_all", return_value=[]), \
-         patch("app.api.routes.users.AppointmentRepository.get_by_user", return_value=None), \
-         patch("app.api.routes.users.ReminderRepository.list_pending", return_value=[]):
-
-        resp = client.put("/users/me/hospital", json={"hospital": "Tikur Anbessa Specialized Hospital"})
+    with (
+        patch(
+            "app.api.routes.users.UserRepository.update_hospital",
+            side_effect=mock_update_hospital,
+        ),
+        patch(
+            "app.api.routes.users.UserRepository.get_by_id", side_effect=mock_get_by_id
+        ),
+        patch("app.api.routes.users.SupplementRepository.list_all", return_value=[]),
+        patch(
+            "app.api.routes.users.AppointmentRepository.get_by_user", return_value=None
+        ),
+        patch("app.api.routes.users.ReminderRepository.list_pending", return_value=[]),
+    ):
+        resp = client.put(
+            "/users/me/hospital",
+            json={"hospital": "Tikur Anbessa Specialized Hospital"},
+        )
         assert resp.status_code == 200
         assert resp.json()["hospital"] == "Tikur Anbessa Specialized Hospital"
 

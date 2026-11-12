@@ -1,0 +1,10 @@
+{
+  "approved_by": "",
+  "approved_at": null,
+  "min_cases": null,
+  "min_danger_cases": null,
+  "max_word_error_rate": null,
+  "min_field_accuracy": null,
+  "min_danger_recall": null,
+  "min_danger_precision": null
+}

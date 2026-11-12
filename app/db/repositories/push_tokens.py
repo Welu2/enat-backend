@@ -1,37 +1,27 @@
-from datetime import datetime
-from typing import Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from app.db.client import get_supabase_client
+from app.core.errors import Conflict
+from app.db.data import normalize, transaction
 
 
 class PushTokenRepository:
-    def register(self, user_id: UUID, token: str, platform: str = "web") -> dict[str, Any]:
-        client = get_supabase_client()
-        payload = {
-            "user_id": str(user_id),
-            "token": token,
-            "platform": platform,
-            "updated_at": datetime.utcnow().isoformat(),
-        }
-        try:
-            # Check if token exists
-            existing = client.table("push_tokens").select("*").eq("token", token).execute()
-            if existing and existing.data:
-                result = client.table("push_tokens").update(payload).eq("token", token).execute()
-                return result.data[0]
-            
-            payload["id"] = str(uuid4())
-            result = client.table("push_tokens").insert(payload).execute()
-            return result.data[0]
-        except Exception:
-            # InMemory / local fallback
-            return payload
+    def register(self, user_id: UUID, token: str, platform: str = "web") -> dict:
+        # Uniqueness is global; a conflict never transfers another user's token.
+        with transaction() as conn:
+            row = conn.execute(
+                """INSERT INTO push_tokens(user_id,token,platform) VALUES(%s,%s,%s)
+            ON CONFLICT(token) DO UPDATE SET platform=excluded.platform,updated_at=now()
+            WHERE push_tokens.user_id=excluded.user_id RETURNING *""",
+                (user_id, token, platform),
+            ).fetchone()
+        if not row:
+            raise Conflict("Device registration conflict")
+        return normalize(row)
 
-    def list_for_user(self, user_id: UUID) -> list[dict[str, Any]]:
-        client = get_supabase_client()
-        try:
-            result = client.table("push_tokens").select("*").eq("user_id", str(user_id)).execute()
-            return result.data or []
-        except Exception:
-            return []
+    def list_for_user(self, user_id: UUID) -> list[dict]:
+        with transaction() as conn:
+            return normalize(
+                conn.execute(
+                    "SELECT * FROM push_tokens WHERE user_id=%s", (user_id,)
+                ).fetchall()
+            )

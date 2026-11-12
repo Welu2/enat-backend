@@ -1,8 +1,8 @@
-from datetime import date, datetime, time, timedelta
-from typing import Any
-from uuid import UUID
+from datetime import date, datetime, time
 
+from app.core.clock import LOCAL_ZONE, local_day_bounds, utc_now
 from app.db.repositories.appointments import AppointmentRepository
+from app.db.repositories.check_ins import CheckInRepository
 from app.db.repositories.reminders import ReminderRepository
 from app.db.repositories.supplements import SupplementRepository
 from app.db.repositories.users import UserRepository
@@ -10,81 +10,68 @@ from app.services.summary import SummaryService
 
 
 class ReminderService:
-    def __init__(self) -> None:
+    def __init__(self, clock=utc_now):
+        self.clock = clock
         self.users = UserRepository()
-        self.appointments = AppointmentRepository()
-        self.supplements = SupplementRepository()
-        self.reminders = ReminderRepository()
-        self.summary_service = SummaryService()
+        self.appointments = AppointmentRepository(clock)
+        self.supplements = SupplementRepository(clock)
+        self.reminders = ReminderRepository(clock)
+        self.checkins = CheckInRepository(clock)
+        self.summary_service = SummaryService(clock)
 
-    def list_pending(self, user_id: UUID) -> list[dict[str, Any]]:
+    def list_pending(self, user_id):
         return self.reminders.list_pending(user_id)
 
-    def run_daily_job(self) -> dict[str, int]:
-        created = {"set_appointment": 0, "supplement": 0, "appointment_approaching": 0, "auto_summary": 0}
-        today = date.today()
+    def run_user_day(self, user_id, occurrence):
+        today = self.clock().astimezone(LOCAL_ZONE).date()
+        # Recover all queue/checkpoint progress, but never issue stale dose prompts
+        # or fabricate historical snapshots from today's profile and appointments.
+        if occurrence != today or not self.users.get_by_id(user_id):
+            return
+        self.summary_service.check_and_generate_auto_summary(user_id)
+        appointment = self.appointments.get_by_user(user_id)
 
-        for user in self.users.list_all():
-            user_id = UUID(user["id"])
+        def create(kind, related, hour, message):
+            target_time = datetime.combine(today, hour, LOCAL_ZONE)
+            due = min(target_time, self.clock())
+            self.reminders.create_once(
+                user_id, kind, message, due, f"{kind}:{related}:{target_time.isoformat()}"
+            )
 
-            # Automatic clinician summary check (1 day before appointment or 30-day monthly fallback)
-            auto_summary = self.summary_service.check_and_generate_auto_summary(user_id)
-            if auto_summary:
-                created["auto_summary"] += 1
+        if not appointment or appointment.get("status", "scheduled") != "scheduled":
+            create(
+                "set_appointment",
+                "none",
+                time(9),
+                "Please set your next ANC appointment.",
+            )
+        else:
+            apt_date = date.fromisoformat(str(appointment["appointment_date"])[:10])
+            if 0 <= (apt_date - today).days <= appointment.get("reminder_lead_days", 2):
+                create(
+                    "appointment_approaching",
+                    f"{appointment['id']}:{apt_date}",
+                    time(8),
+                    "Your ANC appointment is approaching.",
+                )
+        for supplement in self.supplements.list_active(user_id):
+            if supplement.get("reminder_enabled"):
+                reminder_time = time.fromisoformat(
+                    str(supplement.get("reminder_time") or "09:00:00")
+                )
+                create(
+                    "supplement",
+                    supplement["id"],
+                    reminder_time,
+                    f"Reminder to take your {supplement['name']} supplement.",
+                )
 
-            appointment = self.appointments.get_by_user(user_id)
-
-            if not appointment:
-                due_at = datetime.combine(today, time(hour=9))
-                if not self.reminders.exists_for_today(user_id, "set_appointment", due_at):
-                    self.reminders.create(
-                        user_id,
-                        {
-                            "type": "set_appointment",
-                            "message": "Please set your next ANC appointment.",
-                            "due_at": due_at.isoformat(),
-                        },
-                    )
-                    created["set_appointment"] += 1
-            else:
-                appointment_date = date.fromisoformat(appointment["appointment_date"])
-                lead_days = appointment.get("reminder_lead_days", 2)
-                days_until = (appointment_date - today).days
-
-                if 0 <= days_until <= lead_days:
-                    due_at = datetime.combine(today, time(hour=8))
-                    if not self.reminders.exists_for_today(
-                        user_id, "appointment_approaching", due_at
-                    ):
-                        self.reminders.create(
-                            user_id,
-                            {
-                                "type": "appointment_approaching",
-                                "message": "Your ANC appointment is approaching.",
-                                "due_at": due_at.isoformat(),
-                            },
-                        )
-                        created["appointment_approaching"] += 1
-
-            for supplement in self.supplements.list_active(user_id):
-                if not supplement.get("reminder_enabled"):
-                    continue
-                reminder_time = supplement.get("reminder_time") or "09:00:00"
-                if isinstance(reminder_time, str):
-                    hour, minute, *_ = reminder_time.split(":")
-                    due_at = datetime.combine(today, time(hour=int(hour), minute=int(minute)))
-                else:
-                    due_at = datetime.combine(today, time(hour=9))
-
-                if not self.reminders.exists_for_today(user_id, "supplement", due_at):
-                    self.reminders.create(
-                        user_id,
-                        {
-                            "type": "supplement",
-                            "message": f"Reminder to take your {supplement['name']} supplement.",
-                            "due_at": due_at.isoformat(),
-                        },
-                    )
-                    created["supplement"] += 1
-
-        return created
+        start, end = local_day_bounds(self.clock())
+        has_checked_in = bool(self.checkins.list_observed_in_period(user_id, start, end))
+        if not has_checked_in:
+            create(
+                "checkin",
+                "daily",
+                time(8),
+                "Take 60 seconds to speak how you're feeling today. Your daily check-in is ready.",
+            )

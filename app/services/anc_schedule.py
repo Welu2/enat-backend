@@ -1,6 +1,8 @@
 from datetime import date, timedelta
 from typing import Any
 
+from app.core.clock import LOCAL_ZONE, utc_now
+from app.services.clinical_policy import confirmed_items, danger
 from app.services.extraction import _category_display
 
 WHO_ANC_CONTACTS: list[dict[str, Any]] = [
@@ -112,16 +114,20 @@ def calculate_all_anc_dates(effective_lnmp: date) -> list[dict[str, Any]]:
     schedule = []
     for c in WHO_ANC_CONTACTS:
         target_date = effective_lnmp + timedelta(weeks=c["gestational_weeks"])
-        schedule.append({
-            **c,
-            "target_date": target_date.isoformat(),
-        })
+        schedule.append(
+            {
+                **c,
+                "target_date": target_date.isoformat(),
+            }
+        )
     return schedule
 
 
-def get_next_anc_contact(effective_lnmp: date, as_of_date: date | None = None) -> dict[str, Any]:
+def get_next_anc_contact(
+    effective_lnmp: date, as_of_date: date | None = None
+) -> dict[str, Any]:
     """Determines the next upcoming WHO ANC contact for a pregnant mother based on current gestational age."""
-    today = as_of_date or date.today()
+    today = as_of_date or utc_now().astimezone(LOCAL_ZONE).date()
     current_days = max(0, (today - effective_lnmp).days)
     current_weeks = current_days // 7
 
@@ -149,8 +155,8 @@ def advance_to_next_anc_contact(
     current_appointment_date: date | None,
     effective_lnmp: date | None = None,
 ) -> dict[str, Any] | None:
-    """Calculates the subsequent ANC contact after a contact report is generated.
-    
+    """Calculates a proposed subsequent ANC contact; never records attendance.
+
     If current is Contact 1 (12w), advances after 8 weeks to Contact 2 (20w).
     If current is Contact 2 (20w), advances after 6 weeks to Contact 3 (26w), etc.
     """
@@ -170,7 +176,9 @@ def advance_to_next_anc_contact(
     elif effective_lnmp:
         next_date = effective_lnmp + timedelta(weeks=next_spec["gestational_weeks"])
     else:
-        next_date = date.today() + timedelta(weeks=schedule_next_weeks)
+        next_date = utc_now().astimezone(LOCAL_ZONE).date() + timedelta(
+            weeks=schedule_next_weeks
+        )
 
     return {
         **next_spec,
@@ -179,24 +187,19 @@ def advance_to_next_anc_contact(
     }
 
 
-def generate_checkin_summary_text(symptoms: list[dict[str, Any]] | None) -> dict[str, str]:
-    """Generates localized daily check-in summary statements in Amharic and English.
-    
-    Outcomes:
-    1. Danger Sign(s) detected:
-       - AM: '{x} የአደጋ ምልክት ተገኝቷል፣ በአስቸቋይ የህክምና እርዳታ ያግኙ'
-       - EN: '{x} danger sign detected, seek medical help immediately.'
-    2. Non-danger symptom(s) recorded:
-       - AM: 'ምንም የአደጋ ምልክት አልተገኘም፣ ነገር ግን {x} ምልክት ተመዝግቧል'
-       - EN: 'No danger signs detected, but {x} symptom(s) recorded.'
-    3. No symptoms / clear:
-       - AM: 'ምንም የአደጋ ምልክት አልተገኘም'
-       - EN: 'No danger signs detected.'
+def generate_checkin_summary_text(
+    symptoms: list[dict[str, Any]] | None,
+) -> dict[str, str]:
+    """Render confirmed observations; absent classification remains uncertain.
+
+    Danger wording is retained from the existing application. The conservative
+    policy and localized text require clinical approval before patient release.
     """
+    symptoms = confirmed_items(symptoms)
     if not symptoms:
         return {
-            "summary_text_am": "ምንም የአደጋ ምልክት አልተገኘም",
-            "summary_text_en": "No danger signs detected.",
+            "summary_text_am": "የተረጋገጠ የምልክት ግምገማ የለም",
+            "summary_text_en": "No confirmed symptom assessment is available.",
             "danger_sign_triggered": False,
         }
 
@@ -206,12 +209,12 @@ def generate_checkin_summary_text(symptoms: list[dict[str, Any]] | None) -> dict
     general_labels_en: list[str] = []
 
     for s in symptoms:
-        if not isinstance(s, dict) or s.get("confirmed") is False:
+        if not isinstance(s, dict) or s.get("confirmed") is not True:
             continue
 
         raw = (s.get("raw_text") or s.get("symptom") or "").strip()
         cat = s.get("category")
-        is_danger = bool(s.get("danger_sign")) and cat not in (None, "none", "null", "no_danger_sign_detected")
+        is_danger = danger(s)
 
         if is_danger and cat:
             lbl_am = _category_display(cat, lang="am")
@@ -233,12 +236,20 @@ def generate_checkin_summary_text(symptoms: list[dict[str, Any]] | None) -> dict
             am_names = danger_labels_am[0]
             en_names = danger_labels_en[0]
             summary_am = f"{am_names} የአደጋ ምልክት ተገኝቷል፣ በአስቸቋይ የህክምና እርዳታ ያግኙ"
-            summary_en = f"{en_names} danger sign detected, seek medical help immediately."
+            summary_en = (
+                f"{en_names} danger sign detected, seek medical help immediately."
+            )
         else:
-            am_names = " እና ".join([", ".join(danger_labels_am[:-1]), danger_labels_am[-1]]) if len(danger_labels_am) > 2 else " እና ".join(danger_labels_am)
+            am_names = (
+                " እና ".join([", ".join(danger_labels_am[:-1]), danger_labels_am[-1]])
+                if len(danger_labels_am) > 2
+                else " እና ".join(danger_labels_am)
+            )
             en_names = ", ".join(danger_labels_en)
             summary_am = f"{am_names} የአደጋ ምልክቶች ተገኝተዋል፣ በአስቸቋይ የህክምና እርዳታ ያግኙ"
-            summary_en = f"{en_names} danger signs detected, seek medical help immediately."
+            summary_en = (
+                f"{en_names} danger signs detected, seek medical help immediately."
+            )
 
         return {
             "summary_text_am": summary_am,
@@ -251,13 +262,17 @@ def generate_checkin_summary_text(symptoms: list[dict[str, Any]] | None) -> dict
         if len(general_labels_am) == 1:
             am_names = general_labels_am[0]
             en_names = general_labels_en[0]
-            summary_am = f"ምንም የአደጋ ምልክት አልተገኘም፣ ነገር ግን {am_names} ምልክት ተመዝግቧል"
-            summary_en = f"No danger signs detected, but {en_names} symptom recorded."
+            summary_am = f"{am_names} ምልክት ተመዝግቧል"
+            summary_en = f"Reported symptom: {en_names}. Classification is uncertain."
         else:
-            am_names = " እና ".join([", ".join(general_labels_am[:-1]), general_labels_am[-1]]) if len(general_labels_am) > 2 else " እና ".join(general_labels_am)
+            am_names = (
+                " እና ".join([", ".join(general_labels_am[:-1]), general_labels_am[-1]])
+                if len(general_labels_am) > 2
+                else " እና ".join(general_labels_am)
+            )
             en_names = ", ".join(general_labels_en)
-            summary_am = f"ምንም የአደጋ ምልክት አልተገኘም፣ ነገር ግን {am_names} ምልክቶች ተመዝግበዋል"
-            summary_en = f"No danger signs detected, but {en_names} symptoms recorded."
+            summary_am = f"{am_names} ምልክቶች ተመዝግበዋል"
+            summary_en = f"Reported symptoms: {en_names}. Classification is uncertain."
 
         return {
             "summary_text_am": summary_am,
@@ -267,7 +282,7 @@ def generate_checkin_summary_text(symptoms: list[dict[str, Any]] | None) -> dict
 
     # 3. No symptoms / clear
     return {
-        "summary_text_am": "ምንም የአደጋ ምልክት አልተገኘም",
-        "summary_text_en": "No danger signs detected.",
+        "summary_text_am": "የተረጋገጠ የምልክት ግምገማ የለም",
+        "summary_text_en": "No confirmed symptom assessment is available.",
         "danger_sign_triggered": False,
     }
