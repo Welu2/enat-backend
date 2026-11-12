@@ -26,6 +26,7 @@ class CheckInStartResponse(BaseModel):
     stage_status: str
     session_id: UUID
     stage: CheckInStage
+    stage_order: list[CheckInStage] = Field(default_factory=list)
     question_prompt: str
     question_audio_url: str | None = None
 

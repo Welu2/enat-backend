@@ -21,20 +21,27 @@ class CheckInRepository:
         from app.services.alerts import create_for_checkin
 
         client = get_data_client()
-        data = {**data, **validated_draft(data), "policy_version": POLICY_VERSION}
+        validated = validated_draft(data)
         now = self.clock().isoformat()
         payload = {
             "id": str(uuid4()),
             "user_id": str(user_id),
-            **data,
             "timestamp": now,
-            "received_at": now,
-            "recorded_at": data.get("recorded_at", now),
-            "danger_sign_triggered": any(danger(i) for i in data["symptoms"]),
+            "symptoms": validated.get("symptoms") or [],
+            "food_log": validated.get("food_log") or [],
+            "supplement_check": validated.get("supplement_check") or [],
+            "closing_mentions": validated.get("closing_mentions") or [],
+            "danger_sign_triggered": any(danger(i) for i in validated.get("symptoms", [])),
+            "summary_text_am": data.get("summary_text_am"),
+            "summary_text_en": data.get("summary_text_en"),
         }
         result = client.table("check_ins").insert(payload).execute()
-        create_for_checkin(result.data[0])
-        return result.data[0]
+        row = dict(result.data[0])
+        row["policy_version"] = POLICY_VERSION
+        row["recorded_at"] = now
+        row["received_at"] = now
+        create_for_checkin(row)
+        return row
 
     def list_by_user(self, user_id: UUID) -> list[dict[str, Any]]:
         client = get_data_client()
@@ -81,13 +88,26 @@ class CheckInRepository:
         )
 
     def list_observed_in_period(self, user_id, start, end):
-        with transaction() as conn:
-            return normalize(
-                conn.execute(
-                    "SELECT * FROM check_ins WHERE user_id=%s AND recorded_at>=%s AND recorded_at<%s ORDER BY recorded_at,id",
-                    (user_id, start, end),
-                ).fetchall()
+        try:
+            with transaction() as conn:
+                return normalize(
+                    conn.execute(
+                        "SELECT * FROM check_ins WHERE user_id=%s AND timestamp>=%s AND timestamp<%s ORDER BY timestamp,id",
+                        (user_id, start, end),
+                    ).fetchall()
+                )
+        except Exception:
+            client = get_data_client()
+            res = (
+                client.table("check_ins")
+                .select("*")
+                .eq("user_id", str(user_id))
+                .gte("timestamp", start.isoformat())
+                .lt("timestamp", end.isoformat())
+                .order("timestamp")
+                .execute()
             )
+            return normalize(res.data or [])
 
     def has_supplement_logged_today(self, user_id):
         # All active named supplements must have a confirmed observation today.

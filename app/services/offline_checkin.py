@@ -30,6 +30,46 @@ def sync(
     digest = idempotency.request_hash(body)
 
     def action() -> dict[str, Any]:
+        if not get_settings().database_url:
+            now = clock()
+            if payload.client_confirmed_at > now + timedelta(minutes=5):
+                raise InvalidMutation("Device timestamp is in the future")
+            draft = {
+                field: [
+                    normalize_item(
+                        stage, item, source="offline_form", now=now, confirm=True
+                    )
+                    for item in body[field]
+                ]
+                for stage, field in STAGE_KEYS.items()
+            }
+            from app.services.anc_schedule import generate_checkin_summary_text
+            summary = generate_checkin_summary_text(draft["symptoms"])
+            record = CheckInRepository(lambda: now).create(
+                user_id,
+                {
+                    **draft,
+                    **summary,
+                    "recorded_at": payload.recorded_at.isoformat(),
+                    "client_confirmed_at": payload.client_confirmed_at.isoformat(),
+                    "capture_source": "offline_form",
+                },
+            )
+            idempotency.emit(user_id, "checkin.completed", record["id"])
+            return dict(
+                normalize(
+                    {
+                        "client_submission_id": key,
+                        "check_in_id": record["id"],
+                        "status": "synced",
+                        "recorded_at": record.get("recorded_at") or now.isoformat(),
+                        "received_at": record.get("received_at") or now.isoformat(),
+                        "danger_sign_triggered": record.get("danger_sign_triggered", False),
+                        "alert_id": None,
+                    }
+                )
+            )
+
         with transaction() as conn:
             conn.execute(
                 "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))",

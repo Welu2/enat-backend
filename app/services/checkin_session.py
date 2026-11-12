@@ -67,6 +67,7 @@ class CheckInSessionService:
             return {
                 "session_id": session["id"],
                 "stage": stages[0],
+                "stage_order": stages,
                 "version": session["version"],
                 "stage_status": session["stage_status"],
                 "question_prompt": STAGE_PROMPTS[stages[0]],
