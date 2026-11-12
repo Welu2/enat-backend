@@ -5,7 +5,10 @@ TLS ingress must route only to ready APIs. Cloud configuration is not inferred.
 """
 
 import argparse
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None  # Windows fallback for local development and test collection
 import json
 import os
 
@@ -189,7 +192,8 @@ def main():
         lock_path = ROOT / ".cache/deployment.lock"
         lock_path.parent.mkdir(exist_ok=True)
         with lock_path.open("a") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            if fcntl is not None:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             deploy(record, args.mode, env, bootstrap=args.bootstrap)
     except (
         ValueError,
