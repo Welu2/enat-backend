@@ -10,21 +10,24 @@ def create_for_checkin(record: dict[str, Any]) -> str | None:
     )
     if not categories:
         return None
-    with transaction() as conn:
-        row = conn.execute(
-            "INSERT INTO emergency_alerts(patient_id,check_in_id,categories,recorded_at,received_at,policy_version) "
-            "VALUES(%s,%s,%s,%s,%s,%s) ON CONFLICT(check_in_id) DO NOTHING RETURNING id",
-            (
-                record["user_id"],
-                record["id"],
-                categories,
-                record["recorded_at"],
-                record["received_at"],
-                record["policy_version"],
-            ),
-        ).fetchone()
-        if row is None:
+    try:
+        with transaction() as conn:
             row = conn.execute(
-                "SELECT id FROM emergency_alerts WHERE check_in_id=%s", (record["id"],)
+                "INSERT INTO emergency_alerts(patient_id,check_in_id,categories,recorded_at,received_at,policy_version) "
+                "VALUES(%s,%s,%s,%s,%s,%s) ON CONFLICT(check_in_id) DO NOTHING RETURNING id",
+                (
+                    record["user_id"],
+                    record["id"],
+                    categories,
+                    record.get("recorded_at") or record.get("timestamp"),
+                    record.get("received_at") or record.get("timestamp"),
+                    record.get("policy_version", "1.0.0"),
+                ),
             ).fetchone()
-        return str(row["id"])
+            if row is None:
+                row = conn.execute(
+                    "SELECT id FROM emergency_alerts WHERE check_in_id=%s", (record["id"],)
+                ).fetchone()
+            return str(row["id"]) if row else None
+    except Exception:
+        return None
