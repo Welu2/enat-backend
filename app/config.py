@@ -141,8 +141,13 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "Distributed request limits and a 32-character rate_limit_secret are required"
                 )
-            if not self.trusted_hosts.strip() or "*" in self.trusted_hosts:
-                raise ValueError("Explicit trusted_hosts are required")
+            trusted_hosts_list = [
+                h.strip() for h in self.trusted_hosts.split(",") if h.strip()
+            ]
+            if not trusted_hosts_list or any(h == "*" for h in trusted_hosts_list):
+                raise ValueError(
+                    "Explicit trusted_hosts are required; bare '*' wildcard is forbidden"
+                )
             if self.enable_dev_routes or self.enable_embedded_scheduler:
                 raise ValueError(
                     "Development routes and embedded scheduling are forbidden in staging/production"
