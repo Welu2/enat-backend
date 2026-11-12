@@ -131,10 +131,12 @@ class Settings(BaseSettings):
                     "Legacy HS256 deadline must be timezone-aware and within 30 days"
                 )
         if self.environment in {"staging", "production"}:
-            if not self.database_url or not self.supabase_publishable_key:
+            if not (self.database_url or (self.supabase_url and self.supabase_service_role_key)):
                 raise ValueError(
-                    "database_url and supabase_publishable_key are required"
+                    "Either database_url or (supabase_url and supabase_service_role_key) are required"
                 )
+            if not self.supabase_publishable_key:
+                raise ValueError("supabase_publishable_key is required")
             if not self.enable_request_limits or len(self.rate_limit_secret) < 32:
                 raise ValueError(
                     "Distributed request limits and a 32-character rate_limit_secret are required"

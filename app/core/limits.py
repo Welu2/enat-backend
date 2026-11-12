@@ -14,9 +14,9 @@ def take_rate(identity: str, category: str, limit: int, seconds: int = 60):
     settings = get_settings()
     if not settings.enable_request_limits:
         return
-    if len(settings.rate_limit_secret) < 32 or not settings.database_url:
-        if settings.environment in {"development", "test"}:
-            return
+    if not settings.database_url:
+        return
+    if len(settings.rate_limit_secret) < 32:
         from app.core.errors import DataUnavailable
 
         raise DataUnavailable("Rate limiting is not configured")
@@ -40,7 +40,7 @@ def _admit_provider():
         raise RateLimited("Provider work requires verified identity")
     take_rate(uid, "provider-day", settings.provider_daily_user_calls, 86400)
     take_rate("global", "provider-day", settings.provider_daily_global_calls, 86400)
-    if not settings.enable_request_limits:
+    if not settings.enable_request_limits or not settings.database_url:
         return None
     with transaction() as conn:
         lease = conn.execute(
@@ -53,6 +53,8 @@ def _admit_provider():
 
 
 def _release(lease):
+    if not lease:
+        return
     with transaction() as conn:
         conn.execute("SELECT enat_release_provider(%s)", (lease,))
 
